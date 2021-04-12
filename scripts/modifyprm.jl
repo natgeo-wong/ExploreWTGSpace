@@ -12,7 +12,7 @@ for powerii = 0 : 9
         open(tprm,"w") do fprm
             open(prm,"r") do oprm
                 s = read(oprm,String)
-                s = replace(s,"tabs_s     = 305.00,"=>"tabs_s     = 295.00,")
+                s = replace(s,"dt = 20.,"=>"dt = 30.,")
                 write(fprm,s)
             end
         end
