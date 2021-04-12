@@ -1,5 +1,9 @@
 # ExploreWTGSpace
 
+Small project code repository to explore the various parameters that affect the WTG approximation in a 3D version of SAM.
+
+### Some Admin
+
 This code base is using the Julia Language and [DrWatson](https://juliadynamics.github.io/DrWatson.jl/stable/)
 to make a reproducible scientific project named
 > ExploreWTGSpace
