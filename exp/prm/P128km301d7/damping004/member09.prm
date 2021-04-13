@@ -1,6 +1,6 @@
 &PARAMETERS
 
-caseid ='TroPrecLS-P128km301d7-member09',
+caseid ='ExploreWTGSpace-P128km301d7-member09',
 
 dx = 2000.,
 dy = 2000.,
@@ -61,9 +61,9 @@ doisccp = .false.,
 domodis = .false.,
 domisr  = .false.,
 
-nstop    = 2160000,
-nprint   = 4320,
-nstat    = 4320,    ! Calculate statistics every hour!
+nstop    = 1440000,
+nprint   = 2880,
+nstat    = 2880,    ! Calculate statistics every hour!
 nstatfrq = 288,     ! Collect 60 samples per statistical calculation (every 1 minute)
 
 doSAMconditionals     = .false.,

@@ -2,7 +2,7 @@ using DrWatson
 @quickactivate "ExploreWTGSpace"
 using Printf
 
-exp = "P064km295d0"
+exp = "P064km305d0"
 tprm = projectdir("exp","tmp.prm")
 
 for powerii = 0 : 9
@@ -12,7 +12,9 @@ for powerii = 0 : 9
         open(tprm,"w") do fprm
             open(prm,"r") do oprm
                 s = read(oprm,String)
-                s = replace(s,"dt = 20.,"=>"dt = 30.,")
+                s = replace(s,"nstop    = 2160000,"=>"nstop    = 1440000,")
+                s = replace(s,"nprint   = 4320,"=>"nprint   = 2880,")
+                s = replace(s,"nstat    = 4320,"=>"nstat    = 2880,")
                 write(fprm,s)
             end
         end
