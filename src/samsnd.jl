@@ -11,12 +11,15 @@ function createsndmean(
     mkpath(projectdir("exp/snd")); fsnd = projectdir("exp/snd/$(sndname)")
     statds = NCDataset(datadir("$exp/$config/OUT_STAT/RCE_ExploreWTGSpace-$exp.nc"))
 
-    nz = statds.dim["z"]; nt = statds.dim["time"]; z = statds["z"][:]
+    nz = statds.dim["z"]; nt = statds.dim["time"]
+    z  = statds["z"][:]
+    p  = statds["p"][:]
     dt = (statds["time"][end] - statds["time"][1]) / (nt-1)
     dystep = round(Int,1/dt); beg = ndays*dystep-1
 
     snddata = zeros(nz,6)
-    snddata[:,1] .= z; snddata[:,2] .= -999.0
+    snddata[:,1] .= z
+    snddata[:,2] .= p
     snddata[:,3] .= dropdims(mean(statds["THETA"][:,(end-beg):end],dims=2),dims=2)
     snddata[:,4] .= dropdims(mean(statds["QT"][:,(end-beg):end],dims=2),dims=2)
     close(statds)
