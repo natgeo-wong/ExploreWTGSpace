@@ -13,15 +13,18 @@ function createsndmean(
 
     nz = statds.dim["z"]; nt = statds.dim["time"]
     z  = statds["z"][:]
-    p  = statds["p"][:]
     dt = (statds["time"][end] - statds["time"][1]) / (nt-1)
     dystep = round(Int,1/dt); beg = ndays*dystep-1
+
+    p    = dropdims(mean(statds["PRES"][:,(end-beg):end],dims=(2,3)),dims=(2,3))
+    tabs = dropdims(mean(statds["TABS"][:,(end-beg):end],dims=(2,3)),dims=(2,3))
+    qv   = dropdims(mean(statds["QV"][:,(end-beg):end],dims=(2,3)),dims=(2,3))
 
     snddata = zeros(nz,6)
     snddata[:,1] .= z
     snddata[:,2] .= p
-    snddata[:,3] .= dropdims(mean(statds["THETA"][:,(end-beg):end],dims=2),dims=2)
-    snddata[:,4] .= dropdims(mean(statds["QT"][:,(end-beg):end],dims=2),dims=2)
+    snddata[:,3] .= tabs .* (1000 ./p).^(287/1004)
+    snddata[:,4] .= qv
     close(statds)
 
     printsnd(fsnd,snddata,psfc)
