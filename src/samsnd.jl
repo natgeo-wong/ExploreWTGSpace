@@ -16,9 +16,9 @@ function createsndmean(
     dt = (statds["time"][end] - statds["time"][1]) / (nt-1)
     dystep = round(Int,1/dt); beg = ndays*dystep-1
 
-    p    = dropdims(mean(statds["PRES"][:,(end-beg):end],dims=(2,3)),dims=(2,3))
-    tabs = dropdims(mean(statds["TABS"][:,(end-beg):end],dims=(2,3)),dims=(2,3))
-    qv   = dropdims(mean(statds["QV"][:,(end-beg):end],dims=(2,3)),dims=(2,3))
+    p    = dropdims(mean(statds["PRES"][:,(end-beg):end],dims=2),dims=2)
+    tabs = dropdims(mean(statds["TABS"][:,(end-beg):end],dims=2),dims=2)
+    qv   = dropdims(mean(statds["QV"][:,(end-beg):end],dims=2),dims=2)
 
     snddata = zeros(nz,6)
     snddata[:,1] .= z
