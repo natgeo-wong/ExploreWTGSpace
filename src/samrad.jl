@@ -8,7 +8,7 @@ function createradmean(
 )
 
     mkpath(projectdir("exp/rad")); frad = projectdir("exp/rad/$(radname)")
-    printsnd(frad,raddata)
+    printrad(frad,raddata)
 
 end
 
