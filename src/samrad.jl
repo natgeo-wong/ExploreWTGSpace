@@ -22,7 +22,7 @@ function printrad(frad::AbstractString, raddata::Array{<:Real,2})
 
     open(frad,"a") do io
         for t in [0.0,10000.0]
-            @printf(io,"%10.2f, %10d\n",t,nz)
+            @printf(io,"%10.2f, %10d   day,levels\n",t,nz)
             for iz = 1 : nz
                 @printf(
                     io,"%10.4f\t%16.8e\n",
