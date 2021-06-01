@@ -50,7 +50,7 @@ The pseudo-wavenumber $k'$ is smaller than the actual wavenumber $k$, which impl
 "
 
 # ╔═╡ d3b025e0-5b35-11eb-330a-5fbb2204da63
-expname = "P128km301d7"
+expname = "P064km301d7"
 
 # ╔═╡ a63de98c-5b35-11eb-0a8f-b7a1ebd441b6
 begin
