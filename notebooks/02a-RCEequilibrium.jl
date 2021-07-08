@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.14.2
+# v0.14.5
 
 using Markdown
 using InteractiveUtils
@@ -56,6 +56,12 @@ There are two broad model configuration categories: (P)erpetual (INSOL)ation, an
 # ╔═╡ 810d5a5a-8225-11eb-37b2-6978f37f77c3
 md"Is Diurnal? $(@bind isdiurnal PlutoUI.Slider(0:1))"
 
+# ╔═╡ ad968f4b-305b-42fa-ade1-11aababdae2b
+md"Is Forced? $(@bind isforced PlutoUI.Slider(0:1))"
+
+# ╔═╡ 505aec83-2f74-4f12-be40-b360cfb1d2a8
+md"Is Homogenous? $(@bind ishomo PlutoUI.Slider(0:1))"
+
 # ╔═╡ 427511d0-88cb-11eb-2a40-019c91ee1401
 md"Toggle Domain Size: $(@bind islarge PlutoUI.Slider(0:1))"
 
@@ -64,7 +70,11 @@ md"Sea Surface Temperature: $(@bind issst PlutoUI.Slider(0:2))"
 
 # ╔═╡ ac8b9d4c-5ade-11eb-06f4-33bff063bbde
 begin
-	if isone(isdiurnal)
+	if isone(ishomo)
+		  insol = "H"
+	elseif isone(isforced)
+		  insol = "F"
+	elseif isone(isdiurnal)
 		  insol = "D"
 	else; insol = "P"
 	end
@@ -392,6 +402,8 @@ end
 # ╟─46faa412-5ade-11eb-3c37-23a7e59037a0
 # ╟─b2670c08-81e5-11eb-324e-2b923b289a04
 # ╟─810d5a5a-8225-11eb-37b2-6978f37f77c3
+# ╟─ad968f4b-305b-42fa-ade1-11aababdae2b
+# ╟─505aec83-2f74-4f12-be40-b360cfb1d2a8
 # ╟─427511d0-88cb-11eb-2a40-019c91ee1401
 # ╟─95119ecc-d8d6-4ae6-802f-47b362606dc1
 # ╟─ac8b9d4c-5ade-11eb-06f4-33bff063bbde
