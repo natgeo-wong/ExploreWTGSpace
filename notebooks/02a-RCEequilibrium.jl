@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.14.5
+# v0.15.1
 
 using Markdown
 using InteractiveUtils
@@ -15,6 +15,7 @@ end
 
 # ╔═╡ 417ee688-5ade-11eb-2e95-91a301119e88
 begin
+	using Pkg; Pkg.activate()
 	using DrWatson
 	
 md"Using DrWatson in order to ensure reproducibility between different machines ..."
@@ -396,9 +397,26 @@ if isone(dosnden)
 else; md"We have decided not to create the ensemble SND file $(config) yet ..."
 end
 
+# ╔═╡ 4e305674-e2d4-495a-8597-a5f38cfc346c
+md"
+### E. Plotting the Profile ...
+"
+
+# ╔═╡ c65d73b7-f09a-4112-afd7-d7b2aad347c0
+begin
+	pplt.close(); fp,ap = pplt.subplots(aspect=0.5)
+	
+	ap[1].plot(tem_μ,pre_μ)
+	ap[1].plot([200,300],[200,200])
+	ap[1].format(ylim=(1000,25),yscale="log")
+	
+	fp.savefig("test.png",transparent=false,dpi=150)
+	PNGFiles.load("test.png")
+end
+
 # ╔═╡ Cell order:
 # ╟─9dd4cd7e-5adb-11eb-2735-a7a4a2bb23b1
-# ╟─417ee688-5ade-11eb-2e95-91a301119e88
+# ╠═417ee688-5ade-11eb-2e95-91a301119e88
 # ╟─46faa412-5ade-11eb-3c37-23a7e59037a0
 # ╟─b2670c08-81e5-11eb-324e-2b923b289a04
 # ╟─810d5a5a-8225-11eb-37b2-6978f37f77c3
@@ -425,9 +443,11 @@ end
 # ╟─ad523b4e-81ee-11eb-2d10-a984d5983471
 # ╟─c658d650-8614-11eb-252c-c3066fb1d506
 # ╟─f35ab14c-8226-11eb-29b4-c3b7130f3733
-# ╟─a3650e8a-822b-11eb-29ca-cd01b90e8099
+# ╠═a3650e8a-822b-11eb-29ca-cd01b90e8099
 # ╟─11913f26-8e7c-11eb-1b37-0f9c8e7b7331
 # ╟─4db59bf0-82ec-11eb-0374-81a982a74216
-# ╟─549c7744-82ed-11eb-03e8-7bb72c725856
+# ╠═549c7744-82ed-11eb-03e8-7bb72c725856
 # ╟─eba0fc7a-82eb-11eb-104e-d17de6c6c0de
 # ╟─f53da85a-82eb-11eb-0f42-ad74458f849f
+# ╟─4e305674-e2d4-495a-8597-a5f38cfc346c
+# ╠═c65d73b7-f09a-4112-afd7-d7b2aad347c0

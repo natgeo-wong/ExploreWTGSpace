@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.14.5
+# v0.15.1
 
 using Markdown
 using InteractiveUtils
@@ -15,6 +15,7 @@ end
 
 # ╔═╡ c55e0539-a750-4205-8f36-a5ac8b1e0106
 begin
+	using Pkg; Pkg.activate()
 	using DrWatson
 	
 md"Using DrWatson in order to ensure reproducibility between different machines ..."
