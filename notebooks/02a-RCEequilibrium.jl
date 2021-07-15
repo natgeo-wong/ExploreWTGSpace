@@ -58,7 +58,7 @@ There are two broad model configuration categories: (P)erpetual (INSOL)ation, an
 md"Is Diurnal? $(@bind isdiurnal PlutoUI.Slider(0:1))"
 
 # ╔═╡ ad968f4b-305b-42fa-ade1-11aababdae2b
-md"Is Forced? $(@bind isforced PlutoUI.Slider(0:1))"
+md"Is Temperature Tendency? $(@bind istend PlutoUI.Slider(0:1))"
 
 # ╔═╡ 505aec83-2f74-4f12-be40-b360cfb1d2a8
 md"Is Homogenous? $(@bind ishomo PlutoUI.Slider(0:1))"
@@ -67,14 +67,14 @@ md"Is Homogenous? $(@bind ishomo PlutoUI.Slider(0:1))"
 md"Toggle Domain Size: $(@bind islarge PlutoUI.Slider(0:1))"
 
 # ╔═╡ 95119ecc-d8d6-4ae6-802f-47b362606dc1
-md"Sea Surface Temperature: $(@bind issst PlutoUI.Slider(0:2))"
+md"Sea Surface Temperature: $(@bind issst PlutoUI.Slider(0:2,default=1))"
 
 # ╔═╡ ac8b9d4c-5ade-11eb-06f4-33bff063bbde
 begin
 	if isone(ishomo)
 		  insol = "H"
-	elseif isone(isforced)
-		  insol = "F"
+	elseif isone(istend)
+		  insol = "T"
 	elseif isone(isdiurnal)
 		  insol = "D"
 	else; insol = "P"
@@ -416,7 +416,7 @@ end
 
 # ╔═╡ Cell order:
 # ╟─9dd4cd7e-5adb-11eb-2735-a7a4a2bb23b1
-# ╠═417ee688-5ade-11eb-2e95-91a301119e88
+# ╟─417ee688-5ade-11eb-2e95-91a301119e88
 # ╟─46faa412-5ade-11eb-3c37-23a7e59037a0
 # ╟─b2670c08-81e5-11eb-324e-2b923b289a04
 # ╟─810d5a5a-8225-11eb-37b2-6978f37f77c3
@@ -443,10 +443,10 @@ end
 # ╟─ad523b4e-81ee-11eb-2d10-a984d5983471
 # ╟─c658d650-8614-11eb-252c-c3066fb1d506
 # ╟─f35ab14c-8226-11eb-29b4-c3b7130f3733
-# ╠═a3650e8a-822b-11eb-29ca-cd01b90e8099
+# ╟─a3650e8a-822b-11eb-29ca-cd01b90e8099
 # ╟─11913f26-8e7c-11eb-1b37-0f9c8e7b7331
 # ╟─4db59bf0-82ec-11eb-0374-81a982a74216
-# ╠═549c7744-82ed-11eb-03e8-7bb72c725856
+# ╟─549c7744-82ed-11eb-03e8-7bb72c725856
 # ╟─eba0fc7a-82eb-11eb-104e-d17de6c6c0de
 # ╟─f53da85a-82eb-11eb-0f42-ad74458f849f
 # ╟─4e305674-e2d4-495a-8597-a5f38cfc346c
