@@ -115,7 +115,6 @@ function calcswp(RH,QV,P)
 
 	pvec = vcat(0,reverse(P)) * 100; nt = size(RH,2)
 	QVsat = zeros(length(pvec))
-    csf = zeros(nt)
 	swp = zeros(nt)
 
     for it = 1 : nt
