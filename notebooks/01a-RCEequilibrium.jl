@@ -162,7 +162,7 @@ begin
 	ats[1].plot(tdiff,p)
 	ats[1].scatter(tdiff,p,s=7)
 	ats[1].format(
-		xlim=(-0.15,0.15),xlocator=(-2:2)/10,xlabel=L"T - T$_{OBS}$ / K",
+		xlim=(-0.15,0.15),xlocator=(-2:2)*0.1,xlabel=L"T - T$_{OBS}$ / K",
 		ylim=(1010,10),yscale="log",ylabel="Pressure / hPa",
 		suptitle="RCE Initial Spinup | $config"
 	)
@@ -176,7 +176,7 @@ begin
 		levels=lvls/10
 	)
 	ats[2].format(
-		xlim=(00,nt),
+		xlim=(0,nt),
 		ylim=(1010,25),yscale="log",
 		ylabel="Pressure / hPa",
 		urtitle=L"T$_{RMS}$" * " = $(trms) K"
@@ -185,7 +185,8 @@ begin
 	ats[3].plot(qdiff*100,p)
 	ats[3].scatter(qdiff*100,p,s=7)
 	ats[3].format(
-		xlim=(-1.5,1.5),xlocator=(-2:2),xlabel=L"qr = $\frac{q - q_{OBS}}{q_{OBS}}$",
+		xlim=(-7.5,7.5),xlocator=(-2:2)*5,
+		xlabel=L"qr = $\frac{q - q_{OBS}}{q_{OBS}}$",
 		ylim=(1010,10),yscale="log",ylabel="Pressure / hPa",
 	)
 	
@@ -197,7 +198,7 @@ begin
 		levels=lvls
 	)
 	ats[4].format(
-		xlim=(00,nt),
+		xlim=(0,nt),
 		ylim=(1010,25),yscale="log",
 		xlabel="time / days",ylabel="Pressure / hPa",
 		urtitle=L"$qr_{RMS}$" * " = $(qrms)"# * L" g kg$^{-1}$"
