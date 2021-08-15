@@ -36,8 +36,6 @@ donudging_tq     = .false.,
 timelargescale = 0
 tauls = 3600.,
 
-doFixedWindSpeedForSurfaceFluxes = .true.,
-WindSpeedForFluxes               = 5.,
 SFC_FLX_FXD    = .false.,
 SFC_TAU_FXD    = .false.,
 
@@ -84,5 +82,12 @@ nsave3Dstart = 9999999,
 nsave3Dend   = 999999999,
 save3Dbin    = .true.,
 rad3Dout     = .true.,
+
+/
+
+&UWOPTIONS
+
+doFixedWindSpeedForSurfaceFluxes = .true.,
+WindSpeedForFluxes               = 5.,
 
 /
