@@ -1,13 +1,13 @@
 &PARAMETERS
 
-caseid ='ExploreWTGSpace-Control-member06',
+caseid ='ExploreWTGSpace-Control-member14',
 
 dx = 1000.,
 dy = 1000.,
 dt = 30.,
 
 doensemble    = .true.,
-nensemble     = 6,
+nensemble     = 14,
 nrestart      = 0,
 nrestart_skip = 239,
 perturb_type  = 0,
