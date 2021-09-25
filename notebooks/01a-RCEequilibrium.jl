@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.15.1
+# v0.16.1
 
 using Markdown
 using InteractiveUtils
@@ -40,7 +40,7 @@ end
 
 # ╔═╡ 9dd4cd7e-5adb-11eb-2735-a7a4a2bb23b1
 md"
-# 6a. Finding an Equilibrium RCE State
+# 1a. Finding an Equilibrium RCE State
 
 This notebook will be used to help find an equilibrium RCE state that roughly returns the initial sounding profile used to initialize the model.
 
@@ -60,6 +60,12 @@ md"Is Diurnal? $(@bind isdiurnal PlutoUI.Slider(0:1))"
 # ╔═╡ ad968f4b-305b-42fa-ade1-11aababdae2b
 md"Is Temperature Tendency? $(@bind istend PlutoUI.Slider(0:1))"
 
+# ╔═╡ 90ce0084-1c22-4e74-8c57-fd5db191873c
+md"Is Fixed Surface Flux? $(@bind fixedflux PlutoUI.Slider(0:1))"
+
+# ╔═╡ 7d33165d-9a56-4d6d-96d2-783ec6df3d0c
+md"Is Coarse Resolution? $(@bind coarser PlutoUI.Slider(0:1))"
+
 # ╔═╡ 505aec83-2f74-4f12-be40-b360cfb1d2a8
 md"Is Homogenous? $(@bind ishomo PlutoUI.Slider(0:1))"
 
@@ -74,7 +80,13 @@ begin
 	if isone(ishomo)
 		  insol = "H"
 	elseif isone(istend)
-		  insol = "T"
+		if isone(fixedflux)
+			if isone(coarser)
+				  insol = "C"
+			else; insol = "S"
+			end
+		else;     insol = "T"
+		end
 	elseif isone(isdiurnal)
 		  insol = "D"
 	else; insol = "P"
@@ -95,6 +107,13 @@ begin
 		
 	
 	config = "$(insol)$(domsize)km$(domsst)"
+	
+	if config == "P064km301d7"
+		  nen = 20
+	else; nen = 10
+	end
+	
+md"**Model Ensemble:** $config | **Number of Members**: $nen"
 end
 
 # ╔═╡ 7842e150-822b-11eb-1ded-f35ee4cc6d8c
@@ -162,7 +181,7 @@ begin
 	ats[1].plot(tdiff,p)
 	ats[1].scatter(tdiff,p,s=7)
 	ats[1].format(
-		xlim=(-0.15,0.15),xlocator=(-2:2)*0.1,xlabel=L"T - T$_{OBS}$ / K",
+		xlim=(-0.15,0.15),xlocator=(-2:2)./10,xlabel=L"T - T$_{OBS}$ / K",
 		ylim=(1010,10),yscale="log",ylabel="Pressure / hPa",
 		suptitle="RCE Initial Spinup | $config"
 	)
@@ -233,9 +252,6 @@ else
 md"We have decided not to create the SND file $(config) yet ..."
 end
 
-# ╔═╡ 6fe3de4c-82ec-11eb-023d-7dc6f51fe448
-nen = 10
-
 # ╔═╡ 99dca670-81e5-11eb-24b8-cf1b23d8c1f7
 md"
 ### D. Running a $(nen)-member RCE ensemble
@@ -246,7 +262,7 @@ Should the difference in the final averaged sounding profile be vastly different
 "
 
 # ╔═╡ 401a6a3a-8444-11eb-3ee8-594591ed5aa9
-nendays = 500
+nendays = 250
 
 # ╔═╡ 7d905176-81e8-11eb-20d3-b9be287472f5
 begin
@@ -398,23 +414,6 @@ if isone(dosnden)
 else; md"We have decided not to create the ensemble SND file $(config) yet ..."
 end
 
-# ╔═╡ 4e305674-e2d4-495a-8597-a5f38cfc346c
-md"
-### E. Plotting the Profile ...
-"
-
-# ╔═╡ c65d73b7-f09a-4112-afd7-d7b2aad347c0
-begin
-	pplt.close(); fp,ap = pplt.subplots(aspect=0.5)
-	
-	ap[1].plot(tem_μ,pre_μ)
-	ap[1].plot([200,300],[200,200])
-	ap[1].format(ylim=(1000,25),yscale="log")
-	
-	fp.savefig("test.png",transparent=false,dpi=150)
-	PNGFiles.load("test.png")
-end
-
 # ╔═╡ Cell order:
 # ╟─9dd4cd7e-5adb-11eb-2735-a7a4a2bb23b1
 # ╟─417ee688-5ade-11eb-2e95-91a301119e88
@@ -422,6 +421,8 @@ end
 # ╟─b2670c08-81e5-11eb-324e-2b923b289a04
 # ╟─810d5a5a-8225-11eb-37b2-6978f37f77c3
 # ╟─ad968f4b-305b-42fa-ade1-11aababdae2b
+# ╟─90ce0084-1c22-4e74-8c57-fd5db191873c
+# ╟─7d33165d-9a56-4d6d-96d2-783ec6df3d0c
 # ╟─505aec83-2f74-4f12-be40-b360cfb1d2a8
 # ╟─427511d0-88cb-11eb-2a40-019c91ee1401
 # ╟─95119ecc-d8d6-4ae6-802f-47b362606dc1
@@ -438,7 +439,6 @@ end
 # ╟─4fd6e272-5b32-11eb-2f60-bbd4f8b9fc12
 # ╟─094999c8-5ae5-11eb-1526-f38c604184cb
 # ╟─99dca670-81e5-11eb-24b8-cf1b23d8c1f7
-# ╠═6fe3de4c-82ec-11eb-023d-7dc6f51fe448
 # ╠═401a6a3a-8444-11eb-3ee8-594591ed5aa9
 # ╟─7d905176-81e8-11eb-20d3-b9be287472f5
 # ╟─ad523b4e-81ee-11eb-2d10-a984d5983471
@@ -450,5 +450,3 @@ end
 # ╟─549c7744-82ed-11eb-03e8-7bb72c725856
 # ╟─eba0fc7a-82eb-11eb-104e-d17de6c6c0de
 # ╟─f53da85a-82eb-11eb-0f42-ad74458f849f
-# ╟─4e305674-e2d4-495a-8597-a5f38cfc346c
-# ╠═c65d73b7-f09a-4112-afd7-d7b2aad347c0

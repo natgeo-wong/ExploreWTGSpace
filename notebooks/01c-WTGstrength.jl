@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.15.1
+# v0.16.1
 
 using Markdown
 using InteractiveUtils
@@ -28,9 +28,9 @@ end
 
 # ╔═╡ e78a75c2-590f-11eb-1144-9127b0309135
 md"
-# 6c. Momentum Damping Strength
+# 1c. Momentum Damping Strength
 
-From notebook `06b-RCE2WTG.jl`, we see that adding the WTG approximation into a limited-area domain forces the initial RCE state into one or two regimes: a wet regime and a dry regime.  These regimes are analogues to the wet and dry regimes found in a large-area domain, where self-aggregation of convection naturally occurs in RCE.
+Previous studies (e.g. Emanuel et al. [2014]) have shown that imposing the WTG approximation onto a model that has reached RCE causes it to transition into one of two regimes: a wet regime and a dry regime.  These regimes are analogues to the wet and dry regimes found in a large-area domain, where self-aggregation of convection naturally occurs in RCE.
 
 In this notebook, we explore the characteristics of these wet and dry regimes under different $a_m$ strength.
 "
@@ -51,25 +51,17 @@ The pseudo-wavenumber $k'$ is smaller than the actual wavenumber $k$, which impl
 "
 
 # ╔═╡ d3b025e0-5b35-11eb-330a-5fbb2204da63
-expname = "T064km301d7"
+expname = "P064km301d7"
 
 # ╔═╡ a63de98c-5b35-11eb-0a8f-b7a1ebd441b6
 begin
 	configvec = [
-		"damping001",
-		"damping002",
-		"damping004",
-		"damping008",
-		"damping011",
-		"damping016",
-		"damping023",
-		"damping032",
-		"damping045",
-		"damping064",
-		"damping090",
-		"damping128",
-		"damping256",
-		"damping512",
+		"damping001","damping002","damping004","damping006","damping008",
+		"damping010","damping011","damping012","damping016","damping020",
+		"damping024","damping023","damping028","damping032","damping040",
+		"damping045","damping048","damping056","damping064","damping080",
+		"damping090","damping096","damping112","damping128","damping160",
+		"damping192","damping224","damping256","damping512",
 	]
 	ncon = length(configvec)
 	blues = pplt.Colors("Blues",(ncon+2))
@@ -82,7 +74,7 @@ end
 # ╔═╡ 55230f4a-7661-11eb-1c37-8b022b95e08e
 begin
 	pplt.close()
-	fts,ats = pplt.subplots(ncols=5,aspect=0.5,axwidth=1.2,sharex=0)
+	fts,ats = pplt.subplots(ncols=5,aspect=0.4,axwidth=1.2,sharex=0)
 	
 	for ic in 1 : ncon
 		config = configvec[ic]
@@ -202,7 +194,7 @@ md"
 # ╔═╡ 489b5bea-91b4-11eb-358b-3fe61c900511
 begin
 	pplt.close()
-	feb,aeb = pplt.subplots(ncols=5,aspect=0.5,axwidth=1.2,sharex=0); pw = zeros(10)
+	feb,aeb = pplt.subplots(ncols=5,aspect=0.4,axwidth=1.2,sharex=0); pw = zeros(10)
 	
 	for imem = 1 : 10
 		fnc = outstatname("Control",expname,false,true,imem)
