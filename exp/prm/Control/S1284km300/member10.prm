@@ -1,13 +1,13 @@
 &PARAMETERS
 
-caseid ='ExploreWTGSpace-Control-member02',
+caseid ='ExploreWTGSpace-Control-member10',
 
 dx = 4000.,
 dy = 4000.,
 dt = 30.,
 
 doensemble    = .true.,
-nensemble     = 2,
+nensemble     = 10,
 nrestart      = 0,
 nrestart_skip = 239,
 perturb_type  = 0,
@@ -42,7 +42,7 @@ SFC_TAU_FXD    = .false.,
 longitude0 = 0.,
 latitude0  = 0.,
 day0       = 80.5,
-tabs_s     = 301.70,
+tabs_s     = 300.,
 Szero      = 0,
 
 depth_slab_ocean = 1.,
