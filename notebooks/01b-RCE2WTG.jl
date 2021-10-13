@@ -4,6 +4,15 @@
 using Markdown
 using InteractiveUtils
 
+# This Pluto notebook uses @bind for interactivity. When running this notebook outside of Pluto, the following 'mock version' of @bind gives bound variables a default value (instead of an error).
+macro bind(def, element)
+    quote
+        local el = $(esc(element))
+        global $(esc(def)) = Core.applicable(Base.get, el) ? Base.get(el) : missing
+        el
+    end
+end
+
 # ╔═╡ 681658b0-5914-11eb-0d65-bbace277d145
 begin
 	using Pkg; Pkg.activate()
@@ -15,6 +24,7 @@ end
 # ╔═╡ 6dce35fc-5914-11eb-0ce2-0d4e164e1898
 begin
 	@quickactivate "ExploreWTGSpace"
+	using PlutoUI
 	using Printf
 	using SpecialFunctions
 	using Statistics
@@ -31,7 +41,7 @@ end
 
 # ╔═╡ e78a75c2-590f-11eb-1144-9127b0309135
 md"
-# 6b. Transitioning from RCE to WTG
+# 1b. Transitioning from RCE to WTG
 
 In this notebook, we investigate and develop a way to implement the WTG forcing gradually in the System of Atmospheric Modelling.  The sudden introduction of WTG large-scale forcing often causes a model to enter a \"shocked\" state that unnaturally forces the model into a different state.  Here, we develop a method that gradually increases the strength of the WTG momentum-damping parameter from a near/pseudo-RCE state.
 "
@@ -133,8 +143,31 @@ We encoded this transition in WTG strength via an error function into the `forci
 The number of ensemble members ran depends on the number of members needed for both the dry and wet states to appear.  This can range from 5, to 15.  Regardless, we adjust our analysis code to allow for varying number of ensemble members for each final $a_m$.
 "
 
+# ╔═╡ b7a79d4e-4007-4c55-99cd-33abe6ee9f32
+@bind prefix Select([
+	"P" => "Perpetual Insolation (P)",
+	"D" => "Diurnal Insolation (D)",
+	"T" => "Non-interactive Radiation (T)",
+	"S" => "Bulk-surface Fluxes (S)",
+])
+
+# ╔═╡ fc813056-4cb6-4db8-ba14-2fd2243b7c0d
+md"Toggle Domain Size $(@bind islarge PlutoUI.Slider(64:64:128,show_value=true)) km"
+
+# ╔═╡ 60a1f908-7b2d-4ed2-bfc1-3f3a416c7c88
+md"Toggle Horizontal Resolution: $(@bind hres PlutoUI.Slider(0:1))"
+
+# ╔═╡ bdf1a99a-24f9-4826-af25-3603686f23ad
+md"Sea Surface Temperature: $(@bind sst PlutoUI.Slider(295:5:305,default=300, show_value=true))"
+
 # ╔═╡ d3b025e0-5b35-11eb-330a-5fbb2204da63
-expname = "P064km301d7"
+begin
+	domsize = @sprintf("%03d",islarge)
+	
+	expname = "$(prefix)$(domsize)$(2^hres*Int((islarge/64)))km$(sst)"
+	
+	md"**Experiment Set:** $expname"
+end
 
 # ╔═╡ a63de98c-5b35-11eb-0a8f-b7a1ebd441b6
 begin
@@ -240,9 +273,13 @@ end
 # ╠═5c4cb1a2-c566-4208-b799-7e9644f197dd
 # ╟─de98b3f4-d550-4f00-966d-9e55a034ec51
 # ╠═2171952b-9551-40a8-8838-7d79d8977303
-# ╠═f66daa4b-fe38-47a8-82e5-adfdc91a6a98
+# ╟─f66daa4b-fe38-47a8-82e5-adfdc91a6a98
 # ╟─08173a11-bb0d-4566-9602-017815306de4
-# ╠═d3b025e0-5b35-11eb-330a-5fbb2204da63
+# ╟─b7a79d4e-4007-4c55-99cd-33abe6ee9f32
+# ╟─fc813056-4cb6-4db8-ba14-2fd2243b7c0d
+# ╟─60a1f908-7b2d-4ed2-bfc1-3f3a416c7c88
+# ╟─bdf1a99a-24f9-4826-af25-3603686f23ad
+# ╟─d3b025e0-5b35-11eb-330a-5fbb2204da63
 # ╟─a63de98c-5b35-11eb-0a8f-b7a1ebd441b6
 # ╟─223b4286-8811-11eb-0e67-4da65e1999a5
 # ╟─55230f4a-7661-11eb-1c37-8b022b95e08e

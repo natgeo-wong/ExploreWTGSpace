@@ -54,71 +54,40 @@ md"
 There are two broad model configuration categories: (P)erpetual (INSOL)ation, and (D)iurnal (INSOL)ation.
 "
 
-# ╔═╡ 810d5a5a-8225-11eb-37b2-6978f37f77c3
-md"Is Diurnal? $(@bind isdiurnal PlutoUI.Slider(0:1))"
-
-# ╔═╡ ad968f4b-305b-42fa-ade1-11aababdae2b
-md"Is Temperature Tendency? $(@bind istend PlutoUI.Slider(0:1))"
-
-# ╔═╡ 90ce0084-1c22-4e74-8c57-fd5db191873c
-md"Is Fixed Surface Flux? $(@bind fixedflux PlutoUI.Slider(0:1))"
-
-# ╔═╡ 7d33165d-9a56-4d6d-96d2-783ec6df3d0c
-md"Is Coarse Resolution? $(@bind coarser PlutoUI.Slider(0:1))"
-
 # ╔═╡ 505aec83-2f74-4f12-be40-b360cfb1d2a8
-md"Is Homogenous? $(@bind ishomo PlutoUI.Slider(0:1))"
+@bind prefix Select([
+	"P" => "Perpetual Insolation (P)",
+	"D" => "Diurnal Insolation (D)",
+	"T" => "Non-interactive Radiation (T)",
+	"S" => "Bulk-surface Fluxes (S)",
+])
+
+# ╔═╡ 81c5a74e-1f7c-4f11-b819-3fcfcd9b8221
+md"Toggle Domain Size $(@bind islarge PlutoUI.Slider(64:64:128,show_value=true)) km"
 
 # ╔═╡ 427511d0-88cb-11eb-2a40-019c91ee1401
-md"Toggle Domain Size: $(@bind islarge PlutoUI.Slider(0:1))"
+md"Toggle Horizontal Resolution: $(@bind hres PlutoUI.Slider(0:1))"
 
 # ╔═╡ 95119ecc-d8d6-4ae6-802f-47b362606dc1
-md"Sea Surface Temperature: $(@bind issst PlutoUI.Slider(0:2,default=1))"
+md"Sea Surface Temperature: $(@bind sst PlutoUI.Slider(295:5:305,default=300, show_value=true))"
 
 # ╔═╡ ac8b9d4c-5ade-11eb-06f4-33bff063bbde
 begin
-	if isone(ishomo)
-		  insol = "H"
-	elseif isone(istend)
-		if isone(fixedflux)
-			if isone(coarser)
-				  insol = "C"
-			else; insol = "S"
-			end
-		else;     insol = "T"
-		end
-	elseif isone(isdiurnal)
-		  insol = "D"
-	else; insol = "P"
-	end
+	domsize = @sprintf("%03d",islarge)
 	
-	if isone(islarge)
-		  domsize = "128"
-	else; domsize = "064"
-	end
+	config = "$(prefix)$(domsize)$(2^hres*Int((islarge/64)))km$(sst)"
 	
-	if iszero(issst)
-		domsst = "295d0"
-	elseif isone(issst)
-		domsst = "301d7"
-	else
-		domsst = "305d0"
-	end
-		
-	
-	config = "$(insol)$(domsize)km$(domsst)"
-	
-	if config == "P064km301d7"
+	if config == "P0641km300"
 		  nen = 20
 	else; nen = 10
 	end
 	
-md"**Model Ensemble:** $config | **Number of Members**: $nen"
+md"**Experiment Set:** $config | **Number of Control Members**: $nen"
 end
 
 # ╔═╡ 7842e150-822b-11eb-1ded-f35ee4cc6d8c
 begin
-	arr = [[1,2,2,2,2],[3,4,4,4,4]]
+	arr = [[5,1,2,2,2,2],[6,3,4,4,4,4]]
 	lvls = vcat(-5,-3.16,-2,-1.41,-1,-0.5,0.5,1,1.41,2,3.16,5)
 	md"Defining universal plotting variables"
 end
@@ -222,6 +191,10 @@ begin
 		xlabel="time / days",ylabel="Pressure / hPa",
 		urtitle=L"$qr_{RMS}$" * " = $(qrms)"# * L" g kg$^{-1}$"
 	)
+	
+	ats[5].plot(dropdims(mean(tem[:,(end-100+1):end],dims=2),dims=2),p)
+	ats[5].scatter(dropdims(mean(tem[:,(end-100+1):end],dims=2),dims=2),p,s=7)
+	ats[5].format(xlim=(180,320),xlabel="T / K")
 	
 	ats[2].colorbar(ct,loc="r",width=0.2)
 	ats[4].colorbar(cq,loc="r",width=0.2)
@@ -419,11 +392,8 @@ end
 # ╟─417ee688-5ade-11eb-2e95-91a301119e88
 # ╟─46faa412-5ade-11eb-3c37-23a7e59037a0
 # ╟─b2670c08-81e5-11eb-324e-2b923b289a04
-# ╟─810d5a5a-8225-11eb-37b2-6978f37f77c3
-# ╟─ad968f4b-305b-42fa-ade1-11aababdae2b
-# ╟─90ce0084-1c22-4e74-8c57-fd5db191873c
-# ╟─7d33165d-9a56-4d6d-96d2-783ec6df3d0c
 # ╟─505aec83-2f74-4f12-be40-b360cfb1d2a8
+# ╟─81c5a74e-1f7c-4f11-b819-3fcfcd9b8221
 # ╟─427511d0-88cb-11eb-2a40-019c91ee1401
 # ╟─95119ecc-d8d6-4ae6-802f-47b362606dc1
 # ╟─ac8b9d4c-5ade-11eb-06f4-33bff063bbde

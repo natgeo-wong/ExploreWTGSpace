@@ -4,6 +4,15 @@
 using Markdown
 using InteractiveUtils
 
+# This Pluto notebook uses @bind for interactivity. When running this notebook outside of Pluto, the following 'mock version' of @bind gives bound variables a default value (instead of an error).
+macro bind(def, element)
+    quote
+        local el = $(esc(element))
+        global $(esc(def)) = Core.applicable(Base.get, el) ? Base.get(el) : missing
+        el
+    end
+end
+
 # ╔═╡ 681658b0-5914-11eb-0d65-bbace277d145
 begin
 	using Pkg; Pkg.activate()
@@ -15,6 +24,8 @@ end
 # ╔═╡ 6dce35fc-5914-11eb-0ce2-0d4e164e1898
 begin
 	@quickactivate "ExploreWTGSpace"
+	using PlutoUI
+	using Printf
 	using StatsBase
 	
 	using ImageShow, PNGFiles
@@ -50,8 +61,31 @@ $$k' = \frac{k}{\sqrt{a_m}}$$
 The pseudo-wavenumber $k'$ is smaller than the actual wavenumber $k$, which implies that the wavelength is much, much larger.  This is an analogue to the domain being farther away from the baseline RCE domain, which is taken to be a large-scale domain average.  So as $a_m$ increases, we should see the dry and wet states converge back into the initial RCE state.
 "
 
+# ╔═╡ e5de2fc0-6f10-4ff9-817f-95fa20821b06
+@bind prefix Select([
+	"P" => "Perpetual Insolation (P)",
+	"D" => "Diurnal Insolation (D)",
+	"T" => "Non-interactive Radiation (T)",
+	"S" => "Bulk-surface Fluxes (S)",
+])
+
+# ╔═╡ a99febc5-75f1-416a-8d17-2f6ba4ef9fb0
+md"Toggle Domain Size $(@bind islarge PlutoUI.Slider(64:64:128,show_value=true)) km"
+
+# ╔═╡ ae58e5de-2eb9-4e96-b6ed-2f25c0e682b2
+md"Toggle Horizontal Resolution: $(@bind hres PlutoUI.Slider(0:1))"
+
+# ╔═╡ ab78df44-4f57-447a-80d3-0531f912a9ed
+md"Sea Surface Temperature: $(@bind sst PlutoUI.Slider(295:5:305,default=300, show_value=true))"
+
 # ╔═╡ d3b025e0-5b35-11eb-330a-5fbb2204da63
-expname = "P064km301d7"
+begin
+	domsize = @sprintf("%03d",islarge)
+	
+	expname = "$(prefix)$(domsize)$(2^hres*Int((islarge/64)))km$(sst)"
+	
+	md"**Experiment Set:** $expname"
+end
 
 # ╔═╡ a63de98c-5b35-11eb-0a8f-b7a1ebd441b6
 begin
@@ -360,7 +394,11 @@ end
 # ╟─681658b0-5914-11eb-0d65-bbace277d145
 # ╟─6dce35fc-5914-11eb-0ce2-0d4e164e1898
 # ╟─b6892634-9199-11eb-38d5-8dda8da16ed7
-# ╠═d3b025e0-5b35-11eb-330a-5fbb2204da63
+# ╟─e5de2fc0-6f10-4ff9-817f-95fa20821b06
+# ╟─a99febc5-75f1-416a-8d17-2f6ba4ef9fb0
+# ╟─ae58e5de-2eb9-4e96-b6ed-2f25c0e682b2
+# ╟─ab78df44-4f57-447a-80d3-0531f912a9ed
+# ╟─d3b025e0-5b35-11eb-330a-5fbb2204da63
 # ╟─a63de98c-5b35-11eb-0a8f-b7a1ebd441b6
 # ╟─55230f4a-7661-11eb-1c37-8b022b95e08e
 # ╟─9cf4fa56-91a8-11eb-2710-955eefd10142
