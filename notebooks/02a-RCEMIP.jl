@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.15.1
+# v0.16.1
 
 using Markdown
 using InteractiveUtils
@@ -23,6 +23,18 @@ begin
 	
 	md"Loading modules for the SelfAggregation Project ..."
 end
+
+# ╔═╡ 75323b45-122b-42a7-8c92-6db3044a4676
+md"
+# 02a. The Bifurcation in Large-Domain Simulations
+
+Here, using data from the RCEMIP (Wing et al.) simulations (specifically, from the SAM experiments), we show that the bifurcation that we observed in the `01-notebooks` has been consistently observed in other model experiments.
+"
+
+# ╔═╡ ef753b6b-39a8-492a-b9ea-fe74237761fc
+md"
+### A. Loading of RCEMIP data
+"
 
 # ╔═╡ 5647a8b2-ab77-4cab-b1e0-3d94f0c6d332
 begin
@@ -85,6 +97,11 @@ begin
 	md"Loading 3D humidity data for small-domain RCEMIP simulation ..."
 end
 
+# ╔═╡ 63399d2b-8f05-4685-951a-b9e18fa7d2c6
+md"
+### B. Visualization of the Bifurcation
+"
+
 # ╔═╡ fd155da0-f454-4c17-94a9-124fcf3a28d0
 begin
 	arr = [
@@ -125,17 +142,20 @@ begin
 	a[7].format(ylim=(1010,59),xlim=(0,100),yscale="log")
 	
 	f.colorbar(c,loc="r",title="Precipitable Water Vapour / mm",locator=30:10:80)
-	f.savefig(plotsdir("testRCEMIP.png"),transparent=false,dpi=250)
-	load(plotsdir("testRCEMIP.png"))
+	f.savefig(plotsdir("RCEMIP-SelfAggregation.png"),transparent=false,dpi=250)
+	load(plotsdir("RCEMIP-SelfAggregation.png"))
 end
 
 # ╔═╡ Cell order:
+# ╟─75323b45-122b-42a7-8c92-6db3044a4676
 # ╟─3f630f34-1d64-11ec-073c-316ff2a18be2
 # ╟─5e772289-f828-4876-8456-edc9824716c6
+# ╟─ef753b6b-39a8-492a-b9ea-fe74237761fc
 # ╟─5647a8b2-ab77-4cab-b1e0-3d94f0c6d332
 # ╟─fe212f12-a070-463e-bb85-27c4da4e8665
 # ╟─1faec812-15b4-4ce2-8990-ff3643595116
 # ╟─4e1e1658-799a-436c-820a-240be56ea3ab
 # ╟─82a21af2-a3e7-41dc-98fa-da3ff20c5877
 # ╟─859099a3-e7e9-42aa-8ed7-690c0fdc780a
+# ╟─63399d2b-8f05-4685-951a-b9e18fa7d2c6
 # ╟─fd155da0-f454-4c17-94a9-124fcf3a28d0

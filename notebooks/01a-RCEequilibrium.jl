@@ -273,6 +273,7 @@ begin
 	qdiff_en = qdiff_en ./ qob_en*100
 	qdts_en  = dropdims(mean(qbi_en ./ qob_en*100,dims=3),dims=3)
 	pts_en   = dropdims(mean(pre_en[:,(end-nendays+1):end,:],dims=2),dims=2)
+	tabs_en  = dropdims(mean(tem_en[:,(end-nendays+1):end,:],dims=2),dims=2)
 md"Calculating difference between `TABS` and `TABSOBS` ..."
 end
 
@@ -348,6 +349,16 @@ begin
 		xlabel="time / days",ylabel="Pressure / hPa",
 		urtitle=L"$qr_{RMS}$" * " = $(qrms_en) %",ultitle="(d)"
 	)
+	
+	for im = 1 : nen
+		aen[5].scatter(tabs_en[:,im],pts_en[:,im],s=2,c="gray")
+	end
+	
+	aen[5].plot(
+		dropdims(mean(tabs_en,dims=2),dims=2),
+		dropdims(mean(pts_en,dims=2),dims=2),c="k"
+	)
+	aen[5].format(xlim=(180,320),xlabel="T / K")
 	
 	aen[2].colorbar(cten,loc="r",width=0.2)
 	aen[4].colorbar(cqen,loc="r",width=0.2)
