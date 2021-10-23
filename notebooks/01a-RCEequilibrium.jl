@@ -109,19 +109,17 @@ begin
 	tob = retrievevar("TABSOBS","Control","$(config)")[:,end]
 	qvp = retrievevar("QV","Control","$(config)")
 	qob = retrievevar("QVOBS","Control","$(config)")[:,end]
+	rh  = calcrh(qvp,tem,p)/10
 md"Loading data from $(config) run ..."
 end
 
-# ╔═╡ a198b70a-6d68-11eb-0c84-a1481c131fa3
-w = [ 0.0198,0.0659,0.1284,0.1833,0.2052,0.1833,0.1284,0.0659,0.0198 ]
+# ╔═╡ c658d650-8614-11eb-252c-c3066fb1d506
+ptrop = 70
 
-# ╔═╡ f9ed4c2a-6d68-11eb-1b10-ab05cb1adc4b
+# ╔═╡ d787e885-f566-4a52-bcaa-fe1afa7dd51a
 begin
-	temn = zeros(nz,nt-8)
-	for iz = 1 : nz, it = 5 : (nt-4)
-		temn[iz,it-4] = sum(w .* @view tem[iz,(it-4):(it+4)])
-	end
-md"Doing some smoothing using Lanzcos filtering for future plotting ..."
+	ip = p .> ptrop
+	md"Extracting pressure levels below the tropopause height (assumed to be at $ptrop hPa)"
 end
 
 # ╔═╡ e82cd648-5ade-11eb-2739-ad93c0b6d3af
@@ -136,10 +134,10 @@ end
 
 # ╔═╡ 0c8cc7ec-5ae3-11eb-1c52-0fecbb575c43
 begin
-	trms = sqrt(mean(tdiff.^2)); trms = @sprintf("%.3f",trms)
-	qrms = sqrt(mean(qdiff.^2)); qrms = @sprintf("%.3f",qrms)
+	trms = sqrt(mean(tdiff[ip].^2)); trms = @sprintf("%.3f",trms)
+	qrms = sqrt(mean(qdiff[ip].^2)); qrms = @sprintf("%.3f",qrms)
 	
-md"Assuming that the tropopause is at 100 hPa, the root-mean-square of the temperature difference between the model temperature `TABS` and the observed temperature `TABSOBS` is $(trms) K.  The profile of the temperature difference is shown below:"
+md"Assuming that the tropopause is somewhere below $ptrop hPa (which is reasonable in the Tropics, because the tropopause is higher here), the root-mean-square of the temperature difference between the model temperature `TABS` and the observed large-scale temperature from the spinup `TABSOBS` below the tropopause is $(trms) K.  The profile of the temperature difference is shown below:"
 end
 
 # ╔═╡ 978d0442-5b33-11eb-39e5-cdea9c6efa4c
@@ -196,6 +194,10 @@ begin
 	ats[5].scatter(dropdims(mean(tem[:,(end-100+1):end],dims=2),dims=2),p,s=7)
 	ats[5].format(xlim=(180,320),xlabel="T / K")
 	
+	ats[6].plot(dropdims(mean(rh[:,(end-100+1):end],dims=2),dims=2),p)
+	ats[6].scatter(dropdims(mean(rh[:,(end-100+1):end],dims=2),dims=2),p,s=7)
+	ats[6].format(xlim=(0,120),xlabel="r / %")
+	
 	ats[2].colorbar(ct,loc="r",width=0.2)
 	ats[4].colorbar(cq,loc="r",width=0.2)
 	fts.savefig(plotsdir("rcetdts-$(config).png"),transparent=false,dpi=200)
@@ -244,7 +246,7 @@ begin
 	tbi_en = zeros(nz_en,nt_en,nen); tob_en = zeros(nz_en,nen)
 	qbi_en = zeros(nz_en,nt_en,nen); qob_en = zeros(nz_en,nen)
 	tem_en = zeros(nz_en,nt_en,nen)
-	qvp_en = zeros(nz_en,nt_en,nen)
+	qvp_en = zeros(nz_en,nt_en,nen); rh_en  = zeros(nz_en,nt_en,nen)
 	pre_en = zeros(nz_en,nt_en,nen); plevel = zeros(nz_en,nen)
 	prc_en = zeros(nt_en,nen);
 	for imem = 1 : nen
@@ -257,6 +259,7 @@ begin
 		qob_en[:,imem] = retrievevar("QVOBS","Control","$(config)",isensemble=true,member=imem)[:,end]
 		plevel[:,imem] = retrievevar("p","Control","$(config)",isensemble=true,member=imem)[:,end]
 		prc_en[:,imem] = retrievevar("PREC","Control","$(config)",isensemble=true,member=imem)
+		rh_en[:,:,imem]   = calcrh(qvp_en[:,:,imem],tem_en[:,:,imem],plevel[:,imem])/10
 	end
 	
 	tob_en = dropdims(mean(tob_en,dims=2),dims=2)
@@ -274,18 +277,17 @@ begin
 	qdts_en  = dropdims(mean(qbi_en ./ qob_en*100,dims=3),dims=3)
 	pts_en   = dropdims(mean(pre_en[:,(end-nendays+1):end,:],dims=2),dims=2)
 	tabs_en  = dropdims(mean(tem_en[:,(end-nendays+1):end,:],dims=2),dims=2)
+	relh_en  = dropdims(mean(rh_en[:,(end-nendays+1):end,:],dims=2),dims=2)
 md"Calculating difference between `TABS` and `TABSOBS` ..."
 end
 
-# ╔═╡ c658d650-8614-11eb-252c-c3066fb1d506
-ip = plevel .> 25
-
 # ╔═╡ f35ab14c-8226-11eb-29b4-c3b7130f3733
 begin
-	trms_en = sqrt(mean(tdiff_en[ip,:].^2)); trms_en = @sprintf("%.3f",trms_en)
-	qrms_en = sqrt(mean(qdiff_en[ip,:].^2)); qrms_en = @sprintf("%.3f",qrms_en)
+	ip_en = plevel .> ptrop
+	trms_en = sqrt(mean(tdiff_en[ip_en,:].^2)); trms_en = @sprintf("%.3f",trms_en)
+	qrms_en = sqrt(mean(qdiff_en[ip_en,:].^2)); qrms_en = @sprintf("%.3f",qrms_en)
 	
-md"Assuming that the tropopause is at 100 hPa, the root-mean-square of the temperature difference between the model temperature `TABS` and the observed temperature `TABSOBS` is $(trms_en) K.  The profile of the temperature difference is shown below:"
+md"Assuming that the tropopause in the tropics can sometimes reach as high as $ptrop hPa, the root-mean-square of the temperature difference between the model temperature `TABS` and the observed temperature `TABSOBS` below the tropopause is $(trms_en) K (i.e., we take calculate the root-mean-square using only levels where p > $(ptrop) hPa).  The profile of the temperature difference is shown below:"
 end
 
 # ╔═╡ a3650e8a-822b-11eb-29ca-cd01b90e8099
@@ -360,6 +362,16 @@ begin
 	)
 	aen[5].format(xlim=(180,320),xlabel="T / K")
 	
+	for im = 1 : nen
+		aen[6].scatter(relh_en[:,im],pts_en[:,im],s=2,c="gray")
+	end
+	
+	aen[6].plot(
+		dropdims(mean(relh_en,dims=2),dims=2),
+		dropdims(mean(pts_en,dims=2),dims=2),c="k"
+	)
+	aen[6].format(xlim=(0,120),xlabel="r / %")
+	
 	aen[2].colorbar(cten,loc="r",width=0.2)
 	aen[4].colorbar(cqen,loc="r",width=0.2)
 	fen.savefig(plotsdir("rcetdts-$(config)-ensemble.png"),transparent=false,dpi=200)
@@ -411,8 +423,8 @@ end
 # ╟─7842e150-822b-11eb-1ded-f35ee4cc6d8c
 # ╟─86f0a60a-5ae5-11eb-0b1a-935e8703b842
 # ╟─ab0909d0-5ade-11eb-2622-0fee6450004b
-# ╟─a198b70a-6d68-11eb-0c84-a1481c131fa3
-# ╟─f9ed4c2a-6d68-11eb-1b10-ab05cb1adc4b
+# ╠═c658d650-8614-11eb-252c-c3066fb1d506
+# ╟─d787e885-f566-4a52-bcaa-fe1afa7dd51a
 # ╟─e82cd648-5ade-11eb-2739-ad93c0b6d3af
 # ╟─0c8cc7ec-5ae3-11eb-1c52-0fecbb575c43
 # ╟─978d0442-5b33-11eb-39e5-cdea9c6efa4c
@@ -423,7 +435,6 @@ end
 # ╠═401a6a3a-8444-11eb-3ee8-594591ed5aa9
 # ╟─7d905176-81e8-11eb-20d3-b9be287472f5
 # ╟─ad523b4e-81ee-11eb-2d10-a984d5983471
-# ╟─c658d650-8614-11eb-252c-c3066fb1d506
 # ╟─f35ab14c-8226-11eb-29b4-c3b7130f3733
 # ╟─a3650e8a-822b-11eb-29ca-cd01b90e8099
 # ╟─11913f26-8e7c-11eb-1b37-0f9c8e7b7331
