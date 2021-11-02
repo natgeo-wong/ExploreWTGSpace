@@ -172,18 +172,15 @@ end
 # ╔═╡ a63de98c-5b35-11eb-0a8f-b7a1ebd441b6
 begin
 	configvec = [
-		# "damping001",
-		"damping002","damping004","damping006","damping008",
-		"damping010","damping011","damping012","damping016","damping020",
-		"damping024","damping023","damping028","damping032","damping040",
-		"damping045","damping048","damping056","damping064","damping080",
-		"damping090","damping096","damping112","damping128","damping160",
-		"damping192","damping224","damping256","damping512",
+		"damping001","damping002","damping004","damping008",
+		"damping011","damping016","damping023","damping032",
+		"damping045","damping064","damping090","damping128",
+		"damping256","damping512",
 	]
 	ncon = length(configvec)
-	blues = pplt.Colors("Blues",(ncon+2))
-	reds  = pplt.Colors("Reds",(ncon+2))
-	teals = pplt.Colors("Greens",(ncon+2))
+	blues = pplt.Colors("Blues",(ncon+4))
+	reds  = pplt.Colors("Reds",(ncon+4))
+	teals = pplt.Colors("Greens",(ncon+4))
 	lgd = Dict("frame"=>false,"ncols"=>1)
 md"Loading time dimension and defining the damping experiments ..."
 end
@@ -222,17 +219,17 @@ begin
 				lh = daymean(retrievevar("LHF",fnc))
 				pw = daymean(retrievevar("PW",fnc))
 				seb = sw .- lw .- sh .- lh
-				ats[1].plot(td,pr,lw=1,color=blues[ic+1])
-				ats[3].plot(td,seb,lw=1,color=reds[ic+1])
+				ats[1].plot(td,pr,lw=1,color=blues[ic+2])
+				ats[3].plot(td,seb,lw=1,color=reds[ic+2])
 				if imem == 1
 					constr = @sprintf("%d",config)
 					ats[2].plot(
-						td,pw,lw=1,color=teals[ic+1],
+						td,pw,lw=1,color=teals[ic+2],
 						label=(L"$a_m =$" * " $(constr)"),
 						legend="r",legend_kw=lgd
 					)
 				else
-					ats[2].plot(td,pw,lw=1,color=teals[ic+1])
+					ats[2].plot(td,pw,lw=1,color=teals[ic+2])
 				end
 			end
 		end

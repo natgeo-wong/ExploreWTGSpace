@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.16.1
+# v0.17.0
 
 using Markdown
 using InteractiveUtils
@@ -13,16 +13,9 @@ macro bind(def, element)
     end
 end
 
-# ╔═╡ 417ee688-5ade-11eb-2e95-91a301119e88
-begin
-	using Pkg; Pkg.activate()
-	using DrWatson
-	
-md"Using DrWatson in order to ensure reproducibility between different machines ..."
-end
-
 # ╔═╡ 46faa412-5ade-11eb-3c37-23a7e59037a0
 begin
+	using DrWatson
 	@quickactivate "ExploreWTGSpace"
 	using Statistics
 	using PlutoUI
@@ -88,7 +81,7 @@ end
 # ╔═╡ 7842e150-822b-11eb-1ded-f35ee4cc6d8c
 begin
 	arr = [[5,1,2,2,2,2],[6,3,4,4,4,4]]
-	lvls = vcat(-5,-3.16,-2,-1.41,-1,-0.5,0.5,1,1.41,2,3.16,5)
+	lvls = vcat(-5,-2,-1,-0.5,-0.2,-0.1,0.1,0.2,0.5,1,2,5)
 	md"Defining universal plotting variables"
 end
 
@@ -412,7 +405,6 @@ end
 
 # ╔═╡ Cell order:
 # ╟─9dd4cd7e-5adb-11eb-2735-a7a4a2bb23b1
-# ╟─417ee688-5ade-11eb-2e95-91a301119e88
 # ╟─46faa412-5ade-11eb-3c37-23a7e59037a0
 # ╟─b2670c08-81e5-11eb-324e-2b923b289a04
 # ╟─505aec83-2f74-4f12-be40-b360cfb1d2a8

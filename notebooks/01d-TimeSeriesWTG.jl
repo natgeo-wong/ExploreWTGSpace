@@ -47,13 +47,13 @@ Here, we just want to do a double check to see if the perturbation in $T_v$ can 
 "
 
 # ╔═╡ d3b025e0-5b35-11eb-330a-5fbb2204da63
-expname = "S1284km300"
+expname = "P1284km300"
 
 # ╔═╡ 58095159-99b3-4810-b917-17be2093b8c2
-config = "damping032"
+config = "damping002"
 
 # ╔═╡ 074370dd-64bf-4477-bde7-af1860e94097
-imember = 1
+imember = 3
 
 # ╔═╡ 55230f4a-7661-11eb-1c37-8b022b95e08e
 begin
@@ -66,12 +66,13 @@ begin
 	tabs_WTG = dwtg["TABS"][:]
 	qvap_WTG = dwtg["QV"][:]
 	qcon_WTG = dwtg["QCOND"][:]
+	prcp_WTG = dwtg["PREC"][:]
 	close(dwtg)
 end
 
 # ╔═╡ 3ae60162-7009-43d8-af77-df987e2d7792
 begin
-	drce = NCDataset(outstatname("Control","S1284km300",false,false))
+	drce = NCDataset(outstatname("Control",expname,false,false))
 	vert_RCE = drce["z"][:]
 	plvl_RCE = drce["p"][:]
 	tabs_RCE = drce["TABS"][:]
@@ -93,7 +94,7 @@ begin
 	
 	c1 = axs[1].contourf(
 		time,plvl_WTG,wwtg_WTG,
-		levels=vcat(-50,-20,-10,-5,-2,-1,0,1,2,5,10,20,50)/100,
+		levels=vcat(-50,-20,-10,-5,-2,-1,1,2,5,10,20,50)/1000,
 		extend="both",cmap="RdBu_r"
 	)
 	axs[1].colorbar(c1,loc="r",label=L"$w_{wtg}$ / m s$^{-1}$")
@@ -105,15 +106,16 @@ begin
 	)
 	axs[2].colorbar(c1,loc="r",label=L"$T_v'$ / K")
 	
-	c1 = axs[3].contourf(
-		time,plvl_WTG,pre_WTG .- plvl_WTG,
-		levels=vcat(-50,-20,-10,-5,-2,-1,0,1,2,5,10,20,50),
-		extend="both",cmap="RdBu_r"
+	c1 = axs[3].plot(
+		time,prcp_WTG
+		# time,plvl_WTG,pre_WTG .- plvl_WTG,
+		# levels=vcat(-50,-20,-10,-5,-2,-1,0,1,2,5,10,20,50),
+		# extend="both",cmap="RdBu_r"
 	)
-	axs[3].colorbar(c1,loc="r",label="p' / Pa")
+	# axs[3].colorbar(c1,loc="r",label="p' / Pa")
 	
 	for ax in axs
-		ax.format(yscale="log")
+		ax.format(yscale="log",xlim=(00,350))
 	end
 	
 	fig.savefig("test.png",transparent=false,dpi=150)
@@ -139,7 +141,7 @@ plvl_WTG
 plvl_WTG .- plvl_RCE
 
 # ╔═╡ b3a56224-8d6b-4456-ae0b-62be57381c89
-u = zeros(nlvl,139)
+u = zeros(nlvl,180)
 
 # ╔═╡ 58be642c-789d-4283-bd52-872b86730c09
 u[2:27,:] = Amat \ f[2:27,:]
@@ -154,7 +156,7 @@ begin
 		extend="both",cmap="RdBu_r"
 	)
 	a2[1].colorbar(c1,loc="r",label=L"Pa s$^{-1}$")
-	# a2[1].format(yscale="log")
+	a2[1].format(yscale="log")
 	
 	f2.savefig("test2.png",transparent=false,dpi=150)
 	load("test2.png")
@@ -171,7 +173,7 @@ end
 # ╠═55230f4a-7661-11eb-1c37-8b022b95e08e
 # ╠═3ae60162-7009-43d8-af77-df987e2d7792
 # ╠═0847d519-3f79-437b-97d8-bda02218fcd9
-# ╠═a2b66d2c-e038-4750-b4d2-28f20e6768ef
+# ╟─a2b66d2c-e038-4750-b4d2-28f20e6768ef
 # ╟─f5b70c65-431c-45cf-bd8e-c5ba078d76a1
 # ╠═96b1d658-bb22-4e47-9102-8e749e508833
 # ╠═138a0bf9-ae3f-45f9-98b8-ba0a7c9082f0

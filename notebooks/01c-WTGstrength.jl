@@ -90,12 +90,10 @@ end
 # ╔═╡ a63de98c-5b35-11eb-0a8f-b7a1ebd441b6
 begin
 	configvec = [
-		"damping001","damping002","damping004","damping006","damping008",
-		"damping010","damping011","damping012","damping016","damping020",
-		"damping024","damping023","damping028","damping032","damping040",
-		"damping045","damping048","damping056","damping064","damping080",
-		"damping090","damping096","damping112","damping128","damping160",
-		"damping192","damping224","damping256","damping512",
+		"damping001","damping002","damping004","damping008",
+		"damping011","damping016","damping023","damping032",
+		"damping045","damping064","damping090","damping128",
+		"damping256","damping512",
 	]
 	ncon = length(configvec)
 	blues = pplt.Colors("Blues",(ncon+2))
@@ -317,6 +315,7 @@ begin
 	f3D,a3D = pplt.subplots(ncols=4,aspect=0.5,axwidth=1.2,sharex=0)
 	clc = zeros(64)
 	tab = zeros(64)
+	swh = zeros(64)
 	
 	for ic in 1 : ncon
 		icon = configvec[ic]
@@ -333,7 +332,7 @@ begin
 				tabi = mean(retrievevar("TABS",fnc)[:,(end-99):end],dims=2)
 				qvi  = mean(retrievevar("QV",fnc)[:,(end-99):end],dims=2) / 10
 				rhi  = calcrh(qvi,tabi,p)
-				wwtg = mean(retrievevar("WWTG",fnc)[:,(end-99):end],dims=2) * 3.6
+				wwtg = mean(retrievevar("WWTG",fnc)[:,(end-99):end],dims=2)
 				pwi  = mean(retrievevar("PREC",fnc)[(end-99):end])
 				if pwi < (0.9 * pw)
 					a3D[1].plot(dropdims(clci,dims=2),p,lw=1,c=brwns[ic+1])
@@ -362,10 +361,12 @@ begin
 			_,p,_ = retrievedims(fnc);
 			clc[:] = mean(retrievevar("CLD",fnc)[:,(end-499):end],dims=2) * 100
 			tab[:] = mean(retrievevar("TABS",fnc)[:,(end-499):end],dims=2)
+			# swh[:] = mean(retrievevar("RADQRSW",fnc)[:,(end-499):end],dims=2) .+ mean(retrievevar("RADQRLW",fnc)[:,(end-499):end],dims=2)
 			qv = mean(retrievevar("QV",fnc)[:,(end-99):end],dims=2) / 10
 			rh = calcrh(qv,tab,p)
 			a3D[1].plot(clc,p,color="k")
 			a3D[2].plot(tab,p,color="k")
+			a3D[3].plot(swh,p,color="k")
 			a3D[4].plot(dropdims(rh,dims=2),p,color="k")
 		end
 	end
@@ -378,7 +379,7 @@ begin
 	
 	a3D[2].format(xlim=(150,325),xlabel="Temperature / K",ultitle="(b)")
 	a3D[3].format(xlim=(-2,2),xlabel=L"$w_{WTG}$ / km hr$^{-1}$",xscale="symlog",
-	xscale_kw=Dict("linthresh"=>0.1),ultitle="(c)")
+	xscale_kw=Dict("linthresh"=>0.01),ultitle="(c)")
 	a3D[4].format(xlim=(0,110),xlabel="Relative Humidity / %",ultitle="(d)")
 	# a3D[5].format(xlim=(-350,350),xlabel="Surface Balance",)
 	
@@ -399,7 +400,7 @@ end
 # ╟─ae58e5de-2eb9-4e96-b6ed-2f25c0e682b2
 # ╟─ab78df44-4f57-447a-80d3-0531f912a9ed
 # ╟─d3b025e0-5b35-11eb-330a-5fbb2204da63
-# ╟─a63de98c-5b35-11eb-0a8f-b7a1ebd441b6
+# ╠═a63de98c-5b35-11eb-0a8f-b7a1ebd441b6
 # ╟─55230f4a-7661-11eb-1c37-8b022b95e08e
 # ╟─9cf4fa56-91a8-11eb-2710-955eefd10142
 # ╟─364a1ce8-91ba-11eb-29a8-b948110e6125
