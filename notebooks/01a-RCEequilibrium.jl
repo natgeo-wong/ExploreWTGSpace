@@ -59,6 +59,7 @@ There are two broad model configuration categories: (P)erpetual (INSOL)ation, an
 	"D" => "Diurnal Insolation (D)",
 	"T" => "Non-interactive Radiation (T)",
 	"S" => "Bulk-surface Fluxes (S)",
+	"F" => "Fine Vertical Grid (F)",
 ])
 
 # ╔═╡ 81c5a74e-1f7c-4f11-b819-3fcfcd9b8221
@@ -74,7 +75,10 @@ md"Sea Surface Temperature: $(@bind sst PlutoUI.Slider(295:5:305,default=300, sh
 begin
 	domsize = @sprintf("%03d",islarge)
 	
-	config = "$(prefix)$(domsize)$(2^hres*Int((islarge/64)))km$(sst)"
+	if prefix != "F"
+		  config = "$(prefix)$(domsize)$(2^hres*Int((islarge/64)))km$(sst)"
+	else; config = "$(prefix)1284km$(sst)"
+	end
 	
 	if config == "P0641km300"
 		  nen = 20
@@ -142,7 +146,8 @@ end
 # ╔═╡ 978d0442-5b33-11eb-39e5-cdea9c6efa4c
 begin
 	
-	pplt.close(); fts,ats = pplt.subplots(arr,aspect=1/3,axwidth=0.6,sharex=0)
+	pplt.close()
+	fts,ats = pplt.subplots(arr,aspect=1/3,axwidth=0.6,sharex=0,wspace=[0.1,0.2,0.5,0.5,0.5])
 	
 	ats[1].plot(tdiff,p)
 	ats[1].scatter(tdiff,p,s=7)
@@ -292,7 +297,8 @@ end
 # ╔═╡ a3650e8a-822b-11eb-29ca-cd01b90e8099
 begin
 	
-	pplt.close(); fen,aen = pplt.subplots(arr,aspect=1/3,axwidth=0.6,sharex=0)
+	pplt.close()
+	fen,aen = pplt.subplots(arr,aspect=1/3,axwidth=0.6,sharex=0,wspace=[0.1,0.2,0.5,0.5,0.5])
 	
 	for im = 1 : nen
 		aen[1].scatter(tdiff_en[:,im],pts_en[:,im],s=2,c="gray")
@@ -411,7 +417,7 @@ end
 
 # ╔═╡ Cell order:
 # ╟─9dd4cd7e-5adb-11eb-2735-a7a4a2bb23b1
-# ╠═df810659-6173-483f-912c-523b022d641e
+# ╟─df810659-6173-483f-912c-523b022d641e
 # ╟─46faa412-5ade-11eb-3c37-23a7e59037a0
 # ╟─b2670c08-81e5-11eb-324e-2b923b289a04
 # ╟─505aec83-2f74-4f12-be40-b360cfb1d2a8
