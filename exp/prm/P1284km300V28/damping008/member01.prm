@@ -1,6 +1,6 @@
 &PARAMETERS
 
-caseid ='ExploreWTGSpace-P1284km300-member01',
+caseid ='ExploreWTGSpace-P1284km300V28-member01',
 
 dx = 4000.,
 dy = 4000.,
