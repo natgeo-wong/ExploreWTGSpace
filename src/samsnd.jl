@@ -132,3 +132,21 @@ function printsnd(
     end
 
 end
+
+function readsnd(sndname::String)
+	
+	fsnd = projectdir("exp","snd",sndname)
+	data = readdlm(fsnd)
+	data = data[2:end,:]; nrow = size(data,1)
+	data = data[2:Int(nrow/2),:]
+	
+	z  = data[:,1]
+	p  = data[:,2]
+	pt = data[:,3]
+	q  = data[:,4]
+	t  = pt .* (p/1000).^(2/7)
+	rh = calcrh(q/1000,t,p*100)
+	
+	return z,p,pt,q,t,rh
+	
+end	
