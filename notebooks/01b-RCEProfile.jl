@@ -44,9 +44,10 @@ begin
 	expvec = [
 		"P0641km295","P0641km300","P0641km305",
 		"P1282km295","P1282km300","P1282km305",
-		"F1284km300","P1284km300","S1284km300",
-		"S0641km300",
-		"T0641km300",
+		"F1284km300",
+		# "P1284km300","S1284km300",
+		# "S0641km300",
+		# "T0641km300",
 	]
 	colvec = ["b","g","r","blue6","green6","red6","green3","green1","blue3","blue2","blue1"]
 	nexp = length(expvec)
@@ -125,7 +126,7 @@ end
 # ╟─9dd4cd7e-5adb-11eb-2735-a7a4a2bb23b1
 # ╟─df810659-6173-483f-912c-523b022d641e
 # ╟─46faa412-5ade-11eb-3c37-23a7e59037a0
-# ╠═b2670c08-81e5-11eb-324e-2b923b289a04
+# ╟─b2670c08-81e5-11eb-324e-2b923b289a04
 # ╠═bcc23ba4-c40e-4966-94d9-326feddf0b12
 # ╠═c13062a4-373b-489d-a619-e7b33f059ba7
 # ╠═967cf880-bf6c-4f3b-80ef-c477bc4cdbaf

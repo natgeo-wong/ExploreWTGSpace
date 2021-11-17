@@ -66,7 +66,7 @@ There are two broad model configuration categories: (P)erpetual (INSOL)ation, an
 md"Toggle Domain Size $(@bind islarge PlutoUI.Slider(64:64:128,show_value=true)) km"
 
 # ╔═╡ 427511d0-88cb-11eb-2a40-019c91ee1401
-md"Toggle Horizontal Resolution: $(@bind hres PlutoUI.Slider(0:1))"
+md"Toggle Horizontal Resolution: $(@bind hres PlutoUI.Slider(-1:1,default=0))"
 
 # ╔═╡ 95119ecc-d8d6-4ae6-802f-47b362606dc1
 md"Sea Surface Temperature: $(@bind sst PlutoUI.Slider(295:5:305,default=300, show_value=true))"
@@ -75,10 +75,12 @@ md"Sea Surface Temperature: $(@bind sst PlutoUI.Slider(295:5:305,default=300, sh
 begin
 	domsize = @sprintf("%03d",islarge)
 	
-	if prefix != "F"
-		  config = "$(prefix)$(domsize)$(2^hres*Int((islarge/64)))km$(sst)"
-	else; config = "$(prefix)1284km$(sst)"
+	if islarge == "64"
+		res = 1
+	else; res = 2^hres*Int((islarge/64))
 	end
+	
+	config = "$(prefix)$(domsize)$(res)km$(sst)"
 	
 	if config == "P0641km300"
 		  nen = 20
