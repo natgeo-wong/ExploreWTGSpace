@@ -59,7 +59,6 @@ There are two broad model configuration categories: (P)erpetual (INSOL)ation, an
 	"D" => "Diurnal Insolation (D)",
 	"T" => "Non-interactive Radiation (T)",
 	"S" => "Bulk-surface Fluxes (S)",
-	"F" => "Fine Vertical Grid (F)",
 ])
 
 # ╔═╡ 81c5a74e-1f7c-4f11-b819-3fcfcd9b8221
@@ -71,6 +70,9 @@ md"Toggle Horizontal Resolution: $(@bind hres PlutoUI.Slider(-1:1,default=0))"
 # ╔═╡ 95119ecc-d8d6-4ae6-802f-47b362606dc1
 md"Sea Surface Temperature: $(@bind sst PlutoUI.Slider(295:5:305,default=300, show_value=true))"
 
+# ╔═╡ cd4e97b1-5910-4d74-b02a-de8852584b90
+md"Coarse Vertical Grid? $(@bind iscvg PlutoUI.Slider(0:1))"
+
 # ╔═╡ ac8b9d4c-5ade-11eb-06f4-33bff063bbde
 begin
 	domsize = @sprintf("%03d",islarge)
@@ -80,7 +82,12 @@ begin
 	else; res = 2^hres*Int((islarge/64))
 	end
 	
-	config = "$(prefix)$(domsize)$(res)km$(sst)"
+	if iszero(iscvg)
+		  vgrd = 64
+	else; vgrd = 28
+	end
+	
+	config = "$(prefix)$(domsize)$(res)km$(sst)V$(vgrd)"
 	
 	if config == "P0641km300"
 		  nen = 20
@@ -426,6 +433,7 @@ end
 # ╟─81c5a74e-1f7c-4f11-b819-3fcfcd9b8221
 # ╟─427511d0-88cb-11eb-2a40-019c91ee1401
 # ╟─95119ecc-d8d6-4ae6-802f-47b362606dc1
+# ╟─cd4e97b1-5910-4d74-b02a-de8852584b90
 # ╟─ac8b9d4c-5ade-11eb-06f4-33bff063bbde
 # ╟─7842e150-822b-11eb-1ded-f35ee4cc6d8c
 # ╟─86f0a60a-5ae5-11eb-0b1a-935e8703b842
