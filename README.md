@@ -4,7 +4,6 @@
   <a href="https://www.repostatus.org/#active">
     <img alt="Repo Status" src="https://www.repostatus.org/badges/latest/active.svg?style=flat-square" />
   </a>
-  <br>
   <a href="https://mit-license.org">
     <img alt="MIT License" src="https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square">
   </a>
