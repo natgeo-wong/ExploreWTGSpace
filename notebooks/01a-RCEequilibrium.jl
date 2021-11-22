@@ -62,7 +62,7 @@ There are two broad model configuration categories: (P)erpetual (INSOL)ation, an
 ])
 
 # ╔═╡ 81c5a74e-1f7c-4f11-b819-3fcfcd9b8221
-md"Toggle Domain Size $(@bind islarge PlutoUI.Slider(64:64:128,show_value=true)) km"
+md"Toggle Domain Size $(@bind islarge PlutoUI.Slider(64:64:128,default=128,show_value=true)) km"
 
 # ╔═╡ 427511d0-88cb-11eb-2a40-019c91ee1401
 md"Toggle Horizontal Resolution: $(@bind hres PlutoUI.Slider(-1:1,default=0))"
@@ -77,9 +77,9 @@ md"Coarse Vertical Grid? $(@bind iscvg PlutoUI.Slider(0:1))"
 begin
 	domsize = @sprintf("%03d",islarge)
 	
-	if islarge == "64"
+	if islarge == 64
 		res = 1
-	else; res = 2^hres*Int((islarge/64))
+	else; res = Int(2. ^hres*2)
 	end
 	
 	if iszero(iscvg)
@@ -91,7 +91,7 @@ begin
 	
 	if config == "P0641km300"
 		  nen = 20
-	else; nen = 10
+	else; nen = 8
 	end
 	
 md"**Experiment Set:** $config | **Number of Control Members**: $nen"

@@ -42,14 +42,20 @@ md"
 # ╔═╡ bcc23ba4-c40e-4966-94d9-326feddf0b12
 begin
 	expvec = [
-		"P0641km295","P0641km300","P0641km305",
-		"P1282km295","P1282km300","P1282km305",
-		"F1284km300",
+		"P0641km295V64","P0641km300V64","P0641km305V64",
+		"P1281km300V64",
+		"P1282km295V64","P1282km300V64","P1282km305V64",
+		"P1284km300V64",
 		# "P1284km300","S1284km300",
 		# "S0641km300",
 		# "T0641km300",
 	]
-	colvec = ["b","g","r","blue6","green6","red6","green3","green1","blue3","blue2","blue1"]
+	colvec = [
+		"b","g","r",
+		"green8",
+		"blue6","green6","red6",
+		"green3",
+		"green1","blue3","blue2","blue1"]
 	nexp = length(expvec)
 end
 
@@ -98,7 +104,7 @@ begin
 	
 	end
 	
-	a3D[1].format(xlim=(0,100),xlabel="Cloud Cover / %")
+	a3D[1].format(xlim=(0,25),xlabel="Cloud Cover / %")
 	a3D[2].format(xlim=(180,320),xlabel="Temperature / K")
 	a3D[3].format(xlim=(0,110),xlabel="Relative Humidity / %")
 	a3D[4].format(xlim=(-2.5,2.5),xlabel=L"SW Heating / K day$^{-1}$")
