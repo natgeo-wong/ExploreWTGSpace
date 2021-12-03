@@ -91,7 +91,7 @@ begin
 	
 	if config == "P0641km300"
 		  nen = 20
-	else; nen = 8
+	else; nen = 10
 	end
 	
 md"**Experiment Set:** $config | **Number of Control Members**: $nen"
