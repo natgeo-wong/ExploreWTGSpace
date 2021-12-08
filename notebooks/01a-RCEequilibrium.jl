@@ -310,7 +310,7 @@ begin
 	fen,aen = pplt.subplots(arr,aspect=1/3,axwidth=0.6,sharex=0,wspace=[0.1,0.2,0.5,0.5,0.5])
 	
 	for im = 1 : nen
-		aen[1].scatter(tdiff_en[:,im],pts_en[:,im],s=2,c="gray")
+		aen[1].scatter(tdiff_en[:,im],pts_en[:,im],s=1,c="gray")
 	end
 	
 	aen[1].plot(
@@ -339,7 +339,7 @@ begin
 	)
 	
 	for im = 1 : nen
-		aen[3].scatter(qdiff_en[:,im],pts_en[:,im],s=2,c="gray")
+		aen[3].scatter(qdiff_en[:,im],pts_en[:,im],s=1,c="gray")
 	end
 	
 	aen[3].plot(
