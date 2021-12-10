@@ -70,21 +70,34 @@ The pseudo-wavenumber $k'$ is smaller than the actual wavenumber $k$, which impl
 ])
 
 # ╔═╡ a99febc5-75f1-416a-8d17-2f6ba4ef9fb0
-md"Toggle Domain Size $(@bind islarge PlutoUI.Slider(64:64:128,show_value=true)) km"
+md"Toggle Domain Size $(@bind islarge PlutoUI.Slider(64:64:128,default=128,show_value=true)) km"
 
 # ╔═╡ ae58e5de-2eb9-4e96-b6ed-2f25c0e682b2
-md"Toggle Horizontal Resolution: $(@bind hres PlutoUI.Slider(0:1))"
+md"Toggle Horizontal Resolution: $(@bind hres PlutoUI.Slider(-1:1,default=0))"
 
 # ╔═╡ ab78df44-4f57-447a-80d3-0531f912a9ed
 md"Sea Surface Temperature: $(@bind sst PlutoUI.Slider(295:5:305,default=300, show_value=true))"
+
+# ╔═╡ b8a3a33f-34ca-46c9-867a-f88106ef83cf
+md"Coarse Vertical Grid? $(@bind iscvg PlutoUI.Slider(0:1))"
 
 # ╔═╡ d3b025e0-5b35-11eb-330a-5fbb2204da63
 begin
 	domsize = @sprintf("%03d",islarge)
 	
-	expname = "$(prefix)$(domsize)$(2^hres*Int((islarge/64)))km$(sst)"
+	if islarge == 64
+		res = 1
+	else; res = Int(2. ^hres*2)
+	end
 	
-	md"**Experiment Set:** $expname"
+	if iszero(iscvg)
+		  vgrd = 64
+	else; vgrd = 28
+	end
+	
+	expname = "$(prefix)$(domsize)$(res)km$(sst)V$(vgrd)"
+	
+md"**Experiment Set:** $expname"
 end
 
 # ╔═╡ a63de98c-5b35-11eb-0a8f-b7a1ebd441b6
@@ -399,6 +412,7 @@ end
 # ╟─a99febc5-75f1-416a-8d17-2f6ba4ef9fb0
 # ╟─ae58e5de-2eb9-4e96-b6ed-2f25c0e682b2
 # ╟─ab78df44-4f57-447a-80d3-0531f912a9ed
+# ╟─b8a3a33f-34ca-46c9-867a-f88106ef83cf
 # ╟─d3b025e0-5b35-11eb-330a-5fbb2204da63
 # ╟─a63de98c-5b35-11eb-0a8f-b7a1ebd441b6
 # ╟─55230f4a-7661-11eb-1c37-8b022b95e08e

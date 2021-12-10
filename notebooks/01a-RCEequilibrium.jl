@@ -250,7 +250,7 @@ Should the difference in the final averaged sounding profile be vastly different
 "
 
 # ╔═╡ 401a6a3a-8444-11eb-3ee8-594591ed5aa9
-nendays = 250
+nendays = 500
 
 # ╔═╡ 7d905176-81e8-11eb-20d3-b9be287472f5
 begin
