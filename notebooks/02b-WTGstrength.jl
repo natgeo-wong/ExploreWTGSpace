@@ -39,7 +39,7 @@ end
 
 # ╔═╡ e78a75c2-590f-11eb-1144-9127b0309135
 md"
-# 1c. Momentum Damping Strength
+# 2b. Momentum Damping Strength
 
 Previous studies (e.g. Emanuel et al. [2014]) have shown that imposing the WTG approximation onto a model that has reached RCE causes it to transition into one of two regimes: a wet regime and a dry regime.  These regimes are analogues to the wet and dry regimes found in a large-area domain, where self-aggregation of convection naturally occurs in RCE.
 
@@ -141,11 +141,11 @@ begin
 				rh = calcrh(qv,ta,p)
 				sw = calcswp(rh,qv,p)
 				cr = pw ./ sw / 10
-				ats[1].scatter(mean(pr[(end-99):end]),config,c="blue9",alpha=0.3,lw=0)
-				ats[2].scatter(mean(pa[(end-99):end]),config,c="blue9",alpha=0.3,lw=0)
-				ats[3].scatter(mean(ra[(end-99):end]),config,c="blue9",alpha=0.3,lw=0)
-				ats[4].scatter(mean(pw[(end-99):end]),config,c="blue9",alpha=0.3,lw=0)
-				ats[5].scatter(mean(cr[(end-99):end]),config,c="blue9",alpha=0.3,lw=0)
+				ats[1].scatter(mean(pr[(end-99):end]),config,c="blue9",alpha=0.2,lw=0)
+				ats[2].scatter(mean(pa[(end-99):end]),config,c="blue9",alpha=0.2,lw=0)
+				ats[3].scatter(mean(ra[(end-99):end]),config,c="blue9",alpha=0.2,lw=0)
+				ats[4].scatter(mean(pw[(end-99):end]),config,c="blue9",alpha=0.2,lw=0)
+				ats[5].scatter(mean(cr[(end-99):end]),config,c="blue9",alpha=0.2,lw=0)
 			end
 		end
 		
@@ -193,7 +193,7 @@ begin
 	)
 	
 	ats[4].format(
-		xlim=(0,100),xlabel="PWV / mm",
+		xlim=(0,75),xlabel="PWV / mm",
 		ultitle="(d)"
 	)
 	

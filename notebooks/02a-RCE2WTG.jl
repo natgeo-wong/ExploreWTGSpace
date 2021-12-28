@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.16.1
+# v0.16.4
 
 using Markdown
 using InteractiveUtils
@@ -41,7 +41,7 @@ end
 
 # ╔═╡ e78a75c2-590f-11eb-1144-9127b0309135
 md"
-# 1b. Transitioning from RCE to WTG
+# 2a. Transitioning from RCE to WTG
 
 In this notebook, we investigate and develop a way to implement the WTG forcing gradually in the System of Atmospheric Modelling.  The sudden introduction of WTG large-scale forcing often causes a model to enter a \"shocked\" state that unnaturally forces the model into a different state.  Here, we develop a method that gradually increases the strength of the WTG momentum-damping parameter from a near/pseudo-RCE state.
 "
@@ -152,21 +152,34 @@ The number of ensemble members ran depends on the number of members needed for b
 ])
 
 # ╔═╡ fc813056-4cb6-4db8-ba14-2fd2243b7c0d
-md"Toggle Domain Size $(@bind islarge PlutoUI.Slider(64:64:128,show_value=true)) km"
+md"Toggle Domain Size $(@bind islarge PlutoUI.Slider(64:64:128,default=128,show_value=true)) km"
 
 # ╔═╡ 60a1f908-7b2d-4ed2-bfc1-3f3a416c7c88
-md"Toggle Horizontal Resolution: $(@bind hres PlutoUI.Slider(0:1))"
+md"Toggle Horizontal Resolution: $(@bind hres PlutoUI.Slider(-1:1,default=0))"
 
 # ╔═╡ bdf1a99a-24f9-4826-af25-3603686f23ad
 md"Sea Surface Temperature: $(@bind sst PlutoUI.Slider(295:5:305,default=300, show_value=true))"
+
+# ╔═╡ 292ff637-7f96-4d9b-beeb-8b3d7b28a218
+md"Coarse Vertical Grid? $(@bind iscvg PlutoUI.Slider(0:1))"
 
 # ╔═╡ d3b025e0-5b35-11eb-330a-5fbb2204da63
 begin
 	domsize = @sprintf("%03d",islarge)
 	
-	expname = "$(prefix)$(domsize)$(2^hres*Int((islarge/64)))km$(sst)"
+	if islarge == 64
+		res = 1
+	else; res = Int(2. ^hres*2)
+	end
 	
-	md"**Experiment Set:** $expname"
+	if iszero(iscvg)
+		  vgrd = 64
+	else; vgrd = 28
+	end
+	
+	expname = "$(prefix)$(domsize)$(res)km$(sst)V$(vgrd)"
+	
+md"**Experiment Set:** $expname"
 end
 
 # ╔═╡ a63de98c-5b35-11eb-0a8f-b7a1ebd441b6
@@ -263,7 +276,7 @@ begin
 end
 
 # ╔═╡ Cell order:
-# ╟─e78a75c2-590f-11eb-1144-9127b0309135
+# ╠═e78a75c2-590f-11eb-1144-9127b0309135
 # ╟─681658b0-5914-11eb-0d65-bbace277d145
 # ╟─6dce35fc-5914-11eb-0ce2-0d4e164e1898
 # ╟─63f1f675-61db-4996-ac2a-157701c3da8b
@@ -276,6 +289,7 @@ end
 # ╟─fc813056-4cb6-4db8-ba14-2fd2243b7c0d
 # ╟─60a1f908-7b2d-4ed2-bfc1-3f3a416c7c88
 # ╟─bdf1a99a-24f9-4826-af25-3603686f23ad
+# ╟─292ff637-7f96-4d9b-beeb-8b3d7b28a218
 # ╟─d3b025e0-5b35-11eb-330a-5fbb2204da63
 # ╟─a63de98c-5b35-11eb-0a8f-b7a1ebd441b6
 # ╟─223b4286-8811-11eb-0e67-4da65e1999a5
