@@ -1,5 +1,4 @@
 name = "ExploreWTGSpace"
-uuid = "b4c7efdc-48f8-11ec-1a7e-43a2532b2fa8"
 keywords = ["weak temperature gradient", "tropics", "climate"]
 desc = "Exploring the WTG Space in small-domain RCE simulations"
 authors = ["Nathanael Wong <natgeo.wong@outlook.com>"]
@@ -20,4 +19,4 @@ SpecialFunctions = "276daf66-3868-5448-9aa4-cd146d93841b"
 StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
 
 [compat]
-julia = "1.6"
+julia = "1"
