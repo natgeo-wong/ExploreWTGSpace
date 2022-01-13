@@ -116,10 +116,10 @@ begin
 	end
 	
 	f3D.savefig(plotsdir(
-		"rceprofile-3D.png"),
+		"01b-rceprofile-3D.png"),
 		transparent=false,dpi=200
 	)
-	load(plotsdir("rceprofile-3D.png"))
+	load(plotsdir("01b-rceprofile-3D.png"))
 end
 
 # ╔═╡ 967cf880-bf6c-4f3b-80ef-c477bc4cdbaf

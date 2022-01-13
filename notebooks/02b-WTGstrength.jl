@@ -207,10 +207,10 @@ begin
 	end
 	
 	fts.savefig(plotsdir(
-		"wtgstrength-$(expname).png"),
+		"02b-wtgstrength-$(expname).png"),
 		transparent=false,dpi=200
 	)
-	load(plotsdir("wtgstrength-$(expname).png"))
+	load(plotsdir("02b-wtgstrength-$(expname).png"))
 end
 
 # ╔═╡ 9cf4fa56-91a8-11eb-2710-955eefd10142
@@ -316,10 +316,10 @@ begin
 	aeb[5].format(xlim=(-350,350),xlabel="Surface Balance",ultitle="(e)")
 	
 	feb.savefig(plotsdir(
-		"wtgstrength-$(expname)-seb.png"),
+		"02b-wtgstrength-$(expname)-seb.png"),
 		transparent=false,dpi=200
 	)
-	load(plotsdir("wtgstrength-$(expname)-seb.png"))
+	load(plotsdir("02b-wtgstrength-$(expname)-seb.png"))
 end
 
 # ╔═╡ e967eb5c-91c4-11eb-3066-05ccaa40bd11
@@ -397,10 +397,10 @@ begin
 	# a3D[5].format(xlim=(-350,350),xlabel="Surface Balance",)
 	
 	f3D.savefig(plotsdir(
-		"wtgstrength-$(expname)-3D.png"),
+		"02b-wtgstrength-$(expname)-3D.png"),
 		transparent=false,dpi=200
 	)
-	load(plotsdir("wtgstrength-$(expname)-3D.png"))
+	load(plotsdir("02b-wtgstrength-$(expname)-3D.png"))
 end
 
 # ╔═╡ Cell order:

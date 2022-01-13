@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.16.4
+# v0.17.5
 
 using Markdown
 using InteractiveUtils
@@ -7,8 +7,9 @@ using InteractiveUtils
 # This Pluto notebook uses @bind for interactivity. When running this notebook outside of Pluto, the following 'mock version' of @bind gives bound variables a default value (instead of an error).
 macro bind(def, element)
     quote
+        local iv = try Base.loaded_modules[Base.PkgId(Base.UUID("6e696c72-6542-2067-7265-42206c756150"), "AbstractPlutoDingetjes")].Bonds.initial_value catch; b -> missing; end
         local el = $(esc(element))
-        global $(esc(def)) = Core.applicable(Base.get, el) ? Base.get(el) : missing
+        global $(esc(def)) = Core.applicable(Base.get, el) ? Base.get(el) : iv(el)
         el
     end
 end
@@ -213,8 +214,8 @@ begin
 	
 	ats[2].colorbar(ct,loc="r",width=0.2)
 	ats[4].colorbar(cq,loc="r",width=0.2)
-	fts.savefig(plotsdir("rcetdts-$(config).png"),transparent=false,dpi=200)
-	load(plotsdir("rcetdts-$(config).png"))
+	fts.savefig(plotsdir("01a-rcetdts-$(config).png"),transparent=false,dpi=200)
+	load(plotsdir("01a-rcetdts-$(config).png"))
 	
 end
 
@@ -388,8 +389,8 @@ begin
 	
 	aen[2].colorbar(cten,loc="r",width=0.2)
 	aen[4].colorbar(cqen,loc="r",width=0.2)
-	fen.savefig(plotsdir("rcetdts-$(config)-ensemble.png"),transparent=false,dpi=200)
-	load(plotsdir("rcetdts-$(config)-ensemble.png"))
+	fen.savefig(plotsdir("01a-rcetdts-$(config)-ensemble.png"),transparent=false,dpi=200)
+	load(plotsdir("01a-rcetdts-$(config)-ensemble.png"))
 	
 end
 

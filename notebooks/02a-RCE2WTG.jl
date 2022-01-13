@@ -127,8 +127,8 @@ begin
 		ax.format(xlim=(0,1))
 	end
 
-	f.savefig(plotsdir("wtgcoeff.png"),transparent=false,dpi=200)
-	load(plotsdir("wtgcoeff.png"))
+	f.savefig(plotsdir("02a-wtgcoeff.png"),transparent=false,dpi=200)
+	load(plotsdir("02a-wtgcoeff.png"))
 end
 
 
@@ -269,10 +269,10 @@ begin
 	)
 	
 	fts.savefig(plotsdir(
-		"rce2wtg-$(expname).png"),
+		"02a-rce2wtg-$(expname).png"),
 		transparent=false,dpi=150
 	)
-	load(plotsdir("rce2wtg-$(expname).png"))
+	load(plotsdir("02a-rce2wtg-$(expname).png"))
 end
 
 # ╔═╡ Cell order:
