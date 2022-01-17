@@ -214,8 +214,8 @@ begin
 	
 	ats[2].colorbar(ct,loc="r",width=0.2)
 	ats[4].colorbar(cq,loc="r",width=0.2)
-	fts.savefig(plotsdir("01a-rcetdts-$(config).png"),transparent=false,dpi=200)
-	load(plotsdir("01a-rcetdts-$(config).png"))
+	fts.savefig(plotsdir("01a-spinup-$(config).png"),transparent=false,dpi=200)
+	load(plotsdir("01a-spinup-$(config).png"))
 	
 end
 
@@ -389,8 +389,8 @@ begin
 	
 	aen[2].colorbar(cten,loc="r",width=0.2)
 	aen[4].colorbar(cqen,loc="r",width=0.2)
-	fen.savefig(plotsdir("01a-rcetdts-$(config)-ensemble.png"),transparent=false,dpi=200)
-	load(plotsdir("01a-rcetdts-$(config)-ensemble.png"))
+	fen.savefig(plotsdir("01a-ensemble-$(config).png"),transparent=false,dpi=200)
+	load(plotsdir("01a-ensemble-$(config).png"))
 	
 end
 
