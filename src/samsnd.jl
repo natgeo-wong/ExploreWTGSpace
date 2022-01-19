@@ -1,3 +1,4 @@
+using DelimitedFiles
 using NCDatasets
 using Printf
 using Statistics
@@ -140,10 +141,10 @@ function readsnd(sndname::String)
 	data = data[2:end,:]; nrow = size(data,1)
 	data = data[2:Int(nrow/2),:]
 	
-	z  = data[:,1]
-	p  = data[:,2]
-	pt = data[:,3]
-	q  = data[:,4]
+	z  = Float64.(data[:,1])
+	p  = Float64.(data[:,2])
+	pt = Float64.(data[:,3])
+	q  = Float64.(data[:,4])
 	t  = pt .* (p/1000).^(2/7)
 	rh = calcrh(q/1000,t,p*100)
 	

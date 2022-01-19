@@ -1,0 +1,21 @@
+using DrWatson
+@quickactivate "ExploreWTGSpace"
+using Printf
+
+include(srcdir("samsnd.jl"))
+include(srcdir("sam.jl"))
+
+expii = "P1282km300V64"
+
+z,p,pt,q,t = readsnd(projectdir("exp","snd",expii))
+nz = length(z)
+snddata = zeros(nz,6)
+snddata[:,1] .= z
+snddata[:,2] .= p
+snddata[:,4] .= q
+
+pt_h = pt .+ 0.02; snddata[:,3] .= pt_h
+createsndmean("$(expii)_hot",snddata;psfc=1009.32)
+
+pt_c = pt .- 0.02; snddata[:,3] .= pt_c
+createsndmean("$(expii)_cld",snddata;psfc=1009.32)
