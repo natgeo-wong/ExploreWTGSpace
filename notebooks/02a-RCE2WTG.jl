@@ -186,14 +186,11 @@ end
 # ╔═╡ a63de98c-5b35-11eb-0a8f-b7a1ebd441b6
 begin
 	configvec = [
-		"damping001","damping002","damping004","damping008",
-		"damping011","damping016","damping023","damping032",
-		"damping045","damping064","damping090","damping128",
-		"damping256","damping512",
+		"damping001","damping002","damping004","damping008","damping016",
+		"damping032","damping064","damping128","damping256","damping512",
 	]
 	ncon = length(configvec)
-	blues = pplt.Colors("Blues",(ncon+4))
-	reds  = pplt.Colors("Reds",(ncon+4))
+        blues = pplt.Colors("Blues",(ncon+4))
 	teals = pplt.Colors("Greens",(ncon+4))
 	lgd = Dict("frame"=>false,"ncols"=>1)
 md"Loading time dimension and defining the damping experiments ..."
@@ -209,7 +206,7 @@ end
 # ╔═╡ 55230f4a-7661-11eb-1c37-8b022b95e08e
 begin
 	pplt.close()
-	fts,ats = pplt.subplots(nrows=3,aspect=3,axwidth=4,hspace=0.2,sharey=0)
+	fts,ats = pplt.subplots(nrows=2,aspect=3,axwidth=6,hspace=0.2,sharey=0)
 	
 	for ic in 1 : ncon
 		config = configvec[ic]
@@ -218,32 +215,33 @@ begin
 		config = parse(Float64,config)
 		imem = 0
 		
-		while imem < 100; imem += 1
+		while imem < 5; imem += 1
 			fnc = outstatname(expname,configvec[ic],false,true,imem)
 			if isfile(fnc)
-				_,_,t = retrievedims(fnc); t = t .- floor(t[1])
+				_,p,t = retrievedims(fnc); t = t .- floor(t[1])
 				td = daymean(t)
 				pr = retrievevar("PREC",fnc)
-				pa = retrievevar("AREAPREC",fnc)
-				pa = daymean(pr ./ pa)
-				pr = daymean(pr)
-				sw = daymean(retrievevar("SWNS",fnc))
-				lw = daymean(retrievevar("LWNS",fnc))
-				sh = daymean(retrievevar("SHF",fnc))
-				lh = daymean(retrievevar("LHF",fnc))
-				pw = daymean(retrievevar("PW",fnc))
-				seb = sw .- lw .- sh .- lh
-				ats[1].plot(td,pr,lw=1,color=blues[ic+2])
-				ats[3].plot(td,seb,lw=1,color=reds[ic+2])
+				pw = retrievevar("PW",fnc)
+				ta = retrievevar("TABS",fnc)
+				qv = retrievevar("QV",fnc)
+				rh = calcrh(qv,ta,p)
+				sw = calcswp(rh,qv,p)
+				cr = pw ./ sw / 10
 				if imem == 1
 					constr = @sprintf("%d",config)
+					ats[1].plot(
+						td,cr,color=teals[ic+2],
+						label=(L"$a_m =$" * " $(constr)"),
+						legend="r",legend_kw=lgd
+					)
 					ats[2].plot(
-						td,pw,lw=1,color=teals[ic+2],
+						td,pr,color=blues[ic+2],
 						label=(L"$a_m =$" * " $(constr)"),
 						legend="r",legend_kw=lgd
 					)
 				else
-					ats[2].plot(td,pw,lw=1,color=teals[ic+2])
+					ats[1].plot(td,cr,color=teals[ic+2])
+					ats[2].plot(td,pr,color=blues[ic+2])
 				end
 			end
 		end
@@ -251,28 +249,16 @@ begin
 	end
 	
 	ats[1].format(
-		ylabel=L"Rainfall / mm day$^{-1}$",yscale="log",
-		ylocator=10. .^(-3:3),
-		# yscale_kw=Dict("linthresh"=>0.1),
-		ylim=(0.005,200),
-		suptitle=expname,ultitle="(a)"
+		ylabel="Column Relative Humidity / %",ylim=(0,100),
+		xlim=(0,500),suptitle=expname,ultitle="(a)"
 	)
 	
 	ats[2].format(
-		ylim=(0,100),ylabel="PW / mm",
-		suptitle=expname,ultitle="(b)"
+		ylabel=L"Precipitation Rate / mm day$^{-1}$",ylim=(0.005,200),yscale="log",
+		xlim=(0,500),suptitle=expname,ultitle="(b)",xlabel="Days"
 	)
 	
-	ats[3].format(
-		xlim=(00,500),xlabel="Time / Days",
-		ylim=(-250,250),ylabel=L"SEB / W m$^{-2}$",ylocator=(-3:3)*100,
-		suptitle=expname,ultitle="(c)"
-	)
-	
-	fts.savefig(plotsdir(
-		"02a-rce2wtg-$(expname).png"),
-		transparent=false,dpi=150
-	)
+	fts.savefig(plotsdir("02a-rce2wtg-$(expname).png"),transparent=false,dpi=300)
 	load(plotsdir("02a-rce2wtg-$(expname).png"))
 end
 

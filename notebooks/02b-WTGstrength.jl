@@ -35,7 +35,7 @@ begin
 	
 	include(srcdir("sam.jl"))
 	
-md"Loading modules for the TroPrecLS project..."
+md"Loading modules for the ExploreWTGSpace project..."
 end
 
 # ╔═╡ e78a75c2-590f-11eb-1144-9127b0309135
@@ -129,7 +129,7 @@ begin
 		config = parse(Float64,config)
 		imem = 0
 		
-		while imem < 100; imem += 1
+		while imem < 5; imem += 1
 			fnc = outstatname(expname,configvec[ic],false,true,imem)
 			if isfile(fnc)
 				_,p,t = retrievedims(fnc); t = t .- 80
@@ -269,7 +269,7 @@ begin
 		icon = parse(Float64,icon)
 		imem = 0
 		
-		while imem < 100; imem += 1
+		while imem < 5; imem += 1
 			fnc = outstatname(expname,configvec[ic],false,true,imem)
 			if isfile(fnc)
 				_,_,t = retrievedims(fnc); t = t .- 80
@@ -326,7 +326,7 @@ end
 # ╔═╡ e967eb5c-91c4-11eb-3066-05ccaa40bd11
 begin
 	pplt.close()
-	f3D,a3D = pplt.subplots(ncols=4,aspect=0.5,axwidth=1.2,sharex=0)
+	f3D,a3D = pplt.subplots(ncols=5,aspect=0.4,axwidth=1.2,sharex=0)
 	clc = zeros(64)
 	tab = zeros(64)
 	swh = zeros(64)
@@ -338,12 +338,13 @@ begin
 		icon = parse(Float64,icon)
 		imem = 0
 		
-		while imem < 100; imem += 1
+		while imem < 15; imem += 1
 			fnc = outstatname(expname,configvec[ic],false,true,imem)
 			if isfile(fnc)
 				_,p,t = retrievedims(fnc); t = t .- 80
 				clci = mean(retrievevar("CLD",fnc)[:,(end-99):end],dims=2)*100
 				tabi = mean(retrievevar("TABS",fnc)[:,(end-99):end],dims=2)
+				tabo = mean(retrievevar("TABSOBS",fnc)[:,(end-99):end],dims=2)
 				qvi  = mean(retrievevar("QV",fnc)[:,(end-99):end],dims=2) / 10
 				rhi  = calcrh(qvi,tabi,p)
 				wwtg = mean(retrievevar("WWTG",fnc)[:,(end-99):end],dims=2)
@@ -351,18 +352,21 @@ begin
 				if pwi < (0.9 * pw)
 					a3D[1].plot(dropdims(clci,dims=2),p,lw=1,c=brwns[ic+1])
 					a3D[2].plot(dropdims(tabi,dims=2),p,lw=1,c=brwns[ic+1])
-					a3D[3].plot(dropdims(wwtg,dims=2),p,lw=1,c=brwns[ic+1])
-					a3D[4].plot(dropdims(rhi,dims=2),p,lw=1,c=brwns[ic+1])
+					a3D[3].plot(dropdims(tabi.-tabo,dims=2),p,lw=1,c=brwns[ic+1])
+					a3D[4].plot(dropdims(wwtg,dims=2),p,lw=1,c=brwns[ic+1])
+					a3D[5].plot(dropdims(rhi,dims=2),p,lw=1,c=brwns[ic+1])
 				elseif pwi > (1.1 * pw)
 					a3D[1].plot(dropdims(clci,dims=2),p,lw=1,c=blues[ic+1])
 					a3D[2].plot(dropdims(tabi,dims=2),p,lw=1,c=blues[ic+1])
-					a3D[3].plot(dropdims(wwtg,dims=2),p,lw=1,c=blues[ic+1])
-					a3D[4].plot(dropdims(rhi,dims=2),p,lw=1,c=blues[ic+1])
+					a3D[3].plot(dropdims(tabi.-tabo,dims=2),p,lw=1,c=blues[ic+1])
+					a3D[4].plot(dropdims(wwtg,dims=2),p,lw=1,c=blues[ic+1])
+					a3D[5].plot(dropdims(rhi,dims=2),p,lw=1,c=blues[ic+1])
 				else
 					a3D[1].plot(dropdims(clci,dims=2),p,lw=1,c=grns[ic+1])
 					a3D[2].plot(dropdims(tabi,dims=2),p,lw=1,c=grns[ic+1])
-					a3D[3].plot(dropdims(wwtg,dims=2),p,lw=1,c=grns[ic+1])
-					a3D[4].plot(dropdims(rhi,dims=2),p,lw=1,c=grns[ic+1])
+					a3D[3].plot(dropdims(tabi.-tabo,dims=2),p,lw=1,c=grns[ic+1])
+					a3D[4].plot(dropdims(wwtg,dims=2),p,lw=1,c=grns[ic+1])
+					a3D[5].plot(dropdims(rhi,dims=2),p,lw=1,c=grns[ic+1])
 				end
 			end
 		end
@@ -380,8 +384,9 @@ begin
 			rh = calcrh(qv,tab,p)
 			a3D[1].plot(clc,p,color="k")
 			a3D[2].plot(tab,p,color="k")
-			a3D[3].plot(swh,p,color="k")
-			a3D[4].plot(dropdims(rh,dims=2),p,color="k")
+			a3D[3].plot(tab*0,p,color="k")
+			a3D[4].plot(swh,p,color="k")
+			a3D[5].plot(dropdims(rh,dims=2),p,color="k")
 		end
 	end
 	
@@ -391,10 +396,11 @@ begin
 		suptitle="3D Vertical Profiles | $(expname)",ultitle="(a)"
 	)
 	
-	a3D[2].format(xlim=(150,325),xlabel="Temperature / K",ultitle="(b)")
-	a3D[3].format(xlim=(-2,2),xlabel=L"$w_{WTG}$ / km hr$^{-1}$",xscale="symlog",
+	a3D[2].format(xlim=(150,325),xlabel="T / K",ultitle="(b)")
+	a3D[3].format(xlim=(-30,30),xlabel=L"T - T$_{obs}$ / K",ultitle="(c)")
+	a3D[4].format(xlim=(-2,2),xlabel=L"$w_{WTG}$ / km hr$^{-1}$",xscale="symlog",
 	xscale_kw=Dict("linthresh"=>0.01),ultitle="(c)")
-	a3D[4].format(xlim=(0,110),xlabel="Relative Humidity / %",ultitle="(d)")
+	a3D[5].format(xlim=(0,110),xlabel="Relative Humidity / %",ultitle="(d)")
 	# a3D[5].format(xlim=(-350,350),xlabel="Surface Balance",)
 	
 	f3D.savefig(plotsdir(
@@ -407,7 +413,7 @@ end
 # ╔═╡ Cell order:
 # ╟─e78a75c2-590f-11eb-1144-9127b0309135
 # ╟─681658b0-5914-11eb-0d65-bbace277d145
-# ╟─6dce35fc-5914-11eb-0ce2-0d4e164e1898
+# ╠═6dce35fc-5914-11eb-0ce2-0d4e164e1898
 # ╟─b6892634-9199-11eb-38d5-8dda8da16ed7
 # ╟─e5de2fc0-6f10-4ff9-817f-95fa20821b06
 # ╟─a99febc5-75f1-416a-8d17-2f6ba4ef9fb0
