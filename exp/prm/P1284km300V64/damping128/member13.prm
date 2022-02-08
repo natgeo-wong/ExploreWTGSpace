@@ -1,13 +1,13 @@
 &PARAMETERS
 
-caseid ='ExploreWTGSpace-P1284km300V64-member10',
+caseid ='ExploreWTGSpace-P1284km300V64-member13',
 
 dx = 4000.,
 dy = 4000.,
 dt = 30.,
 
 doensemble    = .true.,
-nensemble     = 10,
+nensemble     = 13,
 nrestart      = 0,
 nrestart_skip = 239,
 perturb_type  = 0,
