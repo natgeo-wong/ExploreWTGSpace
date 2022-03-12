@@ -6,7 +6,7 @@ using Statistics
 
 function outstatname(
     experiment::AbstractString, config::AbstractString,
-    istest::Bool=false,
+    ismpi::Bool=false,
     isensemble::Bool=false, member::Integer=0
 )
 
@@ -15,10 +15,10 @@ function outstatname(
     else; expname = experiment
     end
 
-    if istest
+    if ismpi
     	fnc = datadir(joinpath(
-    		experiment,config,"OUT_STAT",
-    		"RCE_ExploreWTGSpace-$(expname)-test.nc"
+    		"Ensemble",experiment,config,"OUT_STAT",
+    		"RCE_ExploreWTGSpace-$(expname).nc"
     	))
     else
     	fnc = datadir(joinpath(
@@ -33,11 +33,11 @@ end
 
 function retrievedims(
     experiment::AbstractString, config::AbstractString;
-    istest::Bool=false,
+    ismpi::Bool=false,
     isensemble::Bool=false, member::Integer=0
 )
 
-    rce = NCDataset(outstatname(experiment,config,istest,isensemble,member))
+    rce = NCDataset(outstatname(experiment,config,ismpi,isensemble,member))
     z = rce["z"][:]
     p = rce["p"][:]
     t = rce["time"][:]
@@ -62,11 +62,11 @@ end
 function retrievevar(
     variable::AbstractString,
     experiment::AbstractString, config::AbstractString;
-    istest::Bool=false,
+    ismpi::Bool=false,
     isensemble::Bool=false, member::Integer=0
 )
 
-    rce = NCDataset(outstatname(experiment,config,istest,isensemble,member))
+    rce = NCDataset(outstatname(experiment,config,ismpi,isensemble,member))
     var = rce[variable][:]
     close(rce)
 
