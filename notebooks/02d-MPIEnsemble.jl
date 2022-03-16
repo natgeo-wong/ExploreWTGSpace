@@ -40,63 +40,31 @@ end
 
 # ╔═╡ e78a75c2-590f-11eb-1144-9127b0309135
 md"
-# 2b. Momentum Damping Strength
+# 2d. Using the MPI Ensemble in Perturbations
 
-Previous studies (e.g. Emanuel et al. [2014]) have shown that imposing the WTG approximation onto a model that has reached RCE causes it to transition into one of two regimes: a wet regime and a dry regime.  These regimes are analogues to the wet and dry regimes found in a large-area domain, where self-aggregation of convection naturally occurs in RCE.
-
-In this notebook, we explore the characteristics of these wet and dry regimes under different $a_m$ strength.
+There is a thought that maybe, especially in the simulations with static radiation and fixed surface fluxes, that the perturbations away from the RCE states at certain $a_m$ values is due to random noise that is quite evident in large domains.  As a result, we have introduced MPI Ensembles, where individual subdomains are run on individual processes, with only the large-scale forcing being based on domain-wide averages.  This would help to reduce random noise in our perturbations.
 "
 
 # ╔═╡ b6892634-9199-11eb-38d5-8dda8da16ed7
 md"
-### A. The Wet and Dry Regimes in WTG Ensemble Runs
+### A. Breakdown of the Ensemble Members
 
-We recall the momentum damping equation (assuming $a_m$ is constant with height):
+In our initial simulations, we ran a 5-member ensemble against the large-scale reference profiles found in notebook `01a`.  Now however, we run 2 more 5-member ensembles for each configuration:
+1. A \"hot\" perturbation, +0.05 K to temperature of the large-scale profile
+2. A \"cold\" perturbation, -0.05 K to temperature of the large-scale profile
 
-$$\frac{\partial^2\omega'}{\partial p^2} \approx \frac{k^2}{a_m} \frac{R_d}{p}T_v'$$
-
-Recall that $k$ is the wavenumber.  Therefore, increasing $a_m$ increases the wavenumber required for the WTG response to be the same.  Or in other words:
-
-$$k' = \frac{k}{\sqrt{a_m}}$$
-
-The pseudo-wavenumber $k'$ is smaller than the actual wavenumber $k$, which implies that the wavelength is much, much larger.  This is an analogue to the domain being farther away from the baseline RCE domain, which is taken to be a large-scale domain average.  So as $a_m$ increases, we should see the dry and wet states converge back into the initial RCE state.
+We expect the results of the model from the \"hot\" perturbation to favour the dry state, and vice-versa for the \"cold\" perturbation.
 "
 
 # ╔═╡ e5de2fc0-6f10-4ff9-817f-95fa20821b06
 @bind prefix Select([
 	"P" => "Perpetual Insolation (P)",
-	"D" => "Diurnal Insolation (D)",
-	"T" => "Non-interactive Radiation (T)",
 	"S" => "Bulk-surface Fluxes (S)",
 ])
 
-# ╔═╡ a99febc5-75f1-416a-8d17-2f6ba4ef9fb0
-md"Toggle Domain Size $(@bind islarge PlutoUI.Slider(64:64:128,default=128,show_value=true)) km"
-
-# ╔═╡ ae58e5de-2eb9-4e96-b6ed-2f25c0e682b2
-md"Toggle Horizontal Resolution: $(@bind hres PlutoUI.Slider(-1:1,default=0))"
-
-# ╔═╡ ab78df44-4f57-447a-80d3-0531f912a9ed
-md"Sea Surface Temperature: $(@bind sst PlutoUI.Slider(295:5:305,default=300, show_value=true))"
-
-# ╔═╡ b8a3a33f-34ca-46c9-867a-f88106ef83cf
-md"Coarse Vertical Grid? $(@bind iscvg PlutoUI.Slider(0:1))"
-
 # ╔═╡ d3b025e0-5b35-11eb-330a-5fbb2204da63
-begin
-	domsize = @sprintf("%03d",islarge)
-	
-	if islarge == 64
-		res = 1
-	else; res = Int(2. ^hres*2)
-	end
-	
-	if iszero(iscvg)
-		  vgrd = 64
-	else; vgrd = 28
-	end
-	
-	expname = "$(prefix)$(domsize)$(res)km$(sst)V$(vgrd)"
+begin	
+	expname = "$(prefix)1284km300V64"
 	
 md"**Experiment Set:** $expname"
 end
@@ -122,36 +90,6 @@ begin
 	pplt.close()
 	fts,ats = pplt.subplots(ncols=5,aspect=0.4,axwidth=1.2,sharex=0)
 	
-	for ic in 1 : ncon
-		config = configvec[ic]
-		config = replace(config,"damping"=>"")
-		config = replace(config,"d"=>".")
-		config = parse(Float64,config)
-		imem = 0
-		
-		while imem < 5; imem += 1
-			fnc = outstatname(expname,configvec[ic],false,true,imem)
-			if isfile(fnc)
-				_,p,t = retrievedims(fnc); t = t .- 80
-				pr = retrievevar("PREC",fnc)./24
-				pa = retrievevar("AREAPREC",fnc)
-				pw = retrievevar("PW",fnc)
-				ra = pr./pa; ra[isnan.(ra)] .= 0; ra[ra.==Inf] .= 0
-				ta = retrievevar("TABS",fnc)
-				qv = retrievevar("QV",fnc)
-				rh = calcrh(qv,ta,p)
-				sw = calcswp(rh,qv,p)
-				cr = pw ./ sw / 10
-				ats[1].scatter(mean(pr[(end-99):end]),config,c="blue9",alpha=0.2,lw=0)
-				ats[2].scatter(mean(pa[(end-99):end]),config,c="blue9",alpha=0.2,lw=0)
-				ats[3].scatter(mean(ra[(end-99):end]),config,c="blue9",alpha=0.2,lw=0)
-				ats[4].scatter(mean(pw[(end-99):end]),config,c="blue9",alpha=0.2,lw=0)
-				ats[5].scatter(mean(cr[(end-99):end]),config,c="blue9",alpha=0.2,lw=0)
-			end
-		end
-		
-	end
-	
 	for imem = 1 : 10
 		fnc = outstatname("Control",expname,false,true,imem)
 		if isfile(fnc)
@@ -171,6 +109,51 @@ begin
 			ats[4].plot([1,1]*mean(pw[(end-499):end]),[0,2000],c="grey",lw=1)
 			ats[5].plot([1,1]*mean(cr[(end-499):end]),[0,2000],c="grey",lw=1)
 		end
+	end
+	
+	for ic in 1 : ncon
+		config = configvec[ic]
+		config = replace(config,"damping"=>"")
+		config = replace(config,"d"=>".")
+		config = parse(Float64,config)
+		imem = 0
+		
+		while imem < 3; imem += 1
+			fnc = outstatname(expname,configvec[ic],true,true,imem)
+			if isfile(fnc)
+				_,p,t = retrievedims(fnc); t = t .- 80
+				pr = retrievevar("PREC",fnc)./24
+				pa = retrievevar("AREAPREC",fnc)
+				pw = retrievevar("PW",fnc)
+				ra = pr./pa; ra[isnan.(ra)] .= 0; ra[ra.==Inf] .= 0
+				ta = retrievevar("TABS",fnc)
+				qv = retrievevar("QV",fnc)
+				rh = calcrh(qv,ta,p)
+				sw = calcswp(rh,qv,p)
+				cr = pw ./ sw / 10
+
+				if imem == 2
+					clr = "yellow7"
+				elseif imem == 3
+					clr = "blue5"
+				end
+
+				if imem == 1
+					ats[1].plot(mean(pr[(end-99):end]),config,marker=".",c="k",ms=4)
+					ats[2].plot(mean(pa[(end-99):end]),config,marker=".",c="k",ms=4)
+					ats[3].plot(mean(ra[(end-99):end]),config,marker=".",c="k",ms=4)
+					ats[4].plot(mean(pw[(end-99):end]),config,marker=".",c="k",ms=4)
+					ats[5].plot(mean(cr[(end-99):end]),config,marker=".",c="k",ms=4)
+				else
+					ats[1].scatter(mean(pr[(end-99):end]),config,c=clr,alpha=0.5,s=50)
+					ats[2].scatter(mean(pa[(end-99):end]),config,c=clr,alpha=0.5,s=50)
+					ats[3].scatter(mean(ra[(end-99):end]),config,c=clr,alpha=0.5,s=50)
+					ats[4].scatter(mean(pw[(end-99):end]),config,c=clr,alpha=0.5,s=50)
+					ats[5].scatter(mean(cr[(end-99):end]),config,c=clr,alpha=0.5,s=50)
+				end
+			end
+		end
+		
 	end
 	
 	ats[1].format(
@@ -208,36 +191,13 @@ begin
 	end
 	
 	fts.savefig(plotsdir(
-		"02b-bifurcation-$(expname).png"),
+		"02d-MPIEnsemble-$(expname).png"),
 		transparent=false,dpi=200
 	)
-	load(plotsdir("02b-bifurcation-$(expname).png"))
+	load(plotsdir("02d-MPIEnsemble-$(expname).png"))
 end
 
-# ╔═╡ 9cf4fa56-91a8-11eb-2710-955eefd10142
-md"
-We see the following:
-* As $a_m$ increases, both the wet and dry model regimes converge back into the initial RCE state.
-* When $a_m$ becomes too small, all model states collapse into a dry regime.
-* As $a_m$ decreases, the change in rain-area fraction in the domain, rather than rain-rate in the rain-area, which is responsible for changes in the domain-averaged precipitation.
-
-In conclusion, the overall transition from RCE to WTG forcing (decreasing $a_m$) is as follows:
-1. Domain becomes more moist / heavier precipitation / wetter
-2. Eventually, a dry regime separates out
-3. Wet regime begins to show drier characteristics
-4. Eventually, wet regime crosses a threshold and model fully enters into a dry-regime.
-
-We note that the simulations that end up in the wet regime are more numerous than those that end up in the dry regime.  Overall, assuming complete randomness this seems to indicate that the a wet regime is favoured.
-
-I have decided on using precipitable water as the prognostic variable for determining if the model is in a dry or wet regime.
-"
-
-# ╔═╡ 364a1ce8-91ba-11eb-29a8-b948110e6125
-md"
-### B. Exploring some Variables
-"
-
-# ╔═╡ 489b5bea-91b4-11eb-358b-3fe61c900511
+# ╔═╡ 13d4b942-0714-494a-bb2c-362ad13abd9e
 begin
 	pplt.close()
 	feb,aeb = pplt.subplots(ncols=5,aspect=0.4,axwidth=1.2,sharex=0); pw = zeros(10)
@@ -270,7 +230,7 @@ begin
 		imem = 0
 		
 		while imem < 5; imem += 1
-			fnc = outstatname(expname,configvec[ic],false,true,imem)
+			fnc = outstatname(expname,configvec[ic],true,true,imem)
 			if isfile(fnc)
 				_,_,t = retrievedims(fnc); t = t .- 80
 				sw = mean(retrievevar("SWNS",fnc)[(end-99):end])
@@ -317,13 +277,13 @@ begin
 	aeb[5].format(xlim=(-350,350),xlabel="Surface Balance",ultitle="(e)")
 	
 	feb.savefig(plotsdir(
-		"02b-seb-$(expname).png"),
+		"02d-mpiseb-$(expname).png"),
 		transparent=false,dpi=200
 	)
-	load(plotsdir("02b-seb-$(expname).png"))
+	load(plotsdir("02d-mpiseb-$(expname).png"))
 end
 
-# ╔═╡ e967eb5c-91c4-11eb-3066-05ccaa40bd11
+# ╔═╡ 32e9b932-384b-49c5-bdab-62f492e86500
 begin
 	pplt.close()
 	f3D,a3D = pplt.subplots(ncols=5,aspect=0.4,axwidth=1.2,sharex=0)
@@ -338,8 +298,8 @@ begin
 		icon = parse(Float64,icon)
 		imem = 0
 		
-		while imem < 15; imem += 1
-			fnc = outstatname(expname,configvec[ic],false,true,imem)
+		while imem < 3; imem += 1
+			fnc = outstatname(expname,configvec[ic],true,true,imem)
 			if isfile(fnc)
 				_,p,t = retrievedims(fnc); t = t .- 80
 				clci = mean(retrievevar("CLD",fnc)[:,(end-99):end],dims=2)*100
@@ -404,10 +364,10 @@ begin
 	# a3D[5].format(xlim=(-350,350),xlabel="Surface Balance",)
 	
 	f3D.savefig(plotsdir(
-		"02b-vertprofiles-$(expname).png"),
+		"02d-mpivertprofiles-$(expname).png"),
 		transparent=false,dpi=200
 	)
-	load(plotsdir("02b-vertprofiles-$(expname).png"))
+	load(plotsdir("02d-mpivertprofiles-$(expname).png"))
 end
 
 # ╔═╡ Cell order:
@@ -416,14 +376,8 @@ end
 # ╟─6dce35fc-5914-11eb-0ce2-0d4e164e1898
 # ╟─b6892634-9199-11eb-38d5-8dda8da16ed7
 # ╟─e5de2fc0-6f10-4ff9-817f-95fa20821b06
-# ╟─a99febc5-75f1-416a-8d17-2f6ba4ef9fb0
-# ╟─ae58e5de-2eb9-4e96-b6ed-2f25c0e682b2
-# ╟─ab78df44-4f57-447a-80d3-0531f912a9ed
-# ╟─b8a3a33f-34ca-46c9-867a-f88106ef83cf
 # ╟─d3b025e0-5b35-11eb-330a-5fbb2204da63
 # ╟─a63de98c-5b35-11eb-0a8f-b7a1ebd441b6
 # ╟─55230f4a-7661-11eb-1c37-8b022b95e08e
-# ╟─9cf4fa56-91a8-11eb-2710-955eefd10142
-# ╟─364a1ce8-91ba-11eb-29a8-b948110e6125
-# ╟─489b5bea-91b4-11eb-358b-3fe61c900511
-# ╟─e967eb5c-91c4-11eb-3066-05ccaa40bd11
+# ╟─13d4b942-0714-494a-bb2c-362ad13abd9e
+# ╟─32e9b932-384b-49c5-bdab-62f492e86500
