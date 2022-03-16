@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.17.5
+# v0.18.0
 
 using Markdown
 using InteractiveUtils
@@ -215,7 +215,7 @@ begin
 		config = parse(Float64,config)
 		imem = 0
 		
-		while imem < 5; imem += 1
+		while imem < 15; imem += 1
 			fnc = outstatname(expname,configvec[ic],false,true,imem)
 			if isfile(fnc)
 				_,p,t = retrievedims(fnc); t = t .- floor(t[1])
@@ -280,4 +280,4 @@ end
 # ╟─d3b025e0-5b35-11eb-330a-5fbb2204da63
 # ╟─a63de98c-5b35-11eb-0a8f-b7a1ebd441b6
 # ╟─223b4286-8811-11eb-0e67-4da65e1999a5
-# ╟─55230f4a-7661-11eb-1c37-8b022b95e08e
+# ╠═55230f4a-7661-11eb-1c37-8b022b95e08e
