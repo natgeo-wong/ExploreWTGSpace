@@ -31,7 +31,7 @@ docoriolis       = .false.,
 donudging_uv     = .false.,
 donudging_tq     = .false.,
 
-timelargescale = 0
+timelargescale = 4320000
 tauls = 3600.,
 
 SFC_FLX_FXD    = .false.,
@@ -87,6 +87,6 @@ rad3Dout     = .true.,
 
 dowtg_raymondzeng_QJRMS2005 = .true.,
 ttheta_wtg = 0.00390625,
-ttheta_tscale = 0.2,
+ttheta_tscale = 1/9,
 
 /
