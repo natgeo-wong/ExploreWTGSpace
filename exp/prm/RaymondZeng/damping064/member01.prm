@@ -61,10 +61,10 @@ doisccp = .false.,
 domodis = .false.,
 domisr  = .false.,
 
-nstop    = 1440000,
-nprint   = 2880,
-nstat    = 2880,    ! Calculate statistics every hour!
-nstatfrq = 288,     ! Collect 60 samples per statistical calculation (every 1 minute)
+nstop    = 288000,
+nprint   = 120,
+nstat    = 120,    ! Calculate statistics every hour!
+nstatfrq = 20,     ! Collect 60 samples per statistical calculation (every 1 minute)
 
 doSAMconditionals     = .false.,
 dosatupdnconditionals = .false.,
