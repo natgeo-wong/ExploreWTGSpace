@@ -61,10 +61,10 @@ doisccp = .false.,
 domodis = .false.,
 domisr  = .false.,
 
-nstop    = 288000,
-nprint   = 120,
-nstat    = 120,    ! Calculate statistics every hour!
-nstatfrq = 20,     ! Collect 60 samples per statistical calculation (every 1 minute)
+nstop    = 1440000,
+nprint   = 2880,
+nstat    = 2880,    ! Calculate statistics every hour!
+nstatfrq = 288,     ! Collect 60 samples per statistical calculation (every 1 minute)
 
 doSAMconditionals     = .false.,
 dosatupdnconditionals = .false.,
@@ -86,7 +86,7 @@ rad3Dout     = .true.,
 &KUANG_OPTIONS
 
 dowtg_raymondzeng_QJRMS2005 = .true.,
-ttheta_wtg = 0.125,
+ttheta_wtg = 8.,
 ttheta_tscale = 1/9,
 
 /
