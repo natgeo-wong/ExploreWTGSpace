@@ -25,7 +25,6 @@ doshortwave      = .false.,
 dosurface        = .true.,
 dodynamicocean   = .false.,
 dolargescale     = .true.,
-doradtendency    = .true.,
 dosfcforcing     = .false.,
 docoriolis       = .false.,
 donudging_uv     = .false.,
@@ -104,5 +103,11 @@ taulz_wtg_tnudge = 1.5e3,
 
 doFixedWindSpeedForSurfaceFluxes = .true.,
 WindSpeedForFluxes               = 5.,
+
+/
+
+&KUANG_OPTIONS
+
+doradtendency = .true.
 
 /
