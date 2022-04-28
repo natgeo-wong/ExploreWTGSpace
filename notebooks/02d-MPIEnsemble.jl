@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.18.1
+# v0.19.0
 
 using Markdown
 using InteractiveUtils
@@ -78,9 +78,9 @@ begin
 		"damping256","damping512",
 	]
 	ncon = length(configvec)
-	blues = pplt.Colors("Blues",(ncon+2))
-	grns  = pplt.Colors("Teal",(ncon+2))
-	brwns = pplt.Colors("Brown",(ncon+2))
+	blues = pplt.get_colors("Blues",(ncon+2))
+	grns  = pplt.get_colors("Teal",(ncon+2))
+	brwns = pplt.get_colors("Brown",(ncon+2))
 	lgd = Dict("frame"=>false,"ncols"=>4)
 md"Loading time dimension and defining the damping experiments ..."
 end
@@ -370,6 +370,87 @@ begin
 	load(plotsdir("02d-mpivertprofiles-$(expname).png"))
 end
 
+# ╔═╡ f7571f52-30d9-4fd4-9882-febf4f26cf04
+md"
+### B. Let's Have a Look at the Time-Series Plots
+
+For the `S1284km300V64` experiment, we see that there is still a noticeable, consistent WTG forcing.  Here, we compare the time-series of non-mpi and mpi-ensemble simulations to see if there is any difference.
+"
+
+# ╔═╡ f18c4dfb-e9e4-4162-8274-9f238d6536c3
+begin
+	pplt.close()
+	f4,a4 = pplt.subplots(nrows=1,aspect=3,axwidth=6,sharey=0)
+
+	for ic in 8
+		config = configvec[ic]
+		config = replace(config,"damping"=>"")
+		config = replace(config,"d"=>".")
+		config = parse(Float64,config)
+		imem = 0
+
+		while imem < 15; imem += 1
+			fnc = outstatname(expname,configvec[ic],false,true,imem)
+			if isfile(fnc)
+				_,p,t = retrievedims(fnc); t = t .- floor(t[1])
+				pr = retrievevar("PREC",fnc)
+				pw = retrievevar("PW",fnc)
+				ta = retrievevar("TABS",fnc)
+				qv = retrievevar("QV",fnc)
+				rh = calcrh(qv,ta,p)
+				sw = calcswp(rh,qv,p)
+				cr = pw ./ sw / 10
+				if imem <= 5
+					a4[1].plot(t,cr,color=grns[4],lw=0.5)
+				elseif (imem>=6) && (imem<=10)
+					a4[1].plot(t,cr,color=brwns[4],lw=0.5)
+				elseif (imem>=11)
+					a4[1].plot(t,cr,color=blues[4],lw=0.5)
+				end
+			end
+		end
+
+	end
+
+	for ic in 8
+		config = configvec[ic]
+		config = replace(config,"damping"=>"")
+		config = replace(config,"d"=>".")
+		config = parse(Float64,config)
+		imem = 0
+
+		while imem < 15; imem += 1
+			fnc = outstatname(expname,configvec[ic],true,true,imem)
+			if isfile(fnc)
+				_,p,t = retrievedims(fnc); t = t .- floor(t[1])
+				pr = retrievevar("PREC",fnc)
+				pw = retrievevar("PW",fnc)
+				ta = retrievevar("TABS",fnc)
+				qv = retrievevar("QV",fnc)
+				rh = calcrh(qv,ta,p)
+				sw = calcswp(rh,qv,p)
+				cr = pw ./ sw / 10
+				if imem == 1
+					a4[1].plot(t,cr,color=grns[10],lw=3)
+				elseif imem == 2
+					a4[1].plot(t,cr,color=brwns[10],lw=3)
+				elseif imem == 3
+					a4[1].plot(t,cr,color=blues[10],lw=3)
+				end
+			end
+		end
+
+	end
+
+	a4[1].format(
+		ylabel="Column Relative Humidity / %",ylim=(0,100),
+		xlim=(0,500),suptitle=expname,ultitle="(a)"
+	)
+
+	f4.savefig(plotsdir("02d-rce2wtg-$(expname).png"),transparent=false,dpi=300)
+	load(plotsdir("02d-rce2wtg-$(expname).png"))
+end
+
 # ╔═╡ Cell order:
 # ╟─e78a75c2-590f-11eb-1144-9127b0309135
 # ╟─681658b0-5914-11eb-0d65-bbace277d145
@@ -381,3 +462,5 @@ end
 # ╟─55230f4a-7661-11eb-1c37-8b022b95e08e
 # ╟─13d4b942-0714-494a-bb2c-362ad13abd9e
 # ╟─32e9b932-384b-49c5-bdab-62f492e86500
+# ╟─f7571f52-30d9-4fd4-9882-febf4f26cf04
+# ╟─f18c4dfb-e9e4-4162-8274-9f238d6536c3

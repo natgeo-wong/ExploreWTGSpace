@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.18.1
+# v0.19.0
 
 using Markdown
 using InteractiveUtils
@@ -218,7 +218,7 @@ begin
 	
 	fts.savefig(plotsdir(
 		"02c-wetdryperturb-$(expname).png"),
-		transparent=false,dpi=200
+		transparent=false,dpi=300
 	)
 	load(plotsdir("02c-wetdryperturb-$(expname).png"))
 end

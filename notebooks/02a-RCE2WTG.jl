@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.18.0
+# v0.19.0
 
 using Markdown
 using InteractiveUtils
@@ -190,75 +190,73 @@ begin
 		"damping032","damping064","damping128","damping256","damping512",
 	]
 	ncon = length(configvec)
-        blues = pplt.Colors("Blues",(ncon+4))
-	teals = pplt.Colors("Greens",(ncon+4))
+    blues = pplt.get_colors("Blues",(ncon+4))
+	teals = pplt.get_colors("Greens",(ncon+4))
 	lgd = Dict("frame"=>false,"ncols"=>1)
 md"Loading time dimension and defining the damping experiments ..."
 end
 
-# ╔═╡ 223b4286-8811-11eb-0e67-4da65e1999a5
-function daymean(data)
-	
-	return dropdims(mean(reshape(data,1,:),dims=1),dims=1)
-	
-end
+# ╔═╡ 4581e38f-a680-4692-96ce-45d5e8799953
+md"Create Image? $(@bind createimage PlutoUI.Slider(0:1))"
 
 # ╔═╡ 55230f4a-7661-11eb-1c37-8b022b95e08e
 begin
 	pplt.close()
-	fts,ats = pplt.subplots(nrows=2,aspect=3,axwidth=6,hspace=0.2,sharey=0)
-	
-	for ic in 1 : ncon
-		config = configvec[ic]
-		config = replace(config,"damping"=>"")
-		config = replace(config,"d"=>".")
-		config = parse(Float64,config)
-		imem = 0
-		
-		while imem < 15; imem += 1
-			fnc = outstatname(expname,configvec[ic],false,true,imem)
-			if isfile(fnc)
-				_,p,t = retrievedims(fnc); t = t .- floor(t[1])
-				td = daymean(t)
-				pr = retrievevar("PREC",fnc)
-				pw = retrievevar("PW",fnc)
-				ta = retrievevar("TABS",fnc)
-				qv = retrievevar("QV",fnc)
-				rh = calcrh(qv,ta,p)
-				sw = calcswp(rh,qv,p)
-				cr = pw ./ sw / 10
-				if imem == 1
-					constr = @sprintf("%d",config)
-					ats[1].plot(
-						td,cr,color=teals[ic+2],
-						label=(L"$a_m =$" * " $(constr)"),
-						legend="r",legend_kw=lgd
-					)
-					ats[2].plot(
-						td,pr,color=blues[ic+2],
-						label=(L"$a_m =$" * " $(constr)"),
-						legend="r",legend_kw=lgd
-					)
-				else
-					ats[1].plot(td,cr,color=teals[ic+2])
-					ats[2].plot(td,pr,color=blues[ic+2])
+	fts,ats = pplt.subplots(nrows=2,aspect=3,axwidth=6,sharey=0)
+
+	if isone(createimage)
+		for ic in 1 : ncon
+			config = configvec[ic]
+			config = replace(config,"damping"=>"")
+			config = replace(config,"d"=>".")
+			config = parse(Float64,config)
+			imem = 0
+			
+			while imem < 15; imem += 1
+				fnc = outstatname(expname,configvec[ic],false,true,imem)
+				if isfile(fnc)
+					_,p,t = retrievedims(fnc); t = t .- floor(t[1])
+					pr = retrievevar("PREC",fnc) / 24
+					pw = retrievevar("PW",fnc)
+					ta = retrievevar("TABS",fnc)
+					qv = retrievevar("QV",fnc)
+					rh = calcrh(qv,ta,p)
+					sw = calcswp(rh,qv,p)
+					cr = pw ./ sw / 10
+					if imem == 1
+						constr = @sprintf("%d",config)
+						ats[1].plot(
+							t,cr,color=teals[ic+2],
+							label=(L"$a_m =$" * " $(constr)"),
+							legend="r",legend_kw=lgd
+						)
+						ats[2].plot(
+							t,pr,color=blues[ic+2],
+							label=(L"$a_m =$" * " $(constr)"),
+							legend="r",legend_kw=lgd
+						)
+					else
+						ats[1].plot(t,cr,color=teals[ic+2])
+						ats[2].plot(t,pr,color=blues[ic+2])
+					end
 				end
 			end
+			
 		end
 		
+		ats[1].format(
+			ylabel="Column Relative Humidity / %",ylim=(0,100),
+			xlim=(0,500),suptitle=expname,ultitle="(a)"
+		)
+		
+		ats[2].format(
+			ylabel=L"Precipitation Rate / mm day$^{-1}$",ylim=(0,5),yscale="symlog",
+			xlim=(0,500),suptitle=expname,ultitle="(b)",xlabel="Days",
+			yscale_kw=Dict("linthresh"=>0.01),
+		)
+		
+		fts.savefig(plotsdir("02a-rce2wtg-$(expname).png"),transparent=false,dpi=300)
 	end
-	
-	ats[1].format(
-		ylabel="Column Relative Humidity / %",ylim=(0,100),
-		xlim=(0,500),suptitle=expname,ultitle="(a)"
-	)
-	
-	ats[2].format(
-		ylabel=L"Precipitation Rate / mm day$^{-1}$",ylim=(0.005,200),yscale="log",
-		xlim=(0,500),suptitle=expname,ultitle="(b)",xlabel="Days"
-	)
-	
-	fts.savefig(plotsdir("02a-rce2wtg-$(expname).png"),transparent=false,dpi=300)
 	load(plotsdir("02a-rce2wtg-$(expname).png"))
 end
 
@@ -279,5 +277,5 @@ end
 # ╟─292ff637-7f96-4d9b-beeb-8b3d7b28a218
 # ╟─d3b025e0-5b35-11eb-330a-5fbb2204da63
 # ╟─a63de98c-5b35-11eb-0a8f-b7a1ebd441b6
-# ╟─223b4286-8811-11eb-0e67-4da65e1999a5
-# ╠═55230f4a-7661-11eb-1c37-8b022b95e08e
+# ╟─4581e38f-a680-4692-96ce-45d5e8799953
+# ╟─55230f4a-7661-11eb-1c37-8b022b95e08e

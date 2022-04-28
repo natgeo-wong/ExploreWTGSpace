@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.18.1
+# v0.19.0
 
 using Markdown
 using InteractiveUtils
@@ -100,7 +100,7 @@ end
 
 # ╔═╡ 7842e150-822b-11eb-1ded-f35ee4cc6d8c
 begin
-	arr = [[5,1,2,2,2,2],[6,3,4,4,4,4]]
+	arr = [[5,1,2,2,2,2,2,2],[6,3,4,4,4,4,4,4]]
 	lvls = vcat(-5,-2,-1,-0.5,-0.2,-0.1,0.1,0.2,0.5,1,2,5)
 	md"Defining universal plotting variables"
 end
@@ -157,9 +157,9 @@ end
 begin
 	
 	pplt.close()
-	fts,ats = pplt.subplots(arr,aspect=1/3,axwidth=0.6,sharex=0,wspace=[0.1,0.2,0.5,0.5,0.5])
+	fts,ats = pplt.subplots(arr,aspect=1/3,axwidth=0.6,sharex=0,wspace=1)
 	
-	ats[1].plot(tdiff,p)
+	ats[1].plot(tdiff,p,c="k")
 	ats[1].scatter(tdiff,p,s=7)
 	ats[1].format(
 		xlim=(-0.15,0.15),xlocator=(-2:2)./10,xlabel=L"T - T$_{OBS}$ / K",
@@ -182,7 +182,7 @@ begin
 		urtitle=L"T$_{RMS}$" * " = $(trms) K"
 	)
 	
-	ats[3].plot(qdiff*100,p)
+	ats[3].plot(qdiff*100,p,c="k")
 	ats[3].scatter(qdiff*100,p,s=7)
 	ats[3].format(
 		xlim=(-7.5,7.5),xlocator=(-2:2)*5,
@@ -204,11 +204,11 @@ begin
 		urtitle=L"$qr_{RMS}$" * " = $(qrms)"# * L" g kg$^{-1}$"
 	)
 	
-	ats[5].plot(dropdims(mean(tem[:,(end-100+1):end],dims=2),dims=2),p)
+	ats[5].plot(dropdims(mean(tem[:,(end-100+1):end],dims=2),dims=2),p,c="k")
 	ats[5].scatter(dropdims(mean(tem[:,(end-100+1):end],dims=2),dims=2),p,s=7)
 	ats[5].format(xlim=(180,320),xlabel="T / K")
 	
-	ats[6].plot(dropdims(mean(rh[:,(end-100+1):end],dims=2),dims=2),p)
+	ats[6].plot(dropdims(mean(rh[:,(end-100+1):end],dims=2),dims=2),p,c="k")
 	ats[6].scatter(dropdims(mean(rh[:,(end-100+1):end],dims=2),dims=2),p,s=7)
 	ats[6].format(xlim=(0,120),xlabel="r / %")
 	
@@ -308,7 +308,7 @@ end
 begin
 	
 	pplt.close()
-	fen,aen = pplt.subplots(arr,aspect=1/3,axwidth=0.6,sharex=0,wspace=[0.1,0.2,0.5,0.5,0.5])
+	fen,aen = pplt.subplots(arr,aspect=1/3,axwidth=0.6,sharex=0,wspace=1)
 	
 	for im = 1 : nen
 		aen[1].scatter(tdiff_en[:,im],pts_en[:,im],s=1,c="gray")

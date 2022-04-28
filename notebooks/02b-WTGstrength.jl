@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.18.1
+# v0.19.0
 
 using Markdown
 using InteractiveUtils
@@ -110,9 +110,9 @@ begin
 		"damping256","damping512",
 	]
 	ncon = length(configvec)
-	blues = pplt.Colors("Blues",(ncon+2))
-	grns  = pplt.Colors("Teal",(ncon+2))
-	brwns = pplt.Colors("Brown",(ncon+2))
+	blues = pplt.get_colors("Blues",(ncon+2))
+	grns  = pplt.get_colors("Teal",(ncon+2))
+	brwns = pplt.get_colors("Brown",(ncon+2))
 	lgd = Dict("frame"=>false,"ncols"=>4)
 md"Loading time dimension and defining the damping experiments ..."
 end
@@ -120,37 +120,7 @@ end
 # ╔═╡ 55230f4a-7661-11eb-1c37-8b022b95e08e
 begin
 	pplt.close()
-	fts,ats = pplt.subplots(ncols=5,aspect=0.4,axwidth=1.2,sharex=0)
-	
-	for ic in 1 : ncon
-		config = configvec[ic]
-		config = replace(config,"damping"=>"")
-		config = replace(config,"d"=>".")
-		config = parse(Float64,config)
-		imem = 0
-		
-		while imem < 5; imem += 1
-			fnc = outstatname(expname,configvec[ic],false,true,imem)
-			if isfile(fnc)
-				_,p,t = retrievedims(fnc); t = t .- 80
-				pr = retrievevar("PREC",fnc)./24
-				pa = retrievevar("AREAPREC",fnc)
-				pw = retrievevar("PW",fnc)
-				ra = pr./pa; ra[isnan.(ra)] .= 0; ra[ra.==Inf] .= 0
-				ta = retrievevar("TABS",fnc)
-				qv = retrievevar("QV",fnc)
-				rh = calcrh(qv,ta,p)
-				sw = calcswp(rh,qv,p)
-				cr = pw ./ sw / 10
-				ats[1].scatter(mean(pr[(end-99):end]),config,c="blue9",alpha=0.2,lw=0)
-				ats[2].scatter(mean(pa[(end-99):end]),config,c="blue9",alpha=0.2,lw=0)
-				ats[3].scatter(mean(ra[(end-99):end]),config,c="blue9",alpha=0.2,lw=0)
-				ats[4].scatter(mean(pw[(end-99):end]),config,c="blue9",alpha=0.2,lw=0)
-				ats[5].scatter(mean(cr[(end-99):end]),config,c="blue9",alpha=0.2,lw=0)
-			end
-		end
-		
-	end
+	fts,ats = pplt.subplots(ncols=5,aspect=0.4,axwidth=1.2,sharex=0,wspace=1.5)
 	
 	for imem = 1 : 10
 		fnc = outstatname("Control",expname,false,true,imem)
@@ -173,35 +143,70 @@ begin
 		end
 	end
 	
+	for ic in 1 : ncon
+		config = configvec[ic]
+		config = replace(config,"damping"=>"")
+		config = replace(config,"d"=>".")
+		config = parse(Float64,config)
+		imem = 0
+		
+		while imem < 15; imem += 1
+			fnc = outstatname(expname,configvec[ic],false,true,imem)
+			if isfile(fnc)
+				_,p,t = retrievedims(fnc); t = t .- 80
+				pr = retrievevar("PREC",fnc)./24
+				pa = retrievevar("AREAPREC",fnc)
+				pw = retrievevar("PW",fnc)
+				ra = pr./pa; ra[isnan.(ra)] .= 0; ra[ra.==Inf] .= 0
+				ta = retrievevar("TABS",fnc)
+				qv = retrievevar("QV",fnc)
+				rh = calcrh(qv,ta,p)
+				sw = calcswp(rh,qv,p)
+				cr = pw ./ sw / 10
+
+				if (imem >= 6) && (imem <= 10)
+					clr = "yellow7"
+				else
+					clr = "blue5"
+				end
+
+				if imem <= 5
+					ats[1].plot(mean(pr[(end-99):end]),config,marker=".",c="k",ms=4)
+					ats[2].plot(mean(pa[(end-99):end]),config,marker=".",c="k",ms=4)
+					ats[3].plot(mean(ra[(end-99):end]),config,marker=".",c="k",ms=4)
+					ats[4].plot(mean(pw[(end-99):end]),config,marker=".",c="k",ms=4)
+					ats[5].plot(mean(cr[(end-99):end]),config,marker=".",c="k",ms=4)
+				else
+					ats[1].scatter(mean(pr[(end-99):end]),config,c=clr,alpha=0.2,s=50)
+					ats[2].scatter(mean(pa[(end-99):end]),config,c=clr,alpha=0.2,s=50)
+					ats[3].scatter(mean(ra[(end-99):end]),config,c=clr,alpha=0.2,s=50)
+					ats[4].scatter(mean(pw[(end-99):end]),config,c=clr,alpha=0.2,s=50)
+					ats[5].scatter(mean(cr[(end-99):end]),config,c=clr,alpha=0.2,s=50)
+				end
+			end
+		end
+		
+	end
+	
 	ats[1].format(
 		ylim=(0.5,2000),ylabel=L"$a_m$ / day$^{-1}$",yscale="log",
 		xscale="symlog",xscale_kw=Dict("linthresh"=>0.01),
-		xlim=(0,10),xlabel=L"Domain $P$ / mm hr$^{-1}$",
-		suptitle=L"Sensitivity to $a_m$ | " * "$(expname)",
-		ultitle="(a)"
+		xlim=(0,10),xlabel=L"Domain $P$ / mm hr$^{-1}$",ultitle="(a)",
+		ltitle=L"(1) DGW Implementation | Sensitivity to $a_m$ | " * "$(expname)",
 	)
 	
 	ats[2].format(
 		xscale="symlog",xscale_kw=Dict("linthresh"=>0.01),
-		xlim=(0,1),xlabel="Rain Area Fraction",
-		ultitle="(b)"
+		xlim=(0,1),xlabel="Rain Area Fraction",ultitle="(b)",
 	)
 	
 	ats[3].format(
 		xscale="symlog",xscale_kw=Dict("linthresh"=>1),
-		xlim=(0,10),xlabel=L"Rain Area $P$ / mm hr$^{-1}$",
-		ultitle="(c)"
+		xlim=(0,10),xlabel=L"Rain Area $P$ / mm hr$^{-1}$",ultitle="(c)",
 	)
 	
-	ats[4].format(
-		xlim=(0,75),xlabel="PWV / mm",
-		ultitle="(d)"
-	)
-	
-	ats[5].format(
-		xlim=(0,100),xlabel="CRH / %",
-		ultitle="(e)"
-	)
+	ats[4].format(xlim=(0,75),xlabel="PWV / mm",ultitle="(d)")
+	ats[5].format(xlim=(0,100),xlabel="CRH / %",ultitle="(e)")
 	
 	for ax in ats
 		ax.format(lrtitle="Wet",lltitle="Dry")
@@ -209,7 +214,7 @@ begin
 	
 	fts.savefig(plotsdir(
 		"02b-bifurcation-$(expname).png"),
-		transparent=false,dpi=200
+		transparent=false,dpi=300
 	)
 	load(plotsdir("02b-bifurcation-$(expname).png"))
 end
@@ -269,7 +274,7 @@ begin
 		icon = parse(Float64,icon)
 		imem = 0
 		
-		while imem < 5; imem += 1
+		while imem < 15; imem += 1
 			fnc = outstatname(expname,configvec[ic],false,true,imem)
 			if isfile(fnc)
 				_,_,t = retrievedims(fnc); t = t .- 80
@@ -318,7 +323,7 @@ begin
 	
 	feb.savefig(plotsdir(
 		"02b-seb-$(expname).png"),
-		transparent=false,dpi=200
+		transparent=false,dpi=300
 	)
 	load(plotsdir("02b-seb-$(expname).png"))
 end
@@ -368,6 +373,7 @@ begin
 					a3D[4].plot(dropdims(wwtg,dims=2),p,lw=1,c=grns[ic+1])
 					a3D[5].plot(dropdims(rhi,dims=2),p,lw=1,c=grns[ic+1])
 				end
+				# a3D[2].scatter(dropdims(tabi,dims=2),p,c="k")
 			end
 		end
 		
