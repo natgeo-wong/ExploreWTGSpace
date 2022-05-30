@@ -5,25 +5,42 @@ using Printf
 using Statistics
 
 function outstatname(
-    experiment::AbstractString, config::AbstractString,
-    ismpi::Bool=false,
-    isensemble::Bool=false, member::Integer=0
+    expname :: AbstractString,
+    config  :: AbstractString,
+    iscontrol  :: Bool = true,
+    isDGW      :: Bool = false,
+    isWTG      :: Bool = false,
+    ismpi      :: Bool = false,
+    isensemble :: Bool = false,
+    member     :: Integer = 0
 )
 
     if isensemble
-    	  expname = "$(experiment)-member$(@sprintf("%02d",member))"
-    else; expname = experiment
+    	  expmem = "$(expname)-member$(@sprintf("%02d",member))"
+    else; expmem = expname
     end
 
-    if ismpi
+    prefix = "RCE"
+    if isDGW
+        prefix = "DGW"
+    elseif isWTG
+        prefix = "WTG"
+    end
+
+    if iscontrol
+        fnc = datadir(joinpath(
+    		prefix,expname,"OUT_STAT",
+    		"$(prefix)_ExploreWTGSpace-$(expmem).nc"
+    	))
+    elseif ismpi
     	fnc = datadir(joinpath(
-    		"Ensemble",experiment,config,"OUT_STAT",
-    		"RCE_ExploreWTGSpace-$(expname).nc"
+    		prefix,"Ensemble",expname,config,"OUT_STAT",
+    		"$(prefix)_ExploreWTGSpace-$(expmem).nc"
     	))
     else
     	fnc = datadir(joinpath(
-    		experiment,config,"OUT_STAT",
-    		"RCE_ExploreWTGSpace-$(expname).nc"
+    		prefix,experiment,config,"OUT_STAT",
+    		"$(prefix)_ExploreWTGSpace-$(expmem).nc"
     	))
     end
 
@@ -32,16 +49,25 @@ function outstatname(
 end
 
 function retrievedims(
-    experiment::AbstractString, config::AbstractString;
-    ismpi::Bool=false,
-    isensemble::Bool=false, member::Integer=0
+    expname :: AbstractString,
+    config  :: AbstractString = "";
+    iscontrol  :: Bool = true,
+    isDGW      :: Bool = false,
+    isWTG      :: Bool = false,
+    ismpi      :: Bool = false,
+    isensemble :: Bool = false,
+    member     :: Integer=0
 )
 
-    rce = NCDataset(outstatname(experiment,config,ismpi,isensemble,member))
-    z = rce["z"][:]
-    p = rce["p"][:]
-    t = rce["time"][:]
-    close(rce)
+    ds = NCDataset(outstatname(
+        expname,config,
+        iscontrol,isDGW,isWTG,
+        ismpi,isensemble,member
+    ))
+    z = ds["z"][:]
+    p = ds["p"][:]
+    t = ds["time"][:]
+    close(ds)
 
     return z,p,t
 
@@ -60,15 +86,24 @@ function retrievedims(fnc::AbstractString)
 end
 
 function retrievevar(
-    variable::AbstractString,
-    experiment::AbstractString, config::AbstractString;
-    ismpi::Bool=false,
-    isensemble::Bool=false, member::Integer=0
+    varname :: AbstractString,
+    expname :: AbstractString,
+    config  :: AbstractString;
+    iscontrol  :: Bool = true,
+    isDGW      :: Bool = false,
+    isWTG      :: Bool = false,
+    ismpi      :: Bool = false,
+    isensemble :: Bool = false,
+    member     :: Integer=0
 )
 
-    rce = NCDataset(outstatname(experiment,config,ismpi,isensemble,member))
-    var = rce[variable][:]
-    close(rce)
+    ds = NCDataset(outstatname(
+        expname,config,
+        iscontrol,isDGW,isWTG,
+        ismpi,isensemble,member
+    ))
+    var = ds[varname][:]
+    close(ds)
 
     return var
 
@@ -76,9 +111,9 @@ end
 
 function retrievevar(variable::AbstractString, fnc::AbstractString)
 
-    rce = NCDataset(fnc)
-    var = rce[variable][:]
-    close(rce)
+    ds = NCDataset(fnc)
+    var = ds[variable][:]
+    close(ds)
 
     return var
 
