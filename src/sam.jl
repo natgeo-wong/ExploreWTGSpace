@@ -39,7 +39,7 @@ function outstatname(
     	))
     else
     	fnc = datadir(joinpath(
-    		prefix,experiment,config,"OUT_STAT",
+    		prefix,expname,config,"OUT_STAT",
     		"$(prefix)_ExploreWTGSpace-$(expmem).nc"
     	))
     end
@@ -109,10 +109,10 @@ function retrievevar(
 
 end
 
-function retrievevar(variable::AbstractString, fnc::AbstractString)
+function retrievevar(varname::AbstractString, fnc::AbstractString)
 
     ds = NCDataset(fnc)
-    var = ds[variable][:]
+    var = ds[varname][:]
     close(ds)
 
     return var
