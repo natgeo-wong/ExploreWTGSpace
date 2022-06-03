@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.0
+# v0.19.5
 
 using Markdown
 using InteractiveUtils
@@ -185,14 +185,24 @@ end
 
 # ╔═╡ a63de98c-5b35-11eb-0a8f-b7a1ebd441b6
 begin
-	configvec = [
+
+	configDGW = [
 		"damping001","damping002","damping004","damping008","damping016",
 		"damping032","damping064","damping128","damping256","damping512",
 	]
-	ncon = length(configvec)
-    blues = pplt.get_colors("Blues",(ncon+4))
-	teals = pplt.get_colors("Greens",(ncon+4))
-	lgd = Dict("frame"=>false,"ncols"=>1)
+	configWTG = [
+		"relaxscale02d0","relaxscale03d2","relaxscale04d0","relaxscale05d0",
+		"relaxscale05d9","relaxscale07d1","relaxscale08d4","relaxscale10d0",
+		"relaxscale11d9","relaxscale14d1","relaxscale16d8","relaxscale20d0",
+		"relaxscale25d1","relaxscale31d6","relaxscale50d0",
+	]
+	
+	nconDGW = length(configDGW)
+	nconWTG = length(configWTG)
+    blues_DGW = pplt.get_colors("Blues",(nconDGW+4))
+	blues_WTG = pplt.get_colors("Blues",(nconWTG+4))
+	lgd_DGW = Dict("frame"=>false,"ncols"=>1)
+	lgd_WTG = Dict("frame"=>false,"ncols"=>2)
 md"Loading time dimension and defining the damping experiments ..."
 end
 
@@ -202,56 +212,106 @@ md"Create Image? $(@bind createimage PlutoUI.Slider(0:1))"
 # ╔═╡ 55230f4a-7661-11eb-1c37-8b022b95e08e
 begin
 	pplt.close()
-	fts,ats = pplt.subplots(nrows=2,aspect=3,axwidth=6,sharey=0)
+	fts,ats = pplt.subplots(nrows=2,aspect=2.5,axwidth=4,hspace=1.5)
 
 	if isone(createimage)
-		for ic in 1 : ncon
-			config = configvec[ic]
+		for ic in 1 : nconDGW
+			config = configDGW[ic]
 			config = replace(config,"damping"=>"")
 			config = replace(config,"d"=>".")
 			config = parse(Float64,config)
 			imem = 0
 			
 			while imem < 15; imem += 1
-				fnc = outstatname(expname,configvec[ic],false,true,imem)
+				fnc = outstatname(
+					expname,configDGW[ic],
+					false,true,false,
+					false,true,imem
+				)
 				if isfile(fnc)
 					_,p,t = retrievedims(fnc); t = t .- floor(t[1])
 					pr = retrievevar("PREC",fnc) / 24
-					pw = retrievevar("PW",fnc)
-					ta = retrievevar("TABS",fnc)
-					qv = retrievevar("QV",fnc)
-					rh = calcrh(qv,ta,p)
-					sw = calcswp(rh,qv,p)
-					cr = pw ./ sw / 10
 					if imem == 1
 						constr = @sprintf("%d",config)
 						ats[1].plot(
-							t,cr,color=teals[ic+2],
-							label=(L"$a_m =$" * " $(constr)"),
-							legend="r",legend_kw=lgd
-						)
-						ats[2].plot(
-							t,pr,color=blues[ic+2],
-							label=(L"$a_m =$" * " $(constr)"),
-							legend="r",legend_kw=lgd
+							t,pr,color=blues_DGW[ic+2],
+							label=(L"$a_m =$" * " $(constr)" * L" day$^{-1}$"),
+							legend="r",legend_kw=lgd_WTG
 						)
 					else
-						ats[1].plot(t,cr,color=teals[ic+2])
-						ats[2].plot(t,pr,color=blues[ic+2])
+						ats[1].plot(t,pr,color=blues_DGW[ic+2])
 					end
 				end
 			end
 			
 		end
 		
+		for ic in 1 : nconWTG
+			config = configWTG[ic]
+			config = replace(config,"relaxscale"=>"")
+			config = replace(config,"d"=>".")
+			config = parse(Float64,config)
+			imem = 0
+			
+			while imem < 15; imem += 1
+				fnc = outstatname(
+					expname,configWTG[ic],
+					false,false,true,
+					false,true,imem
+				)
+				if isfile(fnc)
+					_,p,t = retrievedims(fnc); t = t .- floor(t[1])
+					pr = retrievevar("PREC",fnc) / 24
+					if imem == 1
+						constr = @sprintf("%d",config)
+						ats[2].plot(
+							t,pr,color=blues_WTG[ic+2],
+							label=(L"$\tau =$" * " $(constr) hr"),
+							legend="r",legend_kw=lgd_WTG
+						)
+					else
+						ats[2].plot(t,pr,color=blues_WTG[ic+2])
+					end
+				end
+			end
+			
+		end
+
+		for imem = 1 : 10
+			fnc = outstatname(
+				expname,"",
+				true,false,false,
+				false,true,imem
+			)
+			if isfile(fnc)
+				_,p,t = retrievedims(fnc); t = t .- floor(t[1])
+				pr = retrievevar("PREC",fnc) / 24
+				if imem == 1
+					ats[1].plot(
+						t,pr,color="k",label=("RCE"),
+						legend="r",legend_kw=lgd_WTG
+					)
+					ats[2].plot(
+						t,pr,color="k",label=("RCE"),
+						legend="r",legend_kw=lgd_WTG
+					)
+				else
+					ats[1].plot(t,pr,color="k")
+					ats[2].plot(t,pr,color="k")
+				end
+			end
+		end
+
 		ats[1].format(
-			ylabel="Column Relative Humidity / %",ylim=(0,100),
-			xlim=(0,500),suptitle=expname,ultitle="(a)"
+			ylabel=L"Precipitation Rate / mm hr$^{-1}$",ylim=(0,5),yscale="symlog",
+			xlim=(0,500),suptitle=expname,
+			ultitle="(a) DGW Implementation",xlabel="Days",
+			yscale_kw=Dict("linthresh"=>0.01),
 		)
 		
 		ats[2].format(
-			ylabel=L"Precipitation Rate / mm day$^{-1}$",ylim=(0,5),yscale="symlog",
-			xlim=(0,500),suptitle=expname,ultitle="(b)",xlabel="Days",
+			ylabel=L"Precipitation Rate / mm hr$^{-1}$",ylim=(0,0.3),#yscale="symlog",
+			xlim=(0,500),ultitle="(b) WTG Implementation",xlabel="Days",
 			yscale_kw=Dict("linthresh"=>0.01),
 		)
 		
