@@ -88,7 +88,7 @@ end
 function retrievevar(
     varname :: AbstractString,
     expname :: AbstractString,
-    config  :: AbstractString;
+    config  :: AbstractString = "";
     iscontrol  :: Bool = true,
     isDGW      :: Bool = false,
     isWTG      :: Bool = false,
