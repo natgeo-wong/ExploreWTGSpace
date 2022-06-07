@@ -31,7 +31,6 @@ docoriolis       = .false.,
 donudging_uv     = .false.,
 donudging_tq     = .false.,
 
-timelargescale = 0
 tauls = 3600.,
 
 SFC_FLX_FXD    = .false.,
@@ -39,7 +38,7 @@ SFC_TAU_FXD    = .false.,
 
 longitude0 = 0.,
 latitude0  = 0.,
-day0       = 80.5,
+day0       = 0.,
 tabs_s     = 295.,
 Szero      = 0,
 
@@ -69,13 +68,13 @@ nstatfrq = 288,     ! Collect 60 samples per statistical calculation (every 1 mi
 doSAMconditionals     = .false.,
 dosatupdnconditionals = .false.,
 
-nsave2D      = 180,
+nsave2D      = 120,
 nsave2Dstart = 9999999,
 nsave2Dend   = 999999999,
 save2Dbin    = .true.,
 save2Davg    = .true.,
 
-nsave3D      = 180,
+nsave3D      = 120,
 nsave3Dstart = 9999999,
 nsave3Dend   = 999999999,
 save3Dbin    = .true.,
@@ -86,20 +85,25 @@ rad3Dout     = .true.,
 &UWOPTIONS
 
 compute_advection_everywhere = .true.,
+
 dowtg_blossey_etal_JAMES2009 = .true., ! alternate implementation
 am_tscale = 0.2, ! If WTG/Large-scale is turned on for 100 days, am_tscale = 1/4 means that the scaling up to WTG from pseudo-RCE occurs over 25 days.
-
 am_wtg  = 1.,                           ! momentum damping rate in 1/d -- note must be non-zero, default= 2.,
 am_wtg_exp = 0.,                        ! exponent of p/p0 in momentum damping rate.
 lambda_wtg = 650.e3,                    ! quarter wavelength in m. default = 650.e3 (=650 km).
 
-dowtg_qnudge = .false.,                 ! if T, nudge q profile to observations on below timescale
-itau_wtg_qnudge = 0.,                   ! inverse nudging timescale for q in 1/day.
-tauz0_wtg_qnudge = 3.e3,
-taulz_wtg_qnudge = 1.5e3,
+doFixedWindSpeedForSurfaceFluxes = .false.,
+WindSpeedForFluxes               = 5.,
 
-dowtg_tnudge = .false.,                 ! enable temperature nudging above tropopause
-itau_wtg_tnudge = 0.,                   ! inverse nudging timescale for temperature, 1/day
-taulz_wtg_tnudge = 1.5e3,
+/
+
+&KUANG_OPTIONS
+
+dowtg_raymondzeng_QJRMS2005 = .false.,
+ttheta_wtg =   2.000000,
+ttheta_tscale = 0.2,
+dthetadz_min  = 1.e-3
+
+doradtendency    = .false.,
 
 /
