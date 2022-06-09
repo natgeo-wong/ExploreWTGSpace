@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.0
+# v0.19.8
 
 using Markdown
 using InteractiveUtils
@@ -116,12 +116,12 @@ We extract the temperature and observed temperature (`TABS` and `TABSOBS` respec
 
 # ╔═╡ ab0909d0-5ade-11eb-2622-0fee6450004b
 begin
-	z,p,t = retrievedims("Control","$(config)")
+	z,p,t = retrievedims("$(config)",iscontrol=true)
 	nz = length(z); nt = length(t)
-	tem = retrievevar("TABS","Control","$(config)")
-	tob = retrievevar("TABSOBS","Control","$(config)")[:,end]
-	qvp = retrievevar("QV","Control","$(config)")
-	qob = retrievevar("QVOBS","Control","$(config)")[:,end]
+	tem = retrievevar("TABS","$(config)",iscontrol=true)
+	tob = retrievevar("TABSOBS","$(config)",iscontrol=true)[:,end]
+	qvp = retrievevar("QV","$(config)",iscontrol=true)
+	qob = retrievevar("QVOBS","$(config)",iscontrol=true)[:,end]
 	rh  = calcrh(qvp,tem,p)/10
 md"Loading data from $(config) run ..."
 end
@@ -255,7 +255,7 @@ nendays = 500
 
 # ╔═╡ 7d905176-81e8-11eb-20d3-b9be287472f5
 begin
-	z_en,_,t_en = retrievedims("Control","$(config)",isensemble=true,member=1)
+	z_en,_,t_en = retrievedims("$(config)",isensemble=true,member=1)
 	nz_en = length(z_en); nt_en = length(t_en)
 	tbi_en = zeros(nz_en,nt_en,nen); tob_en = zeros(nz_en,nen)
 	qbi_en = zeros(nz_en,nt_en,nen); qob_en = zeros(nz_en,nen)
@@ -264,15 +264,15 @@ begin
 	pre_en = zeros(nz_en,nt_en,nen); plevel = zeros(nz_en,nen)
 	prc_en = zeros(nt_en,nen);
 	for imem = 1 : nen
-		tbi_en[:,:,imem] = retrievevar("TBIAS","Control","$(config)",isensemble=true,member=imem)
-		qbi_en[:,:,imem] = retrievevar("QBIAS","Control","$(config)",isensemble=true,member=imem)
-		tem_en[:,:,imem] = retrievevar("TABS","Control","$(config)",isensemble=true,member=imem)
-		qvp_en[:,:,imem] = retrievevar("QV","Control","$(config)",isensemble=true,member=imem)
-		pre_en[:,:,imem] = retrievevar("PRES","Control","$(config)",isensemble=true,member=imem)
-		tob_en[:,imem] = retrievevar("TABSOBS","Control","$(config)",isensemble=true,member=imem)[:,end]
-		qob_en[:,imem] = retrievevar("QVOBS","Control","$(config)",isensemble=true,member=imem)[:,end]
-		plevel[:,imem] = retrievevar("p","Control","$(config)",isensemble=true,member=imem)[:,end]
-		prc_en[:,imem] = retrievevar("PREC","Control","$(config)",isensemble=true,member=imem)
+		tbi_en[:,:,imem] = retrievevar("TBIAS","$(config)",isensemble=true,member=imem)
+		qbi_en[:,:,imem] = retrievevar("QBIAS","$(config)",isensemble=true,member=imem)
+		tem_en[:,:,imem] = retrievevar("TABS","$(config)",isensemble=true,member=imem)
+		qvp_en[:,:,imem] = retrievevar("QV","$(config)",isensemble=true,member=imem)
+		pre_en[:,:,imem] = retrievevar("PRES","$(config)",isensemble=true,member=imem)
+		tob_en[:,imem] = retrievevar("TABSOBS","$(config)",isensemble=true,member=imem)[:,end]
+		qob_en[:,imem] = retrievevar("QVOBS","$(config)",isensemble=true,member=imem)[:,end]
+		plevel[:,imem] = retrievevar("p","$(config)",isensemble=true,member=imem)[:,end]
+		prc_en[:,imem] = retrievevar("PREC","$(config)",isensemble=true,member=imem)
 		rh_en[:,:,imem]   = calcrh(qvp_en[:,:,imem],tem_en[:,:,imem],plevel[:,imem])/10
 	end
 	
