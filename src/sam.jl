@@ -23,8 +23,10 @@ function outstatname(
     prefix = "RCE"
     if isDGW
         prefix = "DGW"
+        iscontrol = false
     elseif isWTG
         prefix = "WTG"
+        iscontrol = false
     end
 
     if iscontrol
@@ -73,7 +75,7 @@ function retrievedims(
 
 end
 
-function retrievedims(fnc::AbstractString)
+function retrievedims_fnc(fnc::AbstractString)
 
     rce = NCDataset(fnc)
     z = rce["z"][:]
@@ -109,7 +111,7 @@ function retrievevar(
 
 end
 
-function retrievevar(varname::AbstractString, fnc::AbstractString)
+function retrievevar_fnc(varname::AbstractString, fnc::AbstractString)
 
     ds = NCDataset(fnc)
     var = ds[varname][:]
