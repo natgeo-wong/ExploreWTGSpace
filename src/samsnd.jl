@@ -4,13 +4,14 @@ using Printf
 using Statistics
 
 function createsndmean(
-    sndname::AbstractString;
-    exp::AbstractString, config::AbstractString,
+    sndname :: AbstractString;
+    expname :: AbstractString,
+    config  :: AbstractString,
     ndays::Integer=100, psfc::Real, extract=false
 )
 
     mkpath(projectdir("exp/snd")); fsnd = projectdir("exp/snd/$(sndname)")
-    statds = NCDataset(datadir("$exp/$config/OUT_STAT/RCE_ExploreWTGSpace-$exp.nc"))
+    statds = NCDataset(datadir("RCE/$expname/$config/OUT_STAT/RCE_ExploreWTGSpace-$expname.nc"))
 
     nz = statds.dim["z"]; nt = statds.dim["time"]
     z  = statds["z"][:]
