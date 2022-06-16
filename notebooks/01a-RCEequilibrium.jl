@@ -233,7 +233,7 @@ md"Create SND file? $(@bind dosnd PlutoUI.Slider(0:1))"
 if isone(dosnd)
 	createsndmean(
 		"$(config)",
-		exp="Control",config="$(config)",
+		expname="$(config)",config="",
 		psfc=1009.32,ndays=100
 	)
 md"Creating the SND file $(config) ..."
@@ -308,7 +308,7 @@ end
 begin
 	
 	pplt.close()
-	fen,aen = pplt.subplots(arr,aspect=1/3,axwidth=0.6,sharex=0,wspace=1)
+	fen,aen = pplt.subplots(arr,aspect=1/3,axwidth=0.8,sharex=0,wspace=1)
 	
 	for im = 1 : nen
 		aen[1].scatter(tdiff_en[:,im],pts_en[:,im],s=1,c="gray")
@@ -328,7 +328,7 @@ begin
 		t_en.-80,plevel,tdts_en,
 		# t.-80,p,tem .- mean(tem[:,(end-100+1):end],dims=2),
 		# t[5:(end-4)].-80,p,temn .- tob[:,1],
-		cmap="RdBu_r",cmap_kw=Dict("alpha"=>(1,1,1,1,1,1,0,1,1,1,1,1,1)),
+		cmap="RdBu_r",
 		extend="both",
 		levels=lvls/10
 	)
@@ -356,7 +356,7 @@ begin
 	cqen = aen[4].contourf(
 		t_en.-80,plevel,qdts_en,
 		# t.-80,p,qvp .- mean(qvp[:,(end-100+1):end],dims=2),
-		cmap="drywet",cmap_kw=Dict("alpha"=>(1,1,1,1,1,1,0,1,1,1,1,1,1)),
+		cmap="drywet",
 		extend="both",
 		levels=lvls
 	)
@@ -389,7 +389,7 @@ begin
 	
 	aen[2].colorbar(cten,loc="r",width=0.2)
 	aen[4].colorbar(cqen,loc="r",width=0.2)
-	fen.savefig(plotsdir("01a-ensemble-$(config).png"),transparent=false,dpi=200)
+	fen.savefig(plotsdir("01a-ensemble-$(config).png"),transparent=true,dpi=400)
 	load(plotsdir("01a-ensemble-$(config).png"))
 	
 end

@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.5
+# v0.19.8
 
 using Markdown
 using InteractiveUtils
@@ -202,7 +202,7 @@ begin
     blues_DGW = pplt.get_colors("Blues",(nconDGW+4))
 	blues_WTG = pplt.get_colors("Blues",(nconWTG+4))
 	lgd_DGW = Dict("frame"=>false,"ncols"=>1)
-	lgd_WTG = Dict("frame"=>false,"ncols"=>2)
+	lgd_WTG = Dict("frame"=>false,"ncols"=>1)
 md"Loading time dimension and defining the damping experiments ..."
 end
 
@@ -212,7 +212,7 @@ md"Create Image? $(@bind createimage PlutoUI.Slider(0:1))"
 # ╔═╡ 55230f4a-7661-11eb-1c37-8b022b95e08e
 begin
 	pplt.close()
-	fts,ats = pplt.subplots(nrows=2,aspect=2.5,axwidth=4,hspace=1.5)
+	fts,ats = pplt.subplots(nrows=2,aspect=2,axwidth=5.4,hspace=1.5)
 
 	if isone(createimage)
 		for ic in 1 : nconDGW
@@ -229,8 +229,8 @@ begin
 					false,true,imem
 				)
 				if isfile(fnc)
-					_,p,t = retrievedims(fnc); t = t .- floor(t[1])
-					pr = retrievevar("PREC",fnc) / 24
+					_,p,t = retrievedims_fnc(fnc); t = t .- floor(t[1])
+					pr = retrievevar_fnc("PREC",fnc) / 24
 					if imem == 1
 						constr = @sprintf("%d",config)
 						ats[1].plot(
@@ -260,8 +260,8 @@ begin
 					false,true,imem
 				)
 				if isfile(fnc)
-					_,p,t = retrievedims(fnc); t = t .- floor(t[1])
-					pr = retrievevar("PREC",fnc) / 24
+					_,p,t = retrievedims_fnc(fnc); t = t .- floor(t[1])
+					pr = retrievevar_fnc("PREC",fnc) / 24
 					if imem == 1
 						constr = @sprintf("%d",config)
 						ats[2].plot(
@@ -284,8 +284,8 @@ begin
 				false,true,imem
 			)
 			if isfile(fnc)
-				_,p,t = retrievedims(fnc); t = t .- floor(t[1])
-				pr = retrievevar("PREC",fnc) / 24
+				_,p,t = retrievedims_fnc(fnc); t = t .- floor(t[1])
+				pr = retrievevar_fnc("PREC",fnc) / 24
 				if imem == 1
 					ats[1].plot(
 						t,pr,color="k",label=("RCE"),
@@ -309,13 +309,19 @@ begin
 			yscale_kw=Dict("linthresh"=>0.01),
 		)
 		
+		# ats[2].format(
+		# 	ylabel=L"Precipitation Rate / mm hr$^{-1}$",ylim=(0,5),yscale="symlog",
+		# 	xlim=(0,500),ultitle="(b) WTG Implementation",xlabel="Days",
+		# 	yscale_kw=Dict("linthresh"=>0.01),
+		# )
+		
 		ats[2].format(
 			ylabel=L"Precipitation Rate / mm hr$^{-1}$",ylim=(0,0.3),#yscale="symlog",
 			xlim=(0,500),ultitle="(b) WTG Implementation",xlabel="Days",
 			yscale_kw=Dict("linthresh"=>0.01),
 		)
 		
-		fts.savefig(plotsdir("02a-rce2wtg-$(expname).png"),transparent=false,dpi=300)
+		fts.savefig(plotsdir("02a-rce2wtg-$(expname).png"),transparent=true,dpi=400)
 	end
 	load(plotsdir("02a-rce2wtg-$(expname).png"))
 end
@@ -338,4 +344,4 @@ end
 # ╟─d3b025e0-5b35-11eb-330a-5fbb2204da63
 # ╟─a63de98c-5b35-11eb-0a8f-b7a1ebd441b6
 # ╟─4581e38f-a680-4692-96ce-45d5e8799953
-# ╟─55230f4a-7661-11eb-1c37-8b022b95e08e
+# ╠═55230f4a-7661-11eb-1c37-8b022b95e08e

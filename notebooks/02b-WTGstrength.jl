@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.0
+# v0.19.8
 
 using Markdown
 using InteractiveUtils
@@ -103,34 +103,49 @@ end
 
 # ╔═╡ a63de98c-5b35-11eb-0a8f-b7a1ebd441b6
 begin
-	configvec = [
+	configDGW = [
 		"damping001","damping002","damping004","damping008",
 		"damping011","damping016","damping023","damping032",
 		"damping045","damping064","damping090","damping128",
 		"damping256","damping512",
 	]
-	ncon = length(configvec)
-	blues = pplt.get_colors("Blues",(ncon+2))
-	grns  = pplt.get_colors("Teal",(ncon+2))
-	brwns = pplt.get_colors("Brown",(ncon+2))
+	configWTG = [
+		"relaxscale02d0","relaxscale03d2","relaxscale04d0","relaxscale05d0",
+		"relaxscale05d9","relaxscale07d1","relaxscale08d4","relaxscale10d0",
+		"relaxscale11d9","relaxscale14d1","relaxscale16d8","relaxscale20d0",
+		"relaxscale25d1","relaxscale31d6","relaxscale50d0",
+	]
+	nconDGW = length(configDGW)
+	nconWTG = length(configWTG)
+	bluesDGW = pplt.get_colors("Blues",(nconDGW+2))
+	bluesWTG = pplt.get_colors("Blues",(nconWTG+2))
+	grnsDGW  = pplt.get_colors("Teal",(nconDGW+2))
+	grnsWTG  = pplt.get_colors("Teal",(nconWTG+2))
+	brwnsDGW = pplt.get_colors("Brown",(nconDGW+2))
+	brwnsWTG = pplt.get_colors("Brown",(nconWTG+2))
 	lgd = Dict("frame"=>false,"ncols"=>4)
 md"Loading time dimension and defining the damping experiments ..."
 end
 
 # ╔═╡ 55230f4a-7661-11eb-1c37-8b022b95e08e
+# ╠═╡ show_logs = false
 begin
 	pplt.close()
-	fts,ats = pplt.subplots(ncols=5,aspect=0.4,axwidth=1.2,sharex=0,wspace=1.5)
+	fts,ats = pplt.subplots(
+		ncols=6,nrows=2,aspect=0.4,axwidth=1.2,
+		sharex=0,sharey=0,wspace=1.5
+	)
 	
 	for imem = 1 : 10
-		fnc = outstatname("Control",expname,false,true,imem)
+		fnc = outstatname(expname,"",true,false,false,false,true,imem)
 		if isfile(fnc)
-			_,p,t = retrievedims(fnc); t = t .- 80
-			pr = retrievevar("PREC",fnc)./24
-			pa = retrievevar("AREAPREC",fnc)
-			pw = retrievevar("PW",fnc)
-			ta = retrievevar("TABS",fnc)
-			qv = retrievevar("QV",fnc)
+			_,p,t = retrievedims_fnc(fnc); t = t .- 80
+			pr = retrievevar_fnc("PREC",fnc)./24
+			pa = retrievevar_fnc("AREAPREC",fnc)
+			pw = retrievevar_fnc("PW",fnc)
+			ta = retrievevar_fnc("TABS",fnc)
+			qv = retrievevar_fnc("QV",fnc)
+			ol = retrievevar_fnc("LWNT",fnc)
 			rh = calcrh(qv,ta,p)
 			sw = calcswp(rh,qv,p)
 			cr = pw ./ sw / 10
@@ -140,26 +155,34 @@ begin
 			ats[3].plot([1,1]*mean(pra[(end-499):end]),[0,2000],c="grey",lw=1)
 			ats[4].plot([1,1]*mean(pw[(end-499):end]),[0,2000],c="grey",lw=1)
 			ats[5].plot([1,1]*mean(cr[(end-499):end]),[0,2000],c="grey",lw=1)
+			ats[6].plot([1,1]*mean(ol[(end-499):end]),[0,2000],c="grey",lw=1)
+			ats[7].plot([1,1]*mean(pr[(end-499):end]),[0,2000],c="grey",lw=1)
+			ats[8].plot([1,1]*mean(pa[(end-499):end]),[0,2000],c="grey",lw=1)
+			ats[9].plot([1,1]*mean(pra[(end-499):end]),[0,2000],c="grey",lw=1)
+			ats[10].plot([1,1]*mean(pw[(end-499):end]),[0,2000],c="grey",lw=1)
+			ats[11].plot([1,1]*mean(cr[(end-499):end]),[0,2000],c="grey",lw=1)
+			ats[12].plot([1,1]*mean(ol[(end-499):end]),[0,2000],c="grey",lw=1)
 		end
 	end
 	
-	for ic in 1 : ncon
-		config = configvec[ic]
+	for ic in 1 : nconDGW
+		config = configDGW[ic]
 		config = replace(config,"damping"=>"")
 		config = replace(config,"d"=>".")
 		config = parse(Float64,config)
 		imem = 0
 		
 		while imem < 15; imem += 1
-			fnc = outstatname(expname,configvec[ic],false,true,imem)
+			fnc = outstatname(expname,configDGW[ic],false,true,false,false,true,imem)
 			if isfile(fnc)
-				_,p,t = retrievedims(fnc); t = t .- 80
-				pr = retrievevar("PREC",fnc)./24
-				pa = retrievevar("AREAPREC",fnc)
-				pw = retrievevar("PW",fnc)
+				_,p,t = retrievedims_fnc(fnc); t = t .- 80
+				pr = retrievevar_fnc("PREC",fnc)./24
+				pa = retrievevar_fnc("AREAPREC",fnc)
+				pw = retrievevar_fnc("PW",fnc)
 				ra = pr./pa; ra[isnan.(ra)] .= 0; ra[ra.==Inf] .= 0
-				ta = retrievevar("TABS",fnc)
-				qv = retrievevar("QV",fnc)
+				ta = retrievevar_fnc("TABS",fnc)
+				qv = retrievevar_fnc("QV",fnc)
+				ol = retrievevar_fnc("LWNT",fnc)
 				rh = calcrh(qv,ta,p)
 				sw = calcswp(rh,qv,p)
 				cr = pw ./ sw / 10
@@ -176,12 +199,62 @@ begin
 					ats[3].plot(mean(ra[(end-99):end]),config,marker=".",c="k",ms=4)
 					ats[4].plot(mean(pw[(end-99):end]),config,marker=".",c="k",ms=4)
 					ats[5].plot(mean(cr[(end-99):end]),config,marker=".",c="k",ms=4)
+					ats[6].plot(mean(ol[(end-99):end]),config,marker=".",c="k",ms=4)
 				else
 					ats[1].scatter(mean(pr[(end-99):end]),config,c=clr,alpha=0.2,s=50)
 					ats[2].scatter(mean(pa[(end-99):end]),config,c=clr,alpha=0.2,s=50)
 					ats[3].scatter(mean(ra[(end-99):end]),config,c=clr,alpha=0.2,s=50)
 					ats[4].scatter(mean(pw[(end-99):end]),config,c=clr,alpha=0.2,s=50)
 					ats[5].scatter(mean(cr[(end-99):end]),config,c=clr,alpha=0.2,s=50)
+					ats[6].scatter(mean(ol[(end-99):end]),config,c=clr,alpha=0.2,s=50)
+				end
+			end
+		end
+		
+	end
+
+	for ic in 1 : nconWTG
+		config = configWTG[ic]
+		config = replace(config,"relaxscale"=>"")
+		config = replace(config,"d"=>".")
+		config = parse(Float64,config)
+		imem = 0
+		
+		while imem < 15; imem += 1
+			fnc = outstatname(expname,configWTG[ic],false,false,true,false,true,imem)
+			if isfile(fnc)
+				_,p,t = retrievedims_fnc(fnc); t = t .- 80
+				pr = retrievevar_fnc("PREC",fnc)./24
+				pa = retrievevar_fnc("AREAPREC",fnc)
+				pw = retrievevar_fnc("PW",fnc)
+				ra = pr./pa; ra[isnan.(ra)] .= 0; ra[ra.==Inf] .= 0
+				ta = retrievevar_fnc("TABS",fnc)
+				qv = retrievevar_fnc("QV",fnc)
+				ol = retrievevar_fnc("LWNT",fnc)
+				rh = calcrh(qv,ta,p)
+				sw = calcswp(rh,qv,p)
+				cr = pw ./ sw / 10
+
+				if (imem >= 6) && (imem <= 10)
+					clr = "yellow7"
+				else
+					clr = "blue5"
+				end
+
+				if imem <= 5
+					ats[7].plot(mean(pr[(end-99):end]),config,marker=".",c="k",ms=4)
+					ats[8].plot(mean(pa[(end-99):end]),config,marker=".",c="k",ms=4)
+					ats[9].plot(mean(ra[(end-99):end]),config,marker=".",c="k",ms=4)
+					ats[10].plot(mean(pw[(end-99):end]),config,marker=".",c="k",ms=4)
+					ats[11].plot(mean(cr[(end-99):end]),config,marker=".",c="k",ms=4)
+					ats[12].plot(mean(ol[(end-99):end]),config,marker=".",c="k",ms=4)
+				else
+					ats[7].scatter(mean(pr[(end-99):end]),config,c=clr,alpha=0.2,s=50)
+					ats[8].scatter(mean(pa[(end-99):end]),config,c=clr,alpha=0.2,s=50)
+					ats[9].scatter(mean(ra[(end-99):end]),config,c=clr,alpha=0.2,s=50)
+					ats[10].scatter(mean(pw[(end-99):end]),config,c=clr,alpha=0.2,s=50)
+					ats[11].scatter(mean(cr[(end-99):end]),config,c=clr,alpha=0.2,s=50)
+					ats[12].scatter(mean(ol[(end-99):end]),config,c=clr,alpha=0.2,s=50)
 				end
 			end
 		end
@@ -189,24 +262,60 @@ begin
 	end
 	
 	ats[1].format(
-		ylim=(0.5,2000),ylabel=L"$a_m$ / day$^{-1}$",yscale="log",
+		ylabel=L"$a_m$ / day$^{-1}$",
 		xscale="symlog",xscale_kw=Dict("linthresh"=>0.01),
-		xlim=(0,10),xlabel=L"Domain $P$ / mm hr$^{-1}$",ultitle="(a)",
+		xlim=(0,10),ultitle="(a)",
 		ltitle=L"(1) DGW Implementation | Sensitivity to $a_m$ | " * "$(expname)",
 	)
 	
 	ats[2].format(
 		xscale="symlog",xscale_kw=Dict("linthresh"=>0.01),
-		xlim=(0,1),xlabel="Rain Area Fraction",ultitle="(b)",
+		xlim=(0,1),ultitle="(b)",
 	)
 	
 	ats[3].format(
 		xscale="symlog",xscale_kw=Dict("linthresh"=>1),
+		xlim=(0,10),ultitle="(c)",
+	)
+	
+	ats[4].format(xlim=(0,75),ultitle="(d)")
+	ats[5].format(xlim=(0,100),ultitle="(e)")
+	ats[6].format(xlim=(350,100),ultitle="(f)")
+
+	for ii in 1 : 6
+		ats[ii].format(ylim=(0.5,2000),yscale="log")
+	end
+	for ii in 2 : 6
+		ats[ii].format(yticklabels=["","","",""],ytickminor=10:10:100)
+	end
+
+	ats[7].format(
+		ylabel=L"$\tau$ / hr",
+		xscale="symlog",xscale_kw=Dict("linthresh"=>0.01),
+		xlim=(0,10),xlabel=L"Domain $P$ / mm hr$^{-1}$",ultitle="(a)",
+		ltitle=L"(2) WTG Implementation | Sensitivity to $a_m$ | " * "$(expname)",
+	)
+	
+	ats[8].format(
+		xscale="symlog",xscale_kw=Dict("linthresh"=>0.01),
+		xlim=(0,1),xlabel="Rain Area Fraction",ultitle="(b)",
+	)
+	
+	ats[9].format(
+		xscale="symlog",xscale_kw=Dict("linthresh"=>1),
 		xlim=(0,10),xlabel=L"Rain Area $P$ / mm hr$^{-1}$",ultitle="(c)",
 	)
 	
-	ats[4].format(xlim=(0,75),xlabel="PWV / mm",ultitle="(d)")
-	ats[5].format(xlim=(0,100),xlabel="CRH / %",ultitle="(e)")
+	ats[10].format(xlim=(0,75),xlabel="PWV / mm",ultitle="(d)")
+	ats[11].format(xlim=(0,100),xlabel="CRH / %",ultitle="(e)")
+	ats[12].format(xlim=(350,100),xlabel=L"OLR / W m$^{-2}$",ultitle="(f)")
+
+	for ii in 7 : 12
+		ats[ii].format(ylim=(2,50),yscale="log")
+	end
+	for ii in 8 : 12
+		ats[ii].format(yticklabels=["","","",""],ytickminor=10:10:100)
+	end
 	
 	for ax in ats
 		ax.format(lrtitle="Wet",lltitle="Dry")
@@ -214,7 +323,7 @@ begin
 	
 	fts.savefig(plotsdir(
 		"02b-bifurcation-$(expname).png"),
-		transparent=false,dpi=300
+		transparent=true,dpi=400
 	)
 	load(plotsdir("02b-bifurcation-$(expname).png"))
 end
@@ -428,7 +537,7 @@ end
 # ╟─b8a3a33f-34ca-46c9-867a-f88106ef83cf
 # ╟─d3b025e0-5b35-11eb-330a-5fbb2204da63
 # ╟─a63de98c-5b35-11eb-0a8f-b7a1ebd441b6
-# ╟─55230f4a-7661-11eb-1c37-8b022b95e08e
+# ╠═55230f4a-7661-11eb-1c37-8b022b95e08e
 # ╟─9cf4fa56-91a8-11eb-2710-955eefd10142
 # ╟─364a1ce8-91ba-11eb-29a8-b948110e6125
 # ╟─489b5bea-91b4-11eb-358b-3fe61c900511
