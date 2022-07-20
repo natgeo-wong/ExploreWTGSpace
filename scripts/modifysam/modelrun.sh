@@ -1,13 +1,13 @@
 #!/bin/sh 
 
 ##SBATCH -p test         # short jobs, time limit 8 hours
-##SBATCH -p huce_intel   # cheap, slower, no time limit
-#SBATCH -p huce_cascade # expensive, faster, no time limit
+#SBATCH -p huce_intel   # cheap, slower, no time limit
+##SBATCH -p huce_cascade # expensive, faster, no time limit
 ##SBATCH -p shared       # longer jobs, 7 days, use only when needed
 
-#SBATCH -N 1 # number of nodes
-#SBATCH -n 32 # number of cores
-#SBATCH --mem-per-cpu=3GB # memory pool for each core
+#SBATCH -N 2 # number of nodes
+#SBATCH -n 64 # number of cores
+#SBATCH --mem-per-cpu=1GB # memory pool for each core
 #SBATCH --hint=compute_bound
 #SBATCH -t 2-00:00 # time (D-HH:MM)
 

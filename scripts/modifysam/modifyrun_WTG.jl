@@ -1,5 +1,5 @@
 using DrWatson
-@quickactivate "TroPrecLS"
+@quickactivate "ExploreWTGSpace"
 using Printf
 
 schname = "CON"
