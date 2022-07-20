@@ -9,6 +9,7 @@ plist1 = [
     5*sqrt(2),5*sqrt(sqrt(2))^3,10,10*sqrt(sqrt(2)),10*sqrt(2),
     10*sqrt(sqrt(2))^3,20,20*sqrt(sqrt(2.5)),20*sqrt(2.5),50
 ]
+plist2 = [2,2*sqrt(2.5),5,5*sqrt(2),10,10*sqrt(2),20,20*sqrt(2.5),50]
 
 for powerii in plist1
     conii = "relaxscale$(@sprintf("%04.1f",powerii))"
