@@ -29,6 +29,7 @@ open(mrun,"r") do frun
 
             open(nrun,"w") do wrun
                 sn = replace(s ,"[email]"=>"")
+                sn = replace(s ,"[user]"=>"")
                 sn = replace(sn,"[project]"=>"ExploreWTGSpace")
                 sn = replace(sn,"[experiment]"=>"$(expname)")
                 sn = replace(sn,"[config]"=>"$(tauname)")
