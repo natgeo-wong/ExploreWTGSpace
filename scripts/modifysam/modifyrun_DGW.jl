@@ -24,11 +24,17 @@ open(mrun,"r") do frun
 
             open(nrun,"w") do wrun
                 sn = replace(s ,"[email]"=>"")
-                sn = replace(s ,"[user]"=>"")
+                sn = replace(sn,"[user]"=>"")
                 sn = replace(sn,"[project]"=>"ExploreWTGSpace")
                 sn = replace(sn,"[experiment]"=>"$(expname)")
                 sn = replace(sn,"[config]"=>"$(pwrname)")
-                sn = replace(sn,"[sndname]"=>"$(expname)")
+                if ensembleii < 6
+                    sn = replace(sn,"[sndname]"=>"$(expname)")
+                elseif (ensembleii > 5) && (ensembleii < 11)
+                    sn = replace(sn,"[sndname]"=>"$(expname)_hot")
+                else
+                    sn = replace(sn,"[sndname]"=>"$(expname)_cld")
+                end
                 sn = replace(sn,"[lsfname]"=>"noforcing")
                 sn = replace(sn,"[schname]"=>"DGW")
                 sn = replace(sn,"member[xx]"=>"member$(@sprintf("%02d",ensembleii))")
