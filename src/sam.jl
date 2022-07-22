@@ -5,11 +5,9 @@ using Printf
 using Statistics
 
 function outstatname(
+    scheme  :: AbstractString,
     expname :: AbstractString,
     config  :: AbstractString,
-    iscontrol  :: Bool = true,
-    isDGW      :: Bool = false,
-    isWTG      :: Bool = false,
     ismpi      :: Bool = false,
     isensemble :: Bool = false,
     member     :: Integer = 0
@@ -20,29 +18,25 @@ function outstatname(
     else; expmem = expname
     end
 
-    prefix = "RCE"
-    if isDGW
-        prefix = "DGW"
-        iscontrol = false
-    elseif isWTG
-        prefix = "WTG"
-        iscontrol = false
+    if scheme == "RCE"
+          iscontrol = true
+    else; iscontrol = false
     end
 
     if iscontrol
         fnc = datadir(joinpath(
-    		prefix,expname,"OUT_STAT",
-    		"$(prefix)_ExploreWTGSpace-$(expmem).nc"
+    		scheme,expname,"OUT_STAT",
+    		"$(scheme)_ExploreWTGSpace-$(expmem).nc"
     	))
     elseif ismpi
     	fnc = datadir(joinpath(
-    		prefix,"Ensemble",expname,config,"OUT_STAT",
-    		"$(prefix)_ExploreWTGSpace-$(expmem).nc"
+    		scheme,"Ensemble",expname,config,"OUT_STAT",
+    		"$(scheme)_ExploreWTGSpace-$(expmem).nc"
     	))
     else
     	fnc = datadir(joinpath(
-    		prefix,expname,config,"OUT_STAT",
-    		"$(prefix)_ExploreWTGSpace-$(expmem).nc"
+    		scheme,expname,config,"OUT_STAT",
+    		"$(scheme)_ExploreWTGSpace-$(expmem).nc"
     	))
     end
 
@@ -51,19 +45,16 @@ function outstatname(
 end
 
 function retrievedims(
+    scheme  :: AbstractString,
     expname :: AbstractString,
     config  :: AbstractString = "";
-    iscontrol  :: Bool = true,
-    isDGW      :: Bool = false,
-    isWTG      :: Bool = false,
     ismpi      :: Bool = false,
     isensemble :: Bool = false,
     member     :: Integer=0
 )
 
     ds = NCDataset(outstatname(
-        expname,config,
-        iscontrol,isDGW,isWTG,
+        scheme,expname,config,
         ismpi,isensemble,member
     ))
     z = ds["z"][:]
@@ -89,19 +80,16 @@ end
 
 function retrievevar(
     varname :: AbstractString,
+    scheme  :: AbstractString,
     expname :: AbstractString,
     config  :: AbstractString = "";
-    iscontrol  :: Bool = true,
-    isDGW      :: Bool = false,
-    isWTG      :: Bool = false,
     ismpi      :: Bool = false,
     isensemble :: Bool = false,
     member     :: Integer=0
 )
 
     ds = NCDataset(outstatname(
-        expname,config,
-        iscontrol,isDGW,isWTG,
+        scheme,expname,config,
         ismpi,isensemble,member
     ))
     var = ds[varname][:]
