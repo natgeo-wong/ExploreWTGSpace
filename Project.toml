@@ -1,0 +1,18 @@
+name = "2023GL104350"
+desc = "Repository containing data for GRL submission 2023GL104350"
+authors = ["Nathanael Wong <natgeo.wong@outlook.com>"]
+
+[deps]
+DSP = "717857b8-e6f2-59f4-9121-6e50c889abd2"
+Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
+DrWatson = "634d3b9d-ee7a-5ddf-bec9-22491ea816e1"
+LaTeXStrings = "b964fa9f-0449-5b57-a5c2-d3ea65f4040f"
+Logging = "56ddb016-857b-54e1-b83d-db4d58db5568"
+NCDatasets = "85f8d34a-cbdd-5861-8df4-14fed0d494ab"
+Printf = "de0858da-6303-5e67-8744-51eddeeeb8d7"
+PyCall = "438e738f-606a-5dbb-bf0a-cddfbfd45ab0"
+StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
+Trapz = "592b5752-818d-11e9-1e9a-2b8ca4a44cd1"
+
+[compat]
+julia = "1.8"
