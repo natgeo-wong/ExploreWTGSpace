@@ -1,5 +1,5 @@
 name = "ExploreWTGSpace"
-desc = "Repository containing data for GRL submission 2023GL104350"
+desc = "Exploring the different schemes and parameters of the WTG Approximation"
 authors = ["Nathanael Wong <natgeo.wong@outlook.com>"]
 
 [deps]
