@@ -8,7 +8,7 @@
     <img alt="MIT License" src="https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square">
   </a>
   <a href="https://natgeo-wong.github.io/ExploreWTGSpace/dev/">
-    <img alt="Latest Documentation" src="https://img.shields.io/badge/docs-latest-blue.svg?style=flat-square">
+    <img alt="Latest Documentation" src="https://img.shields.io/badge/docs-blue.svg?style=flat-square">
   </a>
 </p>
 
