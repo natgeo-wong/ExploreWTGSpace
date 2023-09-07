@@ -2,8 +2,8 @@
 *Exploring the different implementations and parameters of the WTG Approximation*
 
 The Weak Temperature Gradient (WTG) approximation is
-a simplified framework for atmospheric dynamics in the deep tropics where the
-Coriolis force is weak.
+a simplified framework for large-scale atmospheric dynamics in the deep tropics
+where the Coriolis force is weak.
 
 This project aims to explore the different implementations of the WTG Approximation
 in small-domain cloud-resolving models and how these schemes interact with the vast
