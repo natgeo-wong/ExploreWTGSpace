@@ -20,5 +20,5 @@ implement the Weak Temperature Gradient approximation:
 !!! note
     The Temperature Gradient Relaxation framework is also known as the Weak
     Temperature Gradient framework and has been called as such in several different
-    studies. I use Temperature Gradient Relaxation in order to distinguish it from
+    studies ([Daleu2015](@citet), [Romps2012](@citet)). I use Temperature Gradient Relaxation in order to distinguish it from
     the overall Weak Temperature Gradient approximation.
