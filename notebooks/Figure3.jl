@@ -74,8 +74,8 @@ begin
 		sharey=0,sharex=0,wspace=[3,1,3,1]
 	)
 	
-	axs[1].plot(c="blue6", alpha=0.5,w1_wet,zz,label=L"$w_H$ (Moist)",legend="b")
-	axs[1].plot(c="yellow6",alpha=0.5,w2_dry,zz,label=L"$w_F$ (Stratiform)",legend="b",legend_kw=lgd)
+	axs[1].plot(c="blue6", alpha=0.5,w1_wet,zz,label=L"$W_1$ (Moist)",legend="b")
+	axs[1].plot(c="yellow6",alpha=0.5,w2_dry,zz,label=L"$W_2$ (Stratiform)",legend="b",legend_kw=lgd)
 	axs[1].format(xlocator=[0],ultitle="(a)")
 
 	axs[2].plot(id_mse,zz,c="k",label="h",legend="b",legend_kw=lgd)
@@ -86,13 +86,13 @@ begin
 	axs[3].plot(id_gdse,zz,c="gray",linestyle="--",label=L"\partial_zs",legend="b")
 	axs[3].format(xlocator=[0],ultitle="(b2)")
 
-	axs[5].plot(id_gmse.*w2_dry.*25,zz,c="yellow6",label=L"w_F \cdot \partial_zh",legend="b",legend_kw=lgd)
-	axs[5].plot(id_gdse.*w2_dry.*25,zz,c="yellow2",linestyle="--",label=L"w_F \cdot \partial_zs",legend="b")
-	axs[5].format(xlocator=[0],ultitle="(c2)")
-
-	axs[4].plot(id_gmse.*w1_wet.*25,zz,c="blue6",label=L"w_H \cdot \partial_zh",legend="b",legend_kw=lgd)
-	axs[4].plot(id_gdse.*w1_wet.*25,zz,c="blue2",linestyle="--",label=L"w_H \cdot \partial_zs",legend="b")
+	axs[4].plot(id_gmse.*w1_wet.*25,zz,c="blue6",label=L"W_1 \cdot \partial_zh",legend="b",legend_kw=lgd)
+	axs[4].plot(id_gdse.*w1_wet.*25,zz,c="blue2",linestyle="--",label=L"W_1 \cdot \partial_zs",legend="b")
 	axs[4].format(xlocator=[0],ultitle="(c1)")
+
+	axs[5].plot(id_gmse.*w2_dry.*25,zz,c="yellow6",label=L"W_2 \cdot \partial_zh",legend="b",legend_kw=lgd)
+	axs[5].plot(id_gdse.*w2_dry.*25,zz,c="yellow2",linestyle="--",label=L"W_2 \cdot \partial_zs",legend="b")
+	axs[5].format(xlocator=[0],ultitle="(c2)")
 
 	for ax in axs
 		ax.format(
