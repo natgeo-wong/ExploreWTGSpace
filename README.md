@@ -16,16 +16,49 @@
 * Nathanael Wong (nathanaelwong@fas.harvard.edu)
 * Professor Kuang Zhiming
 
-In this project, we explore the instability caused by implementing the Weak Temperature Gradient approximation onto a small-domain Radiative-Convective Equilibrium simulation under a series of different parameter spaces including:
+The Weak Temperature Gradient (WTG) approximation is
+a simplified framework for atmospheric dynamics in the deep tropics where the
+Coriolis force is weak.
+
+This project aims to explore the different implementations of the WTG Approximation
+in small-domain cloud-resolving models and how these schemes interact with the vast
+parameter space with variables such as:
 * Horizontal domain size and resolution
 * Sea-surface temperature
-* Vertical domain resolution
-* Interactive and non-interactive radiation
+* Interactive and non-interactive radiation, presence of a diurnal cycle
+
+Over the past few decades, there are two popular frameworks that have emerged that
+implement the Weak Temperature Gradient approximation:
+1. Temperature Gradient Relaxation (TGR)
+2. Damped Gravity Wave (DGW)
+
+This repository contains files that generate the prm files required to run our
+experiments in the System of Atmospheric Modelling v6.11.8 as modified by the Kuang Lab
+at Harvard University, along with notebooks that will aid in the analysis of our model
+results.
+
+The resulting sounding (snd) files from RCE spinups found in `exp/snd` can also be used
+in future experiments.
+
+## Related Repositories:
+
+* [2023GL104350](https://github.com/natgeo-wong/2023GL104350)
+
+  This project is a subset of ExploreWTGSpace, containing the relevant experiments,
+  notebooks and scripts required to generate the data for the paper submission to GRL
+  with the ID `2023GL104350`.
+
+* [SelfAggregation](https://github.com/natgeo-wong/SelfAggregation)
+
+  A complement to the ExploreWTGSpace project.  Investigates the self-aggregation of
+  convection in the System of Atmospheric Modelling for similar horizontal resolution
+  allowing for direct comparison to WTG results.
 
 ## Installation
 
 This code base is using the Julia Language and [DrWatson](https://juliadynamics.github.io/DrWatson.jl/stable/)
-to make a reproducible scientific project.  To (locally) reproduce this project, do the following:
+to make a reproducible scientific project.  To (locally) reproduce this project, do the
+following:
 
 0. Download this code base. Notice that raw data are typically not included in the
    git-history and may need to be downloaded independently.
@@ -34,7 +67,7 @@ to make a reproducible scientific project.  To (locally) reproduce this project,
    julia> ] activate .
     Activating environment at `path/to/this/project`
 
-   (PiPWV) pkg> instantiate
+   (ExploreWTGSpace) pkg> instantiate
    ```
 
 This will install all necessary packages for you to be able to run the scripts and

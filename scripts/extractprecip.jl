@@ -1,5 +1,5 @@
 using DrWatson
-@quickactivate "2023GL104350"
+@quickactivate "ExploreWTGSpace"
 
 include(srcdir("sam.jl"))
 include(srcdir("extract.jl"))
