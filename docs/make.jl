@@ -5,7 +5,7 @@ using Literate
 bib_filepath = joinpath(dirname(@__FILE__), "references.bib")
 bib = CitationBibliography(bib_filepath, style=:authoryear)
 
-makedocs(;
+makedocs(bib;
     doctest  = false,
     format   = Documenter.HTML(collapselevel=1,prettyurls=false),
     authors  = "Nathanael Wong <natgeo.wong@outlook.com>",
@@ -27,10 +27,11 @@ makedocs(;
             "Results"              => "ccw/results.md",
             "Diurnal vs Perpetual" => "ccw/diurnalcycle.md",
         ],
+        "References"          => "references.md"
     ]
 )
 
 deploydocs(
     repo = "github.com/natgeo-wong/ExploreWTGSpace.git",
-    devbranch = "main"
+    devbranch = "docs"
 )
