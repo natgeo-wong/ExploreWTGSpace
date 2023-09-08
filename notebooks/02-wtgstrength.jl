@@ -24,7 +24,7 @@ end
 
 # ╔═╡ 6dce35fc-5914-11eb-0ce2-0d4e164e1898
 begin
-	@quickactivate "2023GL104350"
+	@quickactivate "ExploreWTGSpace"
 	using PlutoUI
 	using Printf
 	using StatsBase

@@ -13,7 +13,7 @@ end
 
 # ╔═╡ 000a8d8d-24c7-40f6-a47a-8a299bb508f5
 begin
-	@quickactivate "2023GL104350"
+	@quickactivate "ExploreWTGSpace"
 	using DelimitedFiles
 	using NCDatasets
 	using StatsBase
@@ -23,7 +23,7 @@ begin
 
 	pplt = pyimport("proplot")
 
-	md"Loading modules for the 2023GL104350 project..."
+	md"Loading modules for the ExploreWTGSpace project..."
 end
 
 # ╔═╡ 0dcabe70-3b22-4b76-a42e-80ab872da27d

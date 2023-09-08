@@ -23,7 +23,7 @@ end
 
 # ╔═╡ 46faa412-5ade-11eb-3c37-23a7e59037a0
 begin
-	@quickactivate "2023GL104350"
+	@quickactivate "ExploreWTGSpace"
 	using Statistics
 	using PlutoUI
 	using Printf
@@ -35,7 +35,7 @@ begin
 	include(srcdir("sam.jl"))
 	include(srcdir("samsnd.jl"))
 	
-md"Loading modules for the 2023GL104350 paper ..."
+md"Loading modules for the ExploreWTGSpace paper ..."
 end
 
 # ╔═╡ 9dd4cd7e-5adb-11eb-2735-a7a4a2bb23b1

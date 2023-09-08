@@ -14,7 +14,7 @@ end
 
 # ╔═╡ 6dce35fc-5914-11eb-0ce2-0d4e164e1898
 begin
-	@quickactivate "2023GL104350"
+	@quickactivate "ExploreWTGSpace"
 	using NCDatasets
 	using Printf
 	using StatsBase
@@ -25,7 +25,7 @@ begin
 	
 	include(srcdir("sam.jl"))
 	
-md"Loading modules for the 2023GL104350 paper submission ..."
+md"Loading modules for the ExploreWTGSpace paper submission ..."
 end
 
 # ╔═╡ e78a75c2-590f-11eb-1144-9127b0309135

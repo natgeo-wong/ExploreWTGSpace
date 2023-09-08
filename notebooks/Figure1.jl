@@ -13,7 +13,7 @@ end
 
 # ╔═╡ 181a3e2a-126b-4392-a2de-b2dbd68c9d15
 begin
-	@quickactivate "2023GL104350"
+	@quickactivate "ExploreWTGSpace"
 	using NCDatasets
 	using PlutoUI
 	using Printf
@@ -25,7 +25,7 @@ begin
 
 	include(srcdir("sam.jl"))
 
-	md"Loading modules for the 2023GL104350 paper submission ..."
+	md"Loading modules for the ExploreWTGSpace paper submission ..."
 end
 
 # ╔═╡ d41d44c4-e9d0-11ec-0b8d-0d5edc09dbd2
