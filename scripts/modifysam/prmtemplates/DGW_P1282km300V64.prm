@@ -1,6 +1,9 @@
 &PARAMETERS
 
-caseid ='ExploreWTGSpace-P1282km300V64-member[xx]',
+caseid ='ExploreWTGSpace-P1282km300V64-member[xx]-OUT2D',
+
+case_restart = 'DGW',
+caseid_restart = 'ExploreWTGSpace-P1282km300V64-member[xx]',
 
 dx = 2000.,
 dy = 2000.,
