@@ -258,7 +258,8 @@ function extractgms(
 
     end
 
-    fnc = datadir("wwtg","$(schname)-$(expname)-$(runname).nc")
+    mkpath(datadir("gms"))
+    fnc = datadir("gms","$(schname)-$(expname)-$(runname).nc")
     if isfile(fnc); rm(fnc,force=true) end
 
     nds = NCDataset(fnc,"c",attrib = Dict(
