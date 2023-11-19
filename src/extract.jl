@@ -4,6 +4,7 @@ using Logging
 using NCDatasets
 using Printf
 using Statistics
+using Trapz
 
 function extractprecip(
     schname :: String,
@@ -244,9 +245,9 @@ function extractgms(
             try
                 z[:,ids] .= ods["z"][:]
                 p[:,ids] .= ods["p"][:]
-                wwtg[:,:,ids] .= ods["WWTG"][:]
-                dse[:,:,ids]  .= retrievevar_fnc("DSE",fnc)
-                mse[:,:,ids]  .= retrievevar_fnc("MSE",fnc)
+                w[:,:,ids] .= ods["WWTG"][:]
+                dse[:,:,ids]  .= ods["DSE"][:]
+                mse[:,:,ids]  .= ods["MSE"][:]
             catch
                 @warn "Unable to extract WWTG data from $(fnc)"
             end
@@ -297,19 +298,19 @@ function extractgms(
         "full_name" => "Moist Static Energy"
     ))
 
-    ncgms = defVar(nds,"gms",Float64,("level","time","ensemble"),attrib = Dict(
+    ncgms = defVar(nds,"gms",Float64,("time","ensemble"),attrib = Dict(
         "units"     => "",
         "long_name" => "gross_moist_stability",
         "full_name" => "Gross Moist Stability"
     ))
 
-    ncwdse = defVar(nds,"dse",Float64,("time","ensemble"),attrib = Dict(
+    ncwdse = defVar(nds,"wdse",Float64,("time","ensemble"),attrib = Dict(
         "units"     => "J m**2 kg**-1 s**-1",
         "long_name" => "column_integrated_dry_static_energy_export",
         "full_name" => "Column Integrated Dry Static Energy_export"
     ))
 
-    ncwmse = defVar(nds,"mse",Float64,("time","ensemble"),attrib = Dict(
+    ncwmse = defVar(nds,"wmse",Float64,("time","ensemble"),attrib = Dict(
         "units"     => "J m**2 kg**-1 s**-1",
         "long_name" => "column_integrated_moist_static_energy_export",
         "full_name" => "Column Integrated Moist Static Energy_export"
@@ -323,15 +324,16 @@ function extractgms(
 
     for imem = 1 : 15
 
+        iz = @view z[:,imem]
         iw = @view w[:,:,imem]
         imse = @view mse[:,:,imem]
         idse = @view dse[:,:,imem]
 
-        dz = (z[2:end] .- z[1:(end-1)])
-        iz = (z[2:end] .+ z[1:(end-1)]) / 2
+        dz = (iz[2:end] .- iz[1:(end-1)])
+        iz = (iz[2:end] .+ iz[1:(end-1)]) / 2
         iw = (iw[2:end,:] .+ iw[1:(end-1),:]) / 2
-        wdsdz = (idse[2:end,:] .- idse[1:(end-1),:]) ./ dz .* w
-        wdhdz = (imse[2:end,:] .- imse[1:(end-1),:]) ./ dz .* w
+        wdsdz = (idse[2:end,:] .- idse[1:(end-1),:]) ./ dz .* iw
+        wdhdz = (imse[2:end,:] .- imse[1:(end-1),:]) ./ dz .* iw
 
         for it = 1 : nt
             wmse[it,imem] = trapz(iz,@views wdhdz[:,it])

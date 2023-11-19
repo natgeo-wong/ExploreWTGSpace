@@ -1,5 +1,5 @@
 using DrWatson
-@quickactivate "2023GL104350"
+@quickactivate "ExploreWTGSpace"
 
 include(srcdir("sam.jl"))
 include(srcdir("extract.jl"))
@@ -16,5 +16,5 @@ TGR2 = vcat(TGR/10,1,TGR,10,TGR*10)
 pwrvec  = DGW1
 
 for pwr in pwrvec
-    extractwwtg(schname,expname,dampingstrprnt(pwr),nt=6000,tperday=24)
+    extractgms(schname,expname,dampingstrprnt(pwr),nt=6000,tperday=24)
 end
