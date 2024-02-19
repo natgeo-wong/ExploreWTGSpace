@@ -65,7 +65,7 @@ function extractprecip(
     ))
 
     nctime[:] = t
-    ncvar[:]  = prcp
+    ncvar[:,:]  = prcp
 
     close(nds)
 
@@ -125,7 +125,7 @@ function extractprecip(
     ))
 
     nctime[:] = t
-    ncvar[:]  = prcp
+    ncvar[:,:]  = prcp
 
     close(nds)
 
@@ -207,7 +207,7 @@ function extractwwtg(
     nctime[:] = t
     ncz[:] = dropdims(mean(z,dims=2),dims=2)
     ncp[:] = p
-    ncwwtg[:]  = wwtg
+    ncwwtg[:,:,:]  = wwtg
 
     close(nds)
 
@@ -320,8 +320,8 @@ function extractgms(
     nctime[:] = t
     ncz[:] = dropdims(mean(z,dims=2),dims=2)
     ncp[:] = p
-    ncdse[:] = dse
-    ncmse[:] = mse
+    ncdse[:,:,:] = dse
+    ncmse[:,:,:] = mse
 
     for imem = 1 : 15
 
@@ -343,9 +343,9 @@ function extractgms(
 
     end
 
-    ncwdse[:] = wdse
-    ncwmse[:] = wmse
-    ncgms[:]  = wmse ./ wdse
+    ncwdse[:,:] = wdse
+    ncwmse[:,:] = wmse
+    ncgms[:,:]  = wmse ./ wdse
 
     close(nds)
 

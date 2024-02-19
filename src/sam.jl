@@ -80,7 +80,7 @@ function retrievedims_fnc(fnc::AbstractString)
 
 end
 
-function retrievevar(
+function retrieve2Dvar(
     varname :: AbstractString,
     scheme  :: AbstractString,
     expname :: AbstractString,
@@ -94,17 +94,48 @@ function retrievevar(
         scheme,expname,config,
         ismpi,isensemble,member
     ))
-    var = ds[varname][:]
+    var = ds[varname][:,:]
     close(ds)
 
     return var
 
 end
 
-function retrievevar_fnc(varname::AbstractString, fnc::AbstractString)
+function retrieve2Dvar_fnc(varname::AbstractString, fnc::AbstractString)
 
     ds = NCDataset(fnc)
-    var = ds[varname][:]
+    var = ds[varname][:,:]
+    close(ds)
+
+    return var
+
+end
+
+function retrieve3Dvar(
+    varname :: AbstractString,
+    scheme  :: AbstractString,
+    expname :: AbstractString,
+    config  :: AbstractString = "";
+    ismpi      :: Bool = false,
+    isensemble :: Bool = false,
+    member     :: Integer=0
+)
+
+    ds = NCDataset(outstatname(
+        scheme,expname,config,
+        ismpi,isensemble,member
+    ))
+    var = ds[varname][:,:,:]
+    close(ds)
+
+    return var
+
+end
+
+function retrieve3Dvar_fnc(varname::AbstractString, fnc::AbstractString)
+
+    ds = NCDataset(fnc)
+    var = ds[varname][:,:,:]
     close(ds)
 
     return var
