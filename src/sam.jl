@@ -94,7 +94,7 @@ function retrieve2Dvar(
         scheme,expname,config,
         ismpi,isensemble,member
     ))
-    var = ds[varname][:,:]
+    var = ds[varname][:]
     close(ds)
 
     return var
@@ -104,7 +104,7 @@ end
 function retrieve2Dvar_fnc(varname::AbstractString, fnc::AbstractString)
 
     ds = NCDataset(fnc)
-    var = ds[varname][:,:]
+    var = ds[varname][:]
     close(ds)
 
     return var
@@ -125,7 +125,7 @@ function retrieve3Dvar(
         scheme,expname,config,
         ismpi,isensemble,member
     ))
-    var = ds[varname][:,:,:]
+    var = ds[varname][:,:]
     close(ds)
 
     return var
@@ -135,7 +135,7 @@ end
 function retrieve3Dvar_fnc(varname::AbstractString, fnc::AbstractString)
 
     ds = NCDataset(fnc)
-    var = ds[varname][:,:,:]
+    var = ds[varname][:,:]
     close(ds)
 
     return var
