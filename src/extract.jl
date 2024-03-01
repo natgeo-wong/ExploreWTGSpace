@@ -159,7 +159,7 @@ function extractwwtg(
             try
                 z[:,ids] .= ods["z"][:]
                 p[:,ids] .= ods["p"][:]
-                wwtg[:,:,ids] .= ods["WWTG"][:]
+                wwtg[:,:,ids] .= ods["WWTG"][:,:]
             catch
                 @warn "Unable to extract WWTG data from $(fnc)"
             end
@@ -245,9 +245,9 @@ function extractgms(
             try
                 z[:,ids] .= ods["z"][:]
                 p[:,ids] .= ods["p"][:]
-                w[:,:,ids] .= ods["WWTG"][:]
-                dse[:,:,ids]  .= ods["DSE"][:]
-                mse[:,:,ids]  .= ods["MSE"][:]
+                w[:,:,ids] .= ods["WWTG"][:,:]
+                dse[:,:,ids]  .= ods["DSE"][:,:]
+                mse[:,:,ids]  .= ods["MSE"][:,:]
             catch
                 @warn "Unable to extract WWTG data from $(fnc)"
             end
