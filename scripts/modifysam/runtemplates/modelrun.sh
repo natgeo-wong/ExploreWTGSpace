@@ -74,6 +74,8 @@ cd ..
 
 cd $scriptdir
 export OMPI_MCA_btl="self,openib"
+unset I_MPI_PMI_LIBRARY
+export I_MPI_JOB_RESPECT_PROCESS_PLACEMENT=0
 mpirun -np $SLURM_NTASKS $SAMname > ./LOGS/samrun.${SLURM_JOBID}.log
 
 exitstatus=$?
