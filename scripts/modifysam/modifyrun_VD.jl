@@ -4,6 +4,8 @@ using Printf
 
 schname = "VDD"
 expname = "T1282km300V64"
+email   = ""
+doBuild = true
 
 tprm  = projectdir("exp","tmp.prm")
 avec = [1  1   1   1    1   1   1  1 0.5 0]
@@ -26,7 +28,7 @@ open(mrun,"r") do frun
             nrun = projectdir("run",schname,expname,runname,"ensemble$(mstr).sh")
 
             open(nrun,"w") do wrun
-                sn = replace(s ,"[email]"       => )
+                sn = replace(s ,"[email]"       => email)
                 sn = replace(sn,"[directory]"   => projectdir())
                 sn = replace(sn,"[experiment]"  => expname)
                 sn = replace(sn,"[config]"      => runname)
@@ -35,7 +37,7 @@ open(mrun,"r") do frun
                 elseif (ensembleii > 5) && (ensembleii < 11)
                     sn = replace(sn,"[sndname]" => "$(expname)_hot")
                 else
-                    sn = replace(sn,"[sndname]" => "$(expname)_cld")
+                    sn = replace(sn,"[sndname]" => "$(expname)_cold")
                 end
                 sn = replace(sn,"[lsfname]"     => "noforcing")
                 sn = replace(sn,"[schname]"     => schname)
@@ -48,22 +50,24 @@ open(mrun,"r") do frun
     end
 end
 
-open(brun,"r") do frun
-    s = read(frun,String)
-    for iexp in 1 : nexp
+if doBuild
+    open(brun,"r") do frun
+        s = read(frun,String)
+        for iexp in 1 : nexp
 
-        astr  = replace(@sprintf("%04.2f",avec[iexp]),"."=>"d")
-        bstr  = replace(@sprintf("%04.2f",bvec[iexp]),"."=>"d")
-        runname = "H$(astr)F$(bstr)"
-        nrun = projectdir("run",schname,expname,runname,"Build.csh")
+            astr  = replace(@sprintf("%04.2f",avec[iexp]),"."=>"d")
+            bstr  = replace(@sprintf("%04.2f",bvec[iexp]),"."=>"d")
+            runname = "H$(astr)F$(bstr)"
+            nrun = projectdir("run",schname,expname,runname,"Build.csh")
 
-        open(nrun,"w") do wrun
-            sn = replace(s ,"[datadir]" => datadir())
-            sn = replace(sn,"[schname]" => schname)
-            sn = replace(sn,"[expname]" => expname)
-            sn = replace(sn,"[runname]" => runname)
-            write(wrun,sn)
+            open(nrun,"w") do wrun
+                sn = replace(s ,"[datadir]" => datadir())
+                sn = replace(sn,"[schname]" => schname)
+                sn = replace(sn,"[expname]" => expname)
+                sn = replace(sn,"[runname]" => runname)
+                write(wrun,sn)
+            end
+
         end
-
     end
 end
