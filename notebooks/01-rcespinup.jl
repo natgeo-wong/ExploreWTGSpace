@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.26
+# v0.19.40
 
 using Markdown
 using InteractiveUtils
@@ -57,16 +57,27 @@ There are two broad model configuration categories: (P)erpetual (INSOL)ation, an
 # ╔═╡ 505aec83-2f74-4f12-be40-b360cfb1d2a8
 @bind prefix Select([
 	"P" => "Perpetual Insolation (P)",
+	"D" => "Diurnal Insolation (D)",
 	"T" => "Temperature Tendency (T)",
-	"S" => "Fixed-Wind Surface Fluxes (S)",
 ])
 
 # ╔═╡ 427511d0-88cb-11eb-2a40-019c91ee1401
-md"Toggle Horizontal Resolution: $(@bind hres PlutoUI.Slider(0:1,default=0))"
+if prefix == "D"
+	md"Toggle Domain Size: $(@bind hres PlutoUI.Slider(1:2,default=1))"
+else
+	md"Toggle Domain Size: $(@bind hres PlutoUI.Slider(0.5:0.5:1,default=1))"
+end
+
+# ╔═╡ 5940bed1-cf63-4caa-a954-b4aa8d3ab459
+md"Domain Size = $(128*hres) x $(128*hres) km"
+
+# ╔═╡ 9cf41788-9587-4cdc-9761-93a9735ee10d
+md"Is 2D? $(@bind is2D PlutoUI.Slider(0:1,default=0))"
 
 # ╔═╡ ac8b9d4c-5ade-11eb-06f4-33bff063bbde
 begin
-	config = "$(prefix)128$(Int(2. ^hres*2))km300V64"
+	config = "$(prefix)$(@sprintf("%03d",128*hres))2km300V64"
+	if isone(is2D); config = "$(config)_2D" end
 	nen = 10
 	
 md"**Experiment Set:** $config | **Number of Control Members**: $nen"
@@ -97,7 +108,6 @@ ptrop = 70
 # ╔═╡ 7d905176-81e8-11eb-20d3-b9be287472f5
 begin
 	z_en,_,t_en = retrievedims("RCE","$(config)",isensemble=true,member=1)
-	# t_en = t_en[1:1800]
 	nz_en = length(z_en); nt_en = length(t_en);
 	tbi_en = zeros(nz_en,nt_en,nen); tob_en = zeros(nz_en,nen)
 	qbi_en = zeros(nz_en,nt_en,nen); qob_en = zeros(nz_en,nen)
@@ -106,15 +116,15 @@ begin
 	pre_en = zeros(nz_en,nt_en,nen); plevel = zeros(nz_en,nen)
 	prc_en = zeros(nt_en,nen);
 	for imem = 1 : nen
-		tbi_en[:,:,imem] = retrievevar("TBIAS","RCE","$(config)",isensemble=true,member=imem)[:,1:nt_en]
-		qbi_en[:,:,imem] = retrievevar("QBIAS","RCE","$(config)",isensemble=true,member=imem)[:,1:nt_en]
-		tem_en[:,:,imem] = retrievevar("TABS","RCE","$(config)",isensemble=true,member=imem)[:,1:nt_en]
-		qvp_en[:,:,imem] = retrievevar("QV","RCE","$(config)",isensemble=true,member=imem)[:,1:nt_en]
-		pre_en[:,:,imem] = retrievevar("PRES","RCE","$(config)",isensemble=true,member=imem)[:,1:nt_en]
-		tob_en[:,imem] = retrievevar("TABSOBS","RCE","$(config)",isensemble=true,member=imem)[:,end]
-		qob_en[:,imem] = retrievevar("QVOBS","RCE","$(config)",isensemble=true,member=imem)[:,end]
-		plevel[:,imem] = retrievevar("p","RCE","$(config)",isensemble=true,member=imem)[:,end]
-		prc_en[:,imem] = retrievevar("PREC","RCE","$(config)",isensemble=true,member=imem)[1:nt_en]
+		tbi_en[:,:,imem] = retrieve3Dvar("TBIAS","RCE","$(config)",isensemble=true,member=imem)[:,1:nt_en]
+		qbi_en[:,:,imem] = retrieve3Dvar("QBIAS","RCE","$(config)",isensemble=true,member=imem)[:,1:nt_en]
+		tem_en[:,:,imem] = retrieve3Dvar("TABS","RCE","$(config)",isensemble=true,member=imem)[:,1:nt_en]
+		qvp_en[:,:,imem] = retrieve3Dvar("QV","RCE","$(config)",isensemble=true,member=imem)[:,1:nt_en]
+		pre_en[:,:,imem] = retrieve3Dvar("PRES","RCE","$(config)",isensemble=true,member=imem)[:,1:nt_en]
+		tob_en[:,imem] = retrieve3Dvar("TABSOBS","RCE","$(config)",isensemble=true,member=imem)[:,end]
+		qob_en[:,imem] = retrieve3Dvar("QVOBS","RCE","$(config)",isensemble=true,member=imem)[:,end]
+		plevel[:,imem] = retrieve2Dvar("p","RCE","$(config)",isensemble=true,member=imem)
+		prc_en[:,imem] = retrieve2Dvar("PREC","RCE","$(config)",isensemble=true,member=imem)[1:nt_en]
 		rh_en[:,:,imem]   = calcrh(qvp_en[:,:,imem],tem_en[:,:,imem],plevel[:,imem])/10
 	end
 	
@@ -161,7 +171,7 @@ begin
 		dropdims(mean(pts_en,dims=2),dims=2),c="k"
 	)
 	aen[1].format(
-		xlim=(-0.075,0.075),xlocator=(-2:2)/20,xlabel=L"T - T$_{OBS}$ / K",
+		xlim=(-0.15,0.15),xlocator=(-2:2)/10,xlabel=L"T - T$_{OBS}$ / K",
 		ylim=(1010,25),yscale="log",ylabel="Pressure / hPa",
 		suptitle="Model Ensemble Equilibrium RCE | $config",ultitle="(a)"
 	)
@@ -274,6 +284,8 @@ end
 # ╟─b2670c08-81e5-11eb-324e-2b923b289a04
 # ╟─505aec83-2f74-4f12-be40-b360cfb1d2a8
 # ╟─427511d0-88cb-11eb-2a40-019c91ee1401
+# ╟─5940bed1-cf63-4caa-a954-b4aa8d3ab459
+# ╟─9cf41788-9587-4cdc-9761-93a9735ee10d
 # ╟─ac8b9d4c-5ade-11eb-06f4-33bff063bbde
 # ╟─7842e150-822b-11eb-1ded-f35ee4cc6d8c
 # ╟─99dca670-81e5-11eb-24b8-cf1b23d8c1f7

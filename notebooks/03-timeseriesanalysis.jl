@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.26
+# v0.19.27
 
 using Markdown
 using InteractiveUtils
@@ -25,10 +25,10 @@ end
 # ╔═╡ 6dce35fc-5914-11eb-0ce2-0d4e164e1898
 begin
 	@quickactivate "ExploreWTGSpace"
+	using DSP
 	using NCDatasets
 	using PlutoUI
 	using Printf
-	using Statistics
 	using StatsBase
 	
 	using ImageShow, PNGFiles
@@ -42,13 +42,14 @@ end
 
 # ╔═╡ e78a75c2-590f-11eb-1144-9127b0309135
 md"
-# 2a. Transitioning from RCE to WTG
+# 3. Time-Series and Power Spectrum
 
 In this notebook, we investigate and develop a way to implement the WTG forcing gradually in the System of Atmospheric Modelling.  The sudden introduction of WTG large-scale forcing often causes a model to enter a \"shocked\" state that unnaturally forces the model into a different state.  Here, we develop a method that gradually increases the strength of the WTG momentum-damping parameter from a near/pseudo-RCE state.
 "
 
 # ╔═╡ f188190f-81bf-4b29-b479-38e9a85a997c
 @bind wtgscheme Select([
+	"DGW" => "(DGW) Damped Gravity Wave [Blossey et al., 2009]",
 	"TGR" => "(TGR) Temperature Gradient Relaxation [Raymond and Zeng, 2005]",
 	"SPC" => "(SPC) Spectral TGR [Herman and Raymond, 2014]",
 ])
@@ -56,242 +57,144 @@ In this notebook, we investigate and develop a way to implement the WTG forcing 
 # ╔═╡ b7a79d4e-4007-4c55-99cd-33abe6ee9f32
 @bind prefix Select([
 	"P" => "Perpetual Insolation (P)",
-	"T" => "Bulk-surface Fluxes (T)",
-	"S" => "Bulk-surface Fluxes (S)",
+	"D" => "Diurnal Insolation (D)",
+	"T" => "Temperature Tendency (T)",
 ])
 
 # ╔═╡ 292ff637-7f96-4d9b-beeb-8b3d7b28a218
-md"Toggle Horizontal Resolution: $(@bind hres PlutoUI.Slider(0:1,default=0))"
+if prefix == "D"
+	md"Toggle Domain Size: $(@bind hres PlutoUI.Slider(1:2,default=1))"
+else
+	md"Toggle Domain Size: $(@bind hres PlutoUI.Slider(0.5:0.5:1,default=1))"
+end
+
+# ╔═╡ 026110d9-55be-484a-b962-1aed19528933
+md"Domain Size = $(128*hres) x $(128*hres) km"
 
 # ╔═╡ d3b025e0-5b35-11eb-330a-5fbb2204da63
 begin
-	expname = "$(prefix)128$(Int(2. ^hres*2))km300V64"
-md"Weak Temperature Gradient Scheme: $wtgscheme | **Experiment Set:** $expname"
+	expname = "$(prefix)$(@sprintf("%03d",128*hres))2km300V64"
+
+md"**Experiment Set:** $expname"
 end
 
 # ╔═╡ a63de98c-5b35-11eb-0a8f-b7a1ebd441b6
 begin
-	configDGW = [0,0.2,0.5,1,2,5,10,20,50,100,200,500]
-	configWTG = [
-		0,0.1*sqrt(2),0.2,0.2*sqrt(2.5),0.5,0.5*sqrt(2),
-		1,sqrt(2),2,2*sqrt(2.5),5,5*sqrt(2),
-		10,10*sqrt(2),20,20*sqrt(2.5),50,50*sqrt(2)
-	]
-	nconDGW = length(configDGW)
+	if wtgscheme == "DGW"
+		configWTG = [0.02,0.05,0.1,0.2,0.5,1,2,5,10,20,50,100,200,500]
+	else
+		configWTG = [
+			0.1*sqrt(2),0.2,0.2*sqrt(2.5),0.5,0.5*sqrt(2),
+			1,sqrt(2),2,2*sqrt(2.5),5,5*sqrt(2),
+			10,10*sqrt(2),20,20*sqrt(2.5),50,50*sqrt(2)
+		]
+	end
 	nconWTG = length(configWTG)
-    blues_DGW = pplt.get_colors("Blues",(nconDGW+2))
-	blues_WTG = pplt.get_colors("Blues",(nconWTG+2))
-	lgd_DGW = Dict("frame"=>false,"ncols"=>2)
+	blues_WTG = pplt.get_colors("Blues",(nconWTG))
 	lgd_WTG = Dict("frame"=>false,"ncols"=>3)
 	md"Loading time dimension and defining the damping experiments ..."
 end
 
-# ╔═╡ 4581e38f-a680-4692-96ce-45d5e8799953
-md"Create Image? $(@bind createimage PlutoUI.Slider(0:1))"
-
 # ╔═╡ dc06d1f6-b3ab-4c7e-9f30-cfe1bb5e9cbd
 begin
-	if isone(createimage)
-		pplt.close()
-		fts,ats = pplt.subplots(nrows=2,aspect=2,axwidth=3.5)
-	
-		for ic in 2 : nconDGW
-			config = dampingstrprnt(configDGW[ic])
-			imem = 0
-	
-			while imem < 15; imem += 1
-				fnc = outstatname("DGW",expname,config,false,true,imem)
-				if isfile(fnc)
-					_,p,t = retrievedims_fnc(fnc); t = t .- floor(t[1])
-					pr = retrievevar_fnc("PREC",fnc) / 24
-					nt = length(t); nt = nt - mod(nt,24)
-					t  = dropdims(mean(reshape(t[1:nt],24,:),dims=1),dims=1)
-					pr = dropdims(mean(reshape(pr[1:nt],24,:),dims=1),dims=1)
-					if imem == 1
-						constr = @sprintf("%.e",configDGW[ic])
-						ats[1].plot(
-							t,pr,color=blues_DGW[ic+1],
-							label=(L"$a_m =$" * " $(constr)" * L" day$^{-1}$"),
-							legend="r",legend_kw=lgd_DGW
-						)
-					else
-						ats[1].plot(t,pr,color=blues_DGW[ic+1])
-					end
-				end
-			end
-	
+	pplt.close()
+	fts,ats = pplt.subplots(aspect=3,axwidth=5)
+
+	for ic in 1 : nconWTG
+
+		if wtgscheme == "DGW"
+			fnc = "$wtgscheme-$expname-$(dampingstrprnt(configWTG[ic])).nc"
+		else
+			fnc = "$wtgscheme-$expname-$(relaxscalestrprnt(configWTG[ic])).nc"
 		end
-		
-		for ic in 2 : nconWTG
-			config = relaxscalestrprnt(configWTG[ic])
-			imem = 0
-	
-			while imem < 15; imem += 1
-				fnc = outstatname(wtgscheme,expname,config,false,true,imem)
-				if isfile(fnc)
-					_,p,t = retrievedims_fnc(fnc); t = t .- floor(t[1])
-					pr = retrievevar_fnc("PREC",fnc) / 24
-					nt = length(t); nt = nt - mod(nt,24)
-					t  = dropdims(mean(reshape(t[1:nt],24,:),dims=1),dims=1)
-					pr = dropdims(mean(reshape(pr[1:nt],24,:),dims=1),dims=1)
-					if imem == 1
-						constr = @sprintf("%.1e",configWTG[ic])
-						ats[2].plot(
-							t,pr,color=blues_WTG[ic+1],
-							label=(L"$\tau =$" * " $(constr) hr"),
-							legend="r",legend_kw=lgd_WTG
-						)
-					else
-						ats[2].plot(t,pr,color=blues_WTG[ic+1])
-					end
-				end
-			end
-	
+		if isfile(datadir("precipitation",fnc))
+			ds_dgwprcp = NCDataset(datadir("precipitation",fnc))
+			dt    = ds_dgwprcp["time"][:]
+			prcp  = ds_dgwprcp["precipitation"][:] / 24
+			ats[1].plot(dt,prcp,c=blues_WTG[ic])
+			close(ds_dgwprcp)
 		end
 
-		for ic in 1
-			config = dampingstrprnt(configDGW[ic])
-			imem = 0
-	
-			while imem < 15; imem += 1
-				fnc = outstatname("DGW",expname,config,false,true,imem)
-				if isfile(fnc)
-					_,p,t = retrievedims_fnc(fnc); t = t .- floor(t[1])
-					pr = retrievevar_fnc("PREC",fnc) / 24
-					nt = length(t); nt = nt - mod(nt,24)
-					t  = dropdims(mean(reshape(t[1:nt],24,:),dims=1),dims=1)
-					pr = dropdims(mean(reshape(pr[1:nt],24,:),dims=1),dims=1)
-					if imem == 1
-						constr = @sprintf("%.e",configDGW[ic])
-						ats[1].plot(
-							t,pr,color="k",
-							label="RCE",
-							legend="r",legend_kw=lgd_DGW
-						)
-						ats[1].plot(t,pr,color="k")
-					else
-						ats[1].plot(t,pr,color="k")
-					end
-				end
-			end
-			config = relaxscalestrprnt(configWTG[ic])
-			imem = 0
-	
-			while imem < 15; imem += 1
-				fnc = outstatname(wtgscheme,expname,config,false,true,imem)
-				if isfile(fnc)
-					_,p,t = retrievedims_fnc(fnc); t = t .- floor(t[1])
-					pr = retrievevar_fnc("PREC",fnc) / 24
-					nt = length(t); nt = nt - mod(nt,24)
-					t  = dropdims(mean(reshape(t[1:nt],24,:),dims=1),dims=1)
-					pr = dropdims(mean(reshape(pr[1:nt],24,:),dims=1),dims=1)
-					if imem == 1
-						constr = @sprintf("%.1e",configWTG[ic])
-						ats[2].plot(
-							t,pr,color="k",
-							label=(L"$\tau =$" * " $(constr) hr"),
-							legend="r",legend_kw=lgd_WTG
-						)
-					else
-						ats[2].plot(t,pr,color="k")
-					end
-				end
-			end
-
-		end
-
-		for ax in ats
-			ax.format(
-				xlim=(000,250),yscale="symlog",yscale_kw=Dict("linthresh"=>0.1),
-				ylim=(0,10),
-				ylabel=L"Rainfall Rate / mm hr$^{-1}$",xlabel="Days"
-			)
-		end
-
-		ats[1].format(ultitle="(a) Precipitation Time-Series (DGW)")
-		ats[2].format(ultitle="(b) Precipitation Time-Series ($wtgscheme)")
-
-		fts.savefig(
-			plotsdir("02b-rce2wtg-$(expname)-$wtgscheme.png"),
-			transparent=false,dpi=400
-		)
-		
 	end
+
+	for ax in ats
+		ax.format(
+			xlim=(0,250),yscale="symlog",yscale_kw=Dict("linthresh"=>0.001),
+			ylim=(0,10),
+			ylabel=L"Rainfall Rate / mm hr$^{-1}$",xlabel="Days"
+		)
+	end
+
+	ats[1].format(ultitle="(a) Precipitation Time-Series ($wtgscheme)")
+
+	fts.savefig(
+		plotsdir("02b-rce2wtg-$(expname)-$wtgscheme.png"),
+		transparent=false,dpi=400
+	)
+		
 	load(plotsdir("02b-rce2wtg-$(expname)-$wtgscheme.png"))
 end
 
-# ╔═╡ d8db43e6-e537-4348-97f5-da3f7dc76e0f
+# ╔═╡ 0a74e728-1cf6-4db3-b616-fbd5d50595b1
 begin
-	if isone(createimage)
-		pplt.close()
-		fstd,astd = pplt.subplots(ncols=2,aspect=3,axwidth=3)
-	
-		for ic in 2 : nconDGW
-			config = dampingstrprnt(configDGW[ic])
-			imem = 0
-	
-			while imem < 15; imem += 1
-				fnc = outstatname("DGW",expname,config,false,true,imem)
-				if isfile(fnc)
-					pr = retrievevar_fnc("PREC",fnc)[(end-2399):end]/24
-					nt = length(pr); nt = nt - mod(nt,3)
-					pr = dropdims(mean(reshape(pr[1:nt],3,:),dims=1),dims=1)
-					astd[1].errorbar(configDGW[ic],0,std(pr),c="b")
+	signalpower = zeros(1201,nconWTG,15)
+	signalfreq  = zeros(1201,nconWTG,15)
+	totalmember = zeros(1,nconWTG)
+	for icon = 1 : nconWTG
+		if wtgscheme == "DGW"
+			fnc = "$wtgscheme-$expname-$(dampingstrprnt(configWTG[icon])).nc"
+		else
+			fnc = "$wtgscheme-$expname-$(relaxscalestrprnt(configWTG[icon])).nc"
+		end
+		nmem = 0
+		if isfile(datadir("precipitation",fnc))
+			ds_dgwprcp = NCDataset(datadir("precipitation",fnc))
+			prcp  = ds_dgwprcp["precipitation"][:] / 24
+			close(ds_dgwprcp)
+			for imem = 1 : 15
+				if sum(.!isnan.(prcp[:,imem])) == 6000
+					nmem += 1
+					prcpii = prcp[(end-2399):end,imem] .- mean(prcp[(end-2399):end,imem])
+					pdg = periodogram(prcpii,fs=24)
+					signalpower[:,icon,imem] .= pdg.power
+					signalfreq[:,icon,imem]  .= pdg.freq
 				end
 			end
-	
 		end
-		
-		for ic in 2 : nconWTG
-			config = relaxscalestrprnt(configWTG[ic])
-			imem = 0
-	
-			while imem < 15; imem += 1
-				fnc = outstatname(wtgscheme,expname,config,false,true,imem)
-				if isfile(fnc)
-					pr = retrievevar_fnc("PREC",fnc)[(end-2399):end]/24
-					nt = length(pr); nt = nt - mod(nt,3)
-					pr = dropdims(mean(reshape(pr[1:nt],3,:),dims=1),dims=1)
-					astd[2].errorbar(configWTG[ic],0,std(pr),c="b")
-				end
-			end
-	
-		end
-	
-		for ic in 1
-			config = dampingstrprnt(configDGW[ic])
-			imem = 0
-	
-			while imem < 15; imem += 1
-				fnc = outstatname("DGW",expname,config,false,true,imem)
-				if isfile(fnc)
-					pr = retrievevar_fnc("PREC",fnc)[(end-2399):end] / 24
-					pr = dropdims(mean(reshape(pr,3,:),dims=1),dims=1)
-					for icon in configDGW
-						astd[1].errorbar(icon,0,std(pr),c="k")
-					end
-					for icon in configWTG
-						astd[2].errorbar(icon,0,std(pr),c="k")
-					end
-				end
-			end
-	
-		end
-
-		for ax in astd
-			ax.format(xscale="log")
-		end
-
-		astd[1].format(urtitle="(a) Standard Deviation (DGW)")
-		astd[2].format(urtitle="(b) Standard Deviation ($wtgscheme)")
-
-		fstd.savefig(
-			plotsdir("02b-stddeviation-$(expname)-$wtgscheme.png"),
-			transparent=false,dpi=400
-		)
-		
+		totalmember[icon] = nmem
 	end
-	load(plotsdir("02b-stddeviation-$(expname)-$wtgscheme.png"))
+	signalpower = dropdims(sum(signalpower,dims=3),dims=3)
+	signalpower = signalpower ./ totalmember
+	signalfreq  = dropdims(sum(signalfreq ,dims=3),dims=3)
+	signalfreq  = signalfreq  ./ totalmember
+	signalfreq  = dropdims(mean(signalfreq,dims=2),dims=2)
+	md"Doing power spectrum ..."
+end
+
+# ╔═╡ d28f2438-8b19-4763-a31d-4cd2feb30ace
+begin
+	pplt.close(); f2,a2 = pplt.subplots(aspect=4,axwidth=5)
+
+	if wtgscheme == "DGW"
+		wtglabel = L"$a_m$ / day$^{-1}$"
+	else
+		wtglabel = L"$\tau$ / hr"
+	end
+	
+	c2 = a2[1].pcolormesh(1 ./signalfreq[2:end],configWTG,log10.(signalpower')[:,2:end],levels=-5:0.5:-0,extend="both")
+	a2[1].format(
+		xscale="log",xlim=(0.1,10),
+		yscale="log",ylim=(minimum(configWTG),maximum(configWTG)),
+		suptitle="$wtgscheme | $expname",
+		xlabel=L"Frequency / day$^{-1}$",ylabel=wtglabel
+	)
+
+	f2.colorbar(c2,locator=-5:-0)
+	f2.savefig(
+		plotsdir("03-timeseries-$wtgscheme-$expname.png"),
+		transparent=false,dpi=400
+	)
+	load(plotsdir("03-timeseries-$wtgscheme-$expname.png"))
 end
 
 # ╔═╡ Cell order:
@@ -301,8 +204,9 @@ end
 # ╟─f188190f-81bf-4b29-b479-38e9a85a997c
 # ╟─b7a79d4e-4007-4c55-99cd-33abe6ee9f32
 # ╟─292ff637-7f96-4d9b-beeb-8b3d7b28a218
+# ╟─026110d9-55be-484a-b962-1aed19528933
 # ╟─d3b025e0-5b35-11eb-330a-5fbb2204da63
 # ╟─a63de98c-5b35-11eb-0a8f-b7a1ebd441b6
-# ╟─4581e38f-a680-4692-96ce-45d5e8799953
 # ╟─dc06d1f6-b3ab-4c7e-9f30-cfe1bb5e9cbd
-# ╟─d8db43e6-e537-4348-97f5-da3f7dc76e0f
+# ╟─0a74e728-1cf6-4db3-b616-fbd5d50595b1
+# ╟─d28f2438-8b19-4763-a31d-4cd2feb30ace
