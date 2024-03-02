@@ -14,8 +14,14 @@ snddata[:,1] .= z
 snddata[:,2] .= p
 snddata[:,4] .= q
 
-t_h = t .+ 0.05; snddata[:,3] .= t_h .* (1000 ./p).^(287/1004)
+snddata[:,3] .= (t .+ 0.05) .* (1000 ./p).^(287/1004)
+createsndmean("$(expii)_warm",snddata;psfc=1009.32)
+
+snddata[:,3] .= (t .- 0.05) .* (1000 ./p).^(287/1004)
+createsndmean("$(expii)_cool",snddata;psfc=1009.32)
+
+snddata[:,3] .= (t .+ 0.10) .* (1000 ./p).^(287/1004)
 createsndmean("$(expii)_hot",snddata;psfc=1009.32)
 
-t_h = t .- 0.05; snddata[:,3] .= t_h .* (1000 ./p).^(287/1004)
-createsndmean("$(expii)_cld",snddata;psfc=1009.32)
+snddata[:,3] .= (t .- 0.10) .* (1000 ./p).^(287/1004)
+createsndmean("$(expii)_cold",snddata;psfc=1009.32)
