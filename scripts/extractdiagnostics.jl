@@ -14,12 +14,8 @@ else
     pwrvec = vcat(TGR/10,1,TGR,10,TGR*10)
 end
 
-for pwr in DGW
-    if schname == "DGW"
-        pwrname = dampingstrprnt(pwr)
-    else
-        pwrname = relaxscalestrprnt(pwr)
-    end
+for pwr in pwrvec
+    pwrname = powername(pwr,schname)
     extractprecip(schname,expname,pwrname,nt=6000,tperday=24)
     extractwwtg(schname,expname,pwrname,nt=6000,tperday=24)
     extractgms(schname,expname,pwrname,nt=6000,tperday=24)
