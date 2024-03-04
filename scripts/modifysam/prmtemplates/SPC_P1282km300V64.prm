@@ -24,7 +24,7 @@ dolongwave       = .true.,
 doshortwave      = .true.,
 dosurface        = .true.,
 dodynamicocean   = .false.,
-dolargescale     = .[bool].,
+dolargescale     = .true.,
 doradforcing     = .false.,
 doradhomo        = .false.,
 dosfcforcing     = .false.,
@@ -89,7 +89,7 @@ bulksfcflx_u  = 5.
 
 dowtg_blossey_etal_JAMES2009  = .false.
 dowtg_raymondzeng_QJRMS2005   = .false.
-dowtg_hermanraymond_JAMES2014 = .[bool].
+dowtg_hermanraymond_JAMES2014 = .true.
 dowtg_decompdgw               = .false.
 dowtg_decomptgr               = .false.
 
