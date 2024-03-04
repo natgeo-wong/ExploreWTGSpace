@@ -13,7 +13,7 @@ if schname == "DGW"
     pwrvec = [0.02,0.05,0.1,0.2,0.5,1,2,5,10,20,50,100,200,500]
 else
     pwrvec = [sqrt(2),2,2*sqrt(2.5),5,5*sqrt(2)]
-    pwrvec = vcat(TGR/10,1,TGR,10,TGR*10)
+    pwrvec = vcat(pwrvec/10,1,pwrvec,10,pwrvec*10)
 end
 
 mrun = projectdir("run","modifysam","runtemplates","modelrun.sh")
@@ -60,10 +60,10 @@ if doBuild
 
             pwrname = powername(pwr,schname)
             
-            nrun = projectdir("run","TGR",expname,pwrname,"Build.csh")
+            nrun = projectdir("run",schname,expname,pwrname,"Build.csh")
             open(nrun,"w") do wrun
                 sn = replace(s ,"[datadir]" => datadir())
-                sn = replace(sn,"[schname]" => "TGR")
+                sn = replace(sn,"[schname]" => schname)
                 sn = replace(sn,"[expname]" => expname)
                 sn = replace(sn,"[runname]" => pwrname)
                 write(wrun,sn)

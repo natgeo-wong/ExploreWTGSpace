@@ -20,9 +20,10 @@
 module purge
 module load intel/23.0.0-fasrc01 intelmpi/2021.8.0-fasrc01 netcdf-fortran/4.6.0-fasrc03
 
-prmfile=[dirname]/exp/prm/[schname]/[expname]/[pwrname]/[memberx].prm
-sndfile=[dirname]/exp/snd/[sndname]
-lsffile=[dirname]/exp/lsf/[lsfname]
+exproot=[dirname]/exp
+prmfile=$exproot/prm/[schname]/[expname]/[pwrname]/[memberx].prm
+sndfile=$exproot/snd/[sndname]
+lsffile=$exproot/lsf/[lsfname]
 
 prmloc=./[schname]/prm
 sndloc=./[schname]/snd
