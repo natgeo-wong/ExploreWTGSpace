@@ -23,7 +23,7 @@ open(mrun,"r") do frun
     s = read(frun,String)
     for pwrii in pwrvec
 
-        pwrname = powername(pwr,schname)
+        pwrname = powername(pwrii,schname)
 
         for ensembleii in 1 : 15
 
@@ -43,8 +43,8 @@ open(mrun,"r") do frun
                 else
                     sn = replace(sn,"[sndname]" => "$(expname)_cool")
                 end
-                sn = replace(sn,"[lsfname]"     => "noforcing")
-                sn = replace(sn,"member[xx]"    => "member$(mstr)")
+                sn = replace(sn,"[lsfname]" => "noforcing")
+                sn = replace(sn,"[memberx]" => "member$(mstr)")
                 write(wrun,sn)
             end
 
@@ -58,7 +58,7 @@ if doBuild
         s = read(frun,String)
         for pwrii in pwrvec
 
-            pwrname = powername(pwr,schname)
+            pwrname = powername(pwrii,schname)
             
             nrun = projectdir("run",schname,expname,pwrname,"Build.csh")
             open(nrun,"w") do wrun
