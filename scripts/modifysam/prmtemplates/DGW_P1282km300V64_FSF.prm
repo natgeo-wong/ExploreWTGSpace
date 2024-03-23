@@ -1,6 +1,6 @@
 &PARAMETERS
 
-caseid ='ExploreWTGSpace-T0642km300V64-member[xx]',
+caseid ='ExploreWTGSpace-P1282km300V64_FSF-member[xx]',
 
 dx = 2000.,
 dy = 2000.,
@@ -20,8 +20,8 @@ dodamping        = .true.,
 doupperbound     = .true.,
 docloud          = .true.,
 doprecip         = .true.,
-dolongwave       = .false.,
-doshortwave      = .false.,
+dolongwave       = .true.,
+doshortwave      = .true.,
 dosurface        = .true.,
 dodynamicocean   = .false.,
 dolargescale     = .true.,
@@ -34,8 +34,10 @@ donudging_tq     = .false.,
 
 tauls = 3600.,
 
-SFC_FLX_FXD = .false.,
+SFC_FLX_FXD = .true.,
 SFC_TAU_FXD = .false.,
+fluxt0 = 10.,
+fluxq0 = 90.,
 
 longitude0 = 0.,
 latitude0  = 0.,
@@ -83,7 +85,7 @@ rad3Dout     = .true.,
 
 &KUANG_PARAMS
 
-doradtendency = .true.,
+doradtendency = .false.,
 dobulksfcflx  = .false.,
 bulksfcflx_u  = 5.
 
