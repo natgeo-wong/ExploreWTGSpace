@@ -28,7 +28,7 @@ for wtgii in wtgvec
     mkpath(projectdir("exp","prm",schname,expname,wtgstring))
     for imember = 1 : 15
         mstr = @sprintf("%02d",imember)
-        oprm = projectdir("run","modifysam","prmtemplates","$(schname)_$(expname).prm")
+        oprm = projectdir("run","modifysam","prmtemplates",schname,"$(expname).prm")
         nprm = projectdir("exp","prm",schname,expname,wtgstring,"member$(mstr).prm")
         open(tprm,"w") do fprm
             open(oprm,"r") do rprm

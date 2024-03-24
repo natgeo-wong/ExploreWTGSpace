@@ -8,7 +8,7 @@ mkpath(projectdir("exp","prm","RCE",expname))
 
 for imember = 1 : 10
     mstr = @sprintf("%02d",imember)
-    oprm  = projectdir("run","modifysam","prmtemplates","RCE_$(expname).prm")
+    oprm  = projectdir("run","modifysam","prmtemplates","RCE","$(expname).prm")
     nprm  = projectdir("exp","prm","RCE",expname,"member$(mstr).prm")
     open(tprm,"w") do fprm
         open(oprm,"r") do rprm
