@@ -63,21 +63,65 @@ There are two broad model configuration categories: (P)erpetual (INSOL)ation, an
 
 # ╔═╡ 427511d0-88cb-11eb-2a40-019c91ee1401
 if prefix == "D"
-	md"Toggle Domain Size: $(@bind hres PlutoUI.Slider(1:2,default=1))"
+	md"Toggle Domain Size: $(@bind dsize PlutoUI.Slider(0:1,default=0))"
 else
-	md"Toggle Domain Size: $(@bind hres PlutoUI.Slider(0.5:0.5:1,default=1))"
+	md"Toggle Domain Size: $(@bind dsize PlutoUI.Slider(-1:0,default=0))"
+end
+
+# ╔═╡ 20d88eb4-8035-43d3-bfd1-084e38726b4b
+if prefix == "P" && iszero(dsize)
+	md"Toggle Horizontal Resolution: $(@bind hres PlutoUI.Slider(1:2,default=1))"
+else
+	hres = 1
+	md""
+end
+
+# ╔═╡ 8b3016d6-bed8-4161-aa24-90db24b34920
+if prefix == "P" && !isone(hres)
+	md"Toggle Vertical Levels: $(@bind isvert PlutoUI.Slider(1:5,default=4))"
+else
+	isvert=0
+	md""
+end
+
+# ╔═╡ 9cf41788-9587-4cdc-9761-93a9735ee10d
+if (prefix == "P" || prefix == "T") && isone(hres) && iszero(dsize)
+	md"Is 2D? $(@bind is2D PlutoUI.Slider(0:1,default=0))"
+else
+	is2D = 0
+	md""
+end
+
+# ╔═╡ 6497001a-6400-4529-88d7-1a75597e5df5
+if (prefix == "P" || prefix == "T") && isone(hres) && iszero(dsize) && iszero(is2D)
+	md"Is Fixed Surface Flux? $(@bind isfsf PlutoUI.Slider(0:1,default=0))"
+else
+	isfsf = 0
+	md""
 end
 
 # ╔═╡ 5940bed1-cf63-4caa-a954-b4aa8d3ab459
-md"Domain Size = $(128*hres) x $(128*hres) km"
+md"Domain Size = $(128*2. ^dsize) x $(128*2. ^dsize) km"
 
-# ╔═╡ 9cf41788-9587-4cdc-9761-93a9735ee10d
-md"Is 2D? $(@bind is2D PlutoUI.Slider(0:1,default=0))"
+# ╔═╡ 8697387f-a384-41a6-bba1-f61f47056bd0
+md"Horizontal Resolution: $(2. ^hres) km"
+
+# ╔═╡ fab65122-bf01-44d7-8a92-e0b842983a98
+begin
+	if prefix == "P" && !isone(hres)
+		vertvec = [28,42,54,64,144]
+		nvert = vertvec[isvert]
+	else
+		nvert = 64
+	end
+	md"Number of Vertical Levels: $(nvert)"
+end
 
 # ╔═╡ ac8b9d4c-5ade-11eb-06f4-33bff063bbde
 begin
-	config = "$(prefix)$(@sprintf("%03d",128*hres))2km300V64"
+	config = "$(prefix)$(@sprintf("%03d",128*2. ^dsize))$(@sprintf("%d",2. ^hres))km300V$(nvert)"
 	if isone(is2D); config = "$(config)_2D" end
+	if isone(isfsf); config = "$(config)_FSF" end
 	nen = 10
 	
 md"**Experiment Set:** $config | **Number of Control Members**: $nen"
@@ -100,7 +144,7 @@ Should the difference in the final averaged sounding profile be vastly different
 "
 
 # ╔═╡ 401a6a3a-8444-11eb-3ee8-594591ed5aa9
-nendays = 500
+nendays = 1900
 
 # ╔═╡ c658d650-8614-11eb-252c-c3066fb1d506
 ptrop = 70
@@ -115,6 +159,8 @@ begin
 	qvp_en = zeros(nz_en,nt_en,nen); rh_en  = zeros(nz_en,nt_en,nen)
 	pre_en = zeros(nz_en,nt_en,nen); plevel = zeros(nz_en,nen)
 	prc_en = zeros(nt_en,nen);
+	shf_en = zeros(nt_en,nen);
+	lhf_en = zeros(nt_en,nen);
 	for imem = 1 : nen
 		tbi_en[:,:,imem] = retrieve3Dvar("TBIAS","RCE","$(config)",isensemble=true,member=imem)[:,1:nt_en]
 		qbi_en[:,:,imem] = retrieve3Dvar("QBIAS","RCE","$(config)",isensemble=true,member=imem)[:,1:nt_en]
@@ -125,7 +171,9 @@ begin
 		qob_en[:,imem] = retrieve3Dvar("QVOBS","RCE","$(config)",isensemble=true,member=imem)[:,end]
 		plevel[:,imem] = retrieve2Dvar("p","RCE","$(config)",isensemble=true,member=imem)
 		prc_en[:,imem] = retrieve2Dvar("PREC","RCE","$(config)",isensemble=true,member=imem)[1:nt_en]
-		rh_en[:,:,imem]   = calcrh(qvp_en[:,:,imem],tem_en[:,:,imem],plevel[:,imem])/10
+		rh_en[:,:,imem]= calcrh(qvp_en[:,:,imem],tem_en[:,:,imem],plevel[:,imem])/10
+		shf_en[:,imem] = retrieve2Dvar("SHF","RCE","$(config)",isensemble=true,member=imem)[1:nt_en]
+		lhf_en[:,imem] = retrieve2Dvar("LHF","RCE","$(config)",isensemble=true,member=imem)[1:nt_en]
 	end
 	
 	tob_en = dropdims(mean(tob_en,dims=2),dims=2)
@@ -171,7 +219,7 @@ begin
 		dropdims(mean(pts_en,dims=2),dims=2),c="k"
 	)
 	aen[1].format(
-		xlim=(-0.15,0.15),xlocator=(-2:2)/10,xlabel=L"T - T$_{OBS}$ / K",
+		xlim=(-1.5,1.5)./10,xlocator=(-2:2)./10,xlabel=L"T - T$_{OBS}$ / K",
 		ylim=(1010,25),yscale="log",ylabel="Pressure / hPa",
 		suptitle="Model Ensemble Equilibrium RCE | $config",ultitle="(a)"
 	)
@@ -249,6 +297,13 @@ end
 # ╔═╡ 11913f26-8e7c-11eb-1b37-0f9c8e7b7331
 md"The domain mean precipitation is $(mean(prc_en)) mm/day"
 
+# ╔═╡ caf84abe-581d-4859-baf5-81c75d133fd4
+begin
+	shfstring = @sprintf("%.3f",mean(shf_en))
+	lhfstring = @sprintf("%.3f",mean(lhf_en))
+	md"The domain mean Surface and Latent Heat Fluxes are $(shfstring) W m^-2 and $(lhfstring) W m^-2 respectively"
+end
+
 # ╔═╡ 4db59bf0-82ec-11eb-0374-81a982a74216
 md"
 ### D. Creating Sounding from Ensemble
@@ -265,6 +320,7 @@ begin
 	snddata = zeros(nz_en,6)
 	snddata[:,1] .= z_en;  snddata[:,2] .= pre_μ
 	snddata[:,3] .= pot_μ; snddata[:,4] .= qvp_μ
+	md"Creating sounding data from ensemble data ..."
 end
 
 # ╔═╡ eba0fc7a-82eb-11eb-104e-d17de6c6c0de
@@ -284,8 +340,13 @@ end
 # ╟─b2670c08-81e5-11eb-324e-2b923b289a04
 # ╟─505aec83-2f74-4f12-be40-b360cfb1d2a8
 # ╟─427511d0-88cb-11eb-2a40-019c91ee1401
-# ╟─5940bed1-cf63-4caa-a954-b4aa8d3ab459
+# ╟─20d88eb4-8035-43d3-bfd1-084e38726b4b
+# ╟─8b3016d6-bed8-4161-aa24-90db24b34920
 # ╟─9cf41788-9587-4cdc-9761-93a9735ee10d
+# ╟─6497001a-6400-4529-88d7-1a75597e5df5
+# ╟─5940bed1-cf63-4caa-a954-b4aa8d3ab459
+# ╟─8697387f-a384-41a6-bba1-f61f47056bd0
+# ╟─fab65122-bf01-44d7-8a92-e0b842983a98
 # ╟─ac8b9d4c-5ade-11eb-06f4-33bff063bbde
 # ╟─7842e150-822b-11eb-1ded-f35ee4cc6d8c
 # ╟─99dca670-81e5-11eb-24b8-cf1b23d8c1f7
@@ -296,6 +357,7 @@ end
 # ╟─f35ab14c-8226-11eb-29b4-c3b7130f3733
 # ╟─a3650e8a-822b-11eb-29ca-cd01b90e8099
 # ╟─11913f26-8e7c-11eb-1b37-0f9c8e7b7331
+# ╟─caf84abe-581d-4859-baf5-81c75d133fd4
 # ╟─4db59bf0-82ec-11eb-0374-81a982a74216
 # ╟─549c7744-82ed-11eb-03e8-7bb72c725856
 # ╟─eba0fc7a-82eb-11eb-104e-d17de6c6c0de
