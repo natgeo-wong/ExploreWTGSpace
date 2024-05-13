@@ -350,3 +350,115 @@ function extractgms(
     close(nds)
 
 end
+
+function extractmoisturemode(
+    schname :: String,
+    expname :: String,
+    runname :: String;
+    nt      :: Int = 2000,
+    tperday :: Int = 1,
+    nmember :: Int = 15,
+)
+    
+    z = zeros(64,nmember) * NaN
+    t = 0 : nt
+    t = collect(t[1:(end-1)] .+ t[2:end]) / 2
+    t = t / tperday
+
+    mse = zeros(64,nt,nmember) * NaN
+    pre = zeros(64,nt,nmember) * NaN
+    tbs = zeros(64,nt,nmember) * NaN
+    qbs = zeros(64,nt,nmember) * NaN
+
+    int_mse = zeros(nt,nmember) * NaN
+    int_tbs = zeros(nt,nmember) * NaN
+    int_qbs = zeros(nt,nmember) * NaN
+
+    for ids = 1 : nmember
+
+        ensemble = @sprintf("%02d",ids)
+        fnc = datadir(
+            "$schname","$expname","$runname","OUT_STAT",
+            "$(schname)_ExploreWTGSpace-$(expname)-member$(ensemble).nc"
+        )
+        if isfile(fnc)
+            ods = NCDataset(fnc)
+            try
+                z[:,ids] .= ods["z"][:]
+                pre[:,:,ids] .= ods["PRES"][:,:]
+                mse[:,:,ids] .= ods["MSE"][:,:]
+                tbs[:,:,ids] .= ods["TBIAS"][:,:]
+                qbs[:,:,ids] .= ods["QBIAS"][:,:]
+            catch
+                @warn "Unable to extract statistical data for moisture mode calculations from $(fnc)"
+            end
+            close(ods)
+        else
+            @warn "No file exists at $(fnc), please run this configuration again ..."
+        end
+
+    end
+
+    ipp = zeros(66); ipp[1] = 1009.23; iipp  = @view ipp[2:(end-1)]
+    itmp = zeros(66); iitmp = @view itmp[2:(end-1)]
+
+    for ids = 1 : nmember, it = 1 : nt
+
+        iipp  .= pre[:,it,ids]
+        iitmp .= mse[:,it,ids]; int_mse[it,ids] = -trapz(ipp,itmp)
+        iitmp .= tbs[:,it,ids]; int_tbs[it,ids] = -trapz(ipp,itmp)
+        iitmp .= qbs[:,it,ids]; int_qbs[it,ids] = -trapz(ipp,itmp)
+
+    end
+
+    mkpath(datadir("moisturemode"))
+    fnc = datadir("moisturemode","$(schname)-$(expname)-$(runname).nc")
+    if isfile(fnc); rm(fnc,force=true) end
+
+    nds = NCDataset(fnc,"c",attrib = Dict(
+        "Conventions" => "CF-1.6",
+        "history"     => "Created on $(Dates.now()) using NCDatasets.jl",
+        "comments"    => "Creating NetCDF files in the same format that data is saved on the Climate Data Store"
+    ))
+
+    nds.dim["time"] = nt
+    nds.dim["level"] = 64
+    nds.dim["ensemble"] = nmember
+
+    nctime = defVar(nds,"time",Float64,("time",),attrib = Dict(
+        "units"     => "days after model-day 0",
+        "full_name" => "Day"
+    ))
+
+    ncz = defVar(nds,"z",Float64,("level",),attrib = Dict(
+        "units"     => "m",
+        "full_name" => "height"
+    ))
+
+    ncmse = defVar(nds,"hp",Float64,("time","ensemble"),attrib = Dict(
+        "units"     => "J kg**-1",
+        "long_name" => "anomalous_column_integrated_moist_static_energy",
+        "full_name" => "Anomalous Column Integrated Moist Static Energy"
+    ))
+
+    nctbs = defVar(nds,"Tp",Float64,("time","ensemble"),attrib = Dict(
+        "units"     => "J kg**-1",
+        "long_name" => "anomalous_column_integrated_temperature",
+        "full_name" => "Anomalous Column Integrated Temperature"
+    ))
+
+    ncqbs = defVar(nds,"qp",Float64,("time","ensemble"),attrib = Dict(
+        "units"     => "J kg**-1",
+        "long_name" => "anomalous_column_integrated_water_vapour",
+        "full_name" => "Anomalous Column Integrated Water Vapour"
+    ))
+
+    nctime[:] = t
+    ncz[:] = dropdims(mean(z,dims=2),dims=2)
+    ncmse[:,:] = int_mse
+    nctbs[:,:] = int_tbs
+    ncqbs[:,:] = int_qbs
+
+    close(nds)
+
+end
