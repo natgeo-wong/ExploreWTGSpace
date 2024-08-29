@@ -365,12 +365,10 @@ function extractmoisturemode(
     t = collect(t[1:(end-1)] .+ t[2:end]) / 2
     t = t / tperday
 
-    mse = zeros(64,nt,nmember) * NaN
     pre = zeros(64,nt,nmember) * NaN
     tbs = zeros(64,nt,nmember) * NaN
     qbs = zeros(64,nt,nmember) * NaN
 
-    int_mse = zeros(nt,nmember) * NaN
     int_tbs = zeros(nt,nmember) * NaN
     int_qbs = zeros(nt,nmember) * NaN
 
@@ -385,8 +383,7 @@ function extractmoisturemode(
             ods = NCDataset(fnc)
             try
                 z[:,ids] .= ods["z"][:]
-                pre[:,:,ids] .= ods["PRES"][:,:]
-                mse[:,:,ids] .= ods["MSE"][:,:]
+                pre[:,:,ids] .= ods["PRES"][:,:] * 100
                 tbs[:,:,ids] .= ods["TBIAS"][:,:]
                 qbs[:,:,ids] .= ods["QBIAS"][:,:]
             catch
@@ -399,15 +396,14 @@ function extractmoisturemode(
 
     end
 
-    ipp = zeros(66); ipp[1] = 1009.23; iipp  = @view ipp[2:(end-1)]
+    ipp = zeros(66); ipp[1] = 100923; iipp  = @view ipp[2:(end-1)]
     itmp = zeros(66); iitmp = @view itmp[2:(end-1)]
 
     for ids = 1 : nmember, it = 1 : nt
 
         iipp  .= pre[:,it,ids]
-        iitmp .= mse[:,it,ids]; int_mse[it,ids] = -trapz(ipp,itmp)
-        iitmp .= tbs[:,it,ids]; int_tbs[it,ids] = -trapz(ipp,itmp)
-        iitmp .= qbs[:,it,ids]; int_qbs[it,ids] = -trapz(ipp,itmp)
+        iitmp .= tbs[:,it,ids]; int_tbs[it,ids] = -trapz(ipp,itmp) * 1.0035
+        iitmp .= qbs[:,it,ids]; int_qbs[it,ids] = -trapz(ipp,itmp) * 2.5009
 
     end
 
@@ -455,9 +451,9 @@ function extractmoisturemode(
 
     nctime[:] = t
     ncz[:] = dropdims(mean(z,dims=2),dims=2)
-    ncmse[:,:] = int_mse
     nctbs[:,:] = int_tbs
     ncqbs[:,:] = int_qbs
+    ncmse[:,:] = int_tbs .+ int_qbs
 
     close(nds)
 
