@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.41
+# v0.19.46
 
 using Markdown
 using InteractiveUtils
@@ -69,8 +69,12 @@ else
 end
 
 # ╔═╡ 20d88eb4-8035-43d3-bfd1-084e38726b4b
-if prefix == "P" && iszero(dsize)
-	md"Toggle Horizontal Resolution: $(@bind hres PlutoUI.Slider(1:2,default=1))"
+if iszero(dsize)
+	if prefix == "P"
+		md"Toggle Horizontal Resolution: $(@bind hres PlutoUI.Slider(0:2,default=1))"
+	else
+		md"Toggle Horizontal Resolution: $(@bind hres PlutoUI.Slider(0:1,default=1))"
+	end
 else
 	hres = 1
 	md""
@@ -117,9 +121,17 @@ begin
 	md"Number of Vertical Levels: $(nvert)"
 end
 
+# ╔═╡ 2ec96d61-c6f5-4015-b9bb-f2b544914ab3
+if (prefix == "P" || prefix == "T") && isone(hres) && iszero(dsize) && iszero(is2D) && iszero(isfsf)
+	md"Temperature? $(@bind sst PlutoUI.Slider(300:5:305,default=300))"
+else
+	sst = 300
+	md""
+end
+
 # ╔═╡ ac8b9d4c-5ade-11eb-06f4-33bff063bbde
 begin
-	config = "$(prefix)$(@sprintf("%03d",128*2. ^dsize))$(@sprintf("%d",2. ^hres))km300V$(nvert)"
+	config = "$(prefix)$(@sprintf("%03d",128*2. ^dsize))$(@sprintf("%d",2. ^hres))km$(sst)V$(nvert)"
 	if isone(is2D); config = "$(config)_2D" end
 	if isone(isfsf); config = "$(config)_FSF" end
 	nen = 10
@@ -347,6 +359,7 @@ end
 # ╟─5940bed1-cf63-4caa-a954-b4aa8d3ab459
 # ╟─8697387f-a384-41a6-bba1-f61f47056bd0
 # ╟─fab65122-bf01-44d7-8a92-e0b842983a98
+# ╟─2ec96d61-c6f5-4015-b9bb-f2b544914ab3
 # ╟─ac8b9d4c-5ade-11eb-06f4-33bff063bbde
 # ╟─7842e150-822b-11eb-1ded-f35ee4cc6d8c
 # ╟─99dca670-81e5-11eb-24b8-cf1b23d8c1f7

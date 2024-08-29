@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.41
+# v0.19.46
 
 using Markdown
 using InteractiveUtils
@@ -51,12 +51,12 @@ begin
 	pplt.close()
 	fig,axs = pplt.subplots(ncols=6,aspect=0.3,axwidth=0.9,sharey=0,wspace=[1,1,4,1,1])
 
-	ds_rceprcp = NCDataset(datadir("precipitation","RCE-P1282km300V64.nc"))
+	ds_rceprcp = NCDataset(datadir("precipitation","RCE-P0642km300V64.nc"))
 	prcp_RCE = ds_rceprcp["precipitation"][:,:] / 24
 	prcpRCEμ_P = mean(prcp_RCE[1001:2000,:])
 	close(ds_rceprcp)
 
-	ds_rceprcp = NCDataset(datadir("precipitation","RCE-T1282km300V64.nc"))
+	ds_rceprcp = NCDataset(datadir("precipitation","RCE-T0642km300V64.nc"))
 	prcp_RCE = ds_rceprcp["precipitation"][:,:] / 24
 	prcpRCEμ_T = mean(prcp_RCE[1001:2000,:])
 	close(ds_rceprcp)
@@ -68,7 +68,7 @@ begin
 
 	for conDGW in configDGW
 
-		fnc = "DGW-T1282km300V64-$(dampingstrprnt(conDGW)).nc"
+		fnc = "DGW-T0642km300V64-$(dampingstrprnt(conDGW)).nc"
 		ds_dgwprcp = NCDataset(datadir("precipitation",fnc))
 
 		prcp  = ds_dgwprcp["precipitation"][:,:] / 24
@@ -132,7 +132,7 @@ begin
 
 		close(ds_dgwprcp)
 
-		fnc = "DGW-P1282km300V64-$(dampingstrprnt(conDGW)).nc"
+		fnc = "DGW-P0642km300V64-$(dampingstrprnt(conDGW)).nc"
 		ds_dgwprcp = NCDataset(datadir("precipitation",fnc))
 
 		prcp  = ds_dgwprcp["precipitation"][:,:] / 24
@@ -168,7 +168,7 @@ begin
 	
 	for conWTG in configWTG
 
-		fnc = "SPC-T1282km300V64-$(relaxscalestrprnt(conWTG)).nc"
+		fnc = "SPC-T0642km300V64-$(relaxscalestrprnt(conWTG)).nc"
 		ds_wtgprcp = NCDataset(datadir("precipitation",fnc))
 
 		prcp  = ds_wtgprcp["precipitation"][:,:] / 24
@@ -230,7 +230,7 @@ begin
 
 		close(ds_wtgprcp)
 
-		fnc = "SPC-P1282km300V64-$(relaxscalestrprnt(conWTG)).nc"
+		fnc = "SPC-P0642km300V64-$(relaxscalestrprnt(conWTG)).nc"
 		ds_wtgprcp = NCDataset(datadir("precipitation",fnc))
 
 		prcp  = ds_wtgprcp["precipitation"][:,:] / 24

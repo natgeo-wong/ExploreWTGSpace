@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.41
+# v0.19.42
 
 using Markdown
 using InteractiveUtils
@@ -110,7 +110,7 @@ begin
 		if isfile(datadir("precipitation",fnc))
 			ds_dgwprcp = NCDataset(datadir("precipitation",fnc))
 			dt    = ds_dgwprcp["time"][:]
-			prcp  = ds_dgwprcp["precipitation"][:] / 24
+			prcp  = ds_dgwprcp["precipitation"][:,:] / 24
 			ats[1].plot(dt,prcp,c=blues_WTG[ic])
 			close(ds_dgwprcp)
 		end
@@ -149,7 +149,7 @@ begin
 		nmem = 0
 		if isfile(datadir("precipitation",fnc))
 			ds_dgwprcp = NCDataset(datadir("precipitation",fnc))
-			prcp  = ds_dgwprcp["precipitation"][:] / 24
+			prcp  = ds_dgwprcp["precipitation"][:,:] / 24
 			close(ds_dgwprcp)
 			for imem = 1 : 15
 				if sum(.!isnan.(prcp[:,imem])) == 6000
