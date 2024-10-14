@@ -11,7 +11,7 @@ function powername(
     scheme :: AbstractString
 )
 
-    if scheme == "DGW"
+    if (scheme == "DGW") || (scheme == "LGW")
         return dampingstrprnt(power)
     else
         return relaxscalestrprnt(power)

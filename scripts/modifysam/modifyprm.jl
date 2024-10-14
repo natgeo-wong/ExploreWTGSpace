@@ -8,7 +8,7 @@ include(srcdir("sam.jl"))
 schname = "DGW"
 expname = "P1282km300V64"
 
-if schname == "DGW"
+if (schname == "DGW") || (schname == "LGW")
     wtgvec = [0.02,0.05,0.1,0.2,0.5,1,2,5,10,20,50,100,200,500]
 else
     wtgvec = [sqrt(2),2,2*sqrt(2.5),5,5*sqrt(2)]
@@ -20,7 +20,7 @@ tprm  = projectdir("exp","tmp.prm")
 for wtgii in wtgvec
 
     wtgstring = powername(wtgii,schname)
-    if schname == "DGW"
+    if (schname == "DGW") || (schname == "LGW")
           wtgdmp = wtgii; wtgrlx = 1
     else; wtgrlx = wtgii; wtgdmp = 1
     end
