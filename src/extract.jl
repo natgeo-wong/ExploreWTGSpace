@@ -41,7 +41,9 @@ function extractprecip(
 
     end
 
-    fnc = datadir("precipitation","$(schname)-$(expname)-$(runname).nc")
+    fol = datadir("precipitation","$(schname)","$(expname)")
+    fnc = joinpath(fol,"$(runname).nc")
+    if !isdir(fol); mkpath(fol) end
     if isfile(fnc); rm(fnc,force=true) end
 
     nds = NCDataset(fnc,"c",attrib = Dict(
@@ -101,7 +103,9 @@ function extractprecip(
 
     end
 
-    fnc = datadir("precipitation","$(schname)-$(expname).nc")
+    fol = datadir("precipitation","$(schname)")
+    fnc = joinpath(fol,"$(expname).nc")
+    if !isdir(fol); mkpath(fol) end
     if isfile(fnc); rm(fnc,force=true) end
 
     nds = NCDataset(fnc,"c",attrib = Dict(
@@ -170,7 +174,9 @@ function extractwwtg(
 
     end
 
-    fnc = datadir("wwtg","$(schname)-$(expname)-$(runname).nc")
+    fol = datadir("wwtg","$(schname)","$(expname)")
+    fnc = joinpath(fol,"$(runname).nc")
+    if !isdir(fol); mkpath(fol) end
     if isfile(fnc); rm(fnc,force=true) end
 
     nds = NCDataset(fnc,"c",attrib = Dict(
@@ -258,8 +264,9 @@ function extractgms(
 
     end
 
-    mkpath(datadir("gms"))
-    fnc = datadir("gms","$(schname)-$(expname)-$(runname).nc")
+    fol = datadir("gms","$(schname)","$(expname)")
+    fnc = joinpath(fol,"$(runname).nc")
+    if !isdir(fol); mkpath(fol) end
     if isfile(fnc); rm(fnc,force=true) end
 
     nds = NCDataset(fnc,"c",attrib = Dict(
@@ -407,8 +414,9 @@ function extractmoisturemode(
 
     end
 
-    mkpath(datadir("moisturemode"))
-    fnc = datadir("moisturemode","$(schname)-$(expname)-$(runname).nc")
+    fol = datadir("moisturemode","$(schname)","$(expname)")
+    fnc = joinpath(fol,"$(runname).nc")
+    if !isdir(fol); mkpath(fol) end
     if isfile(fnc); rm(fnc,force=true) end
 
     nds = NCDataset(fnc,"c",attrib = Dict(
