@@ -88,11 +88,11 @@ dobulksfcflx  = .false.,
 bulksfcflx_u  = 5.
 
 dowtg_blossey_etal_JAMES2009  = .false.
+dowtg_kuang_JAS2008           = .true.
 dowtg_raymondzeng_QJRMS2005   = .false.
 dowtg_hermanraymond_JAMES2014 = .false.
 dowtg_decompdgw               = .false.
 dowtg_decomptgr               = .false.
-dowtg_blossey_etal_JAMES2009  = .true.
 
 wtgscale_time        = 0.1
 
