@@ -10,13 +10,21 @@ function powername(
     power  :: Real,
     scheme :: AbstractString
 )
-
-    if (scheme == "DGW") || (scheme == "LGW")
+    
+    if checkschemeDGW(scheme)
         return dampingstrprnt(power)
     else
         return relaxscalestrprnt(power)
     end
 
+end
+
+function checkschemeDGW(scheme::AbstractString)
+    if (scheme == "DGW") || (scheme == "KGW") || (scheme == "TDG")
+        return true
+    else
+        return false
+    end
 end
 
 function outstatname(
