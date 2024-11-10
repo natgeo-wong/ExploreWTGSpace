@@ -32,7 +32,8 @@ docoriolis       = .false.,
 donudging_uv     = .true.,
 donudging_tq     = .false.,
 
-tauls = 3600.,
+tauls   = 900.,
+tautqls = 864000.,
 
 SFC_FLX_FXD = .false.,
 SFC_TAU_FXD = .false.,
@@ -84,7 +85,7 @@ rad3Dout     = .true.,
 &KUANG_PARAMS
 
 doradtendency = .true.,
-dobulksfcflx  = .false.,
+dobulksfcflx  = .true.,
 bulksfcflx_u  = 5.
 
 /
