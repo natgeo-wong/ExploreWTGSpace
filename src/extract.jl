@@ -142,9 +142,13 @@ function extractwwtg(
     nt      :: Int = 2000,
     tperday :: Int = 1,
     nmember :: Int = 15,
+    nmode   :: Int = 10
 )
 
     wwtg = zeros(64,nt,nmember) * NaN
+    mode = zeros(nt,nmode,nmember)
+    ztrop = zeros(nt,nmember)
+    ptrop = zeros(nt,nmember)
     z = zeros(64,nmember) * NaN
     p = zeros(64,nmember) * NaN
     t = 0 : nt
@@ -174,6 +178,24 @@ function extractwwtg(
 
     end
 
+    for ids = 1 : nmember, it = 1 : nt
+
+        iwwtg = @views wwtg[:,it,ids]
+        if !isnan(sum(iwwtg))
+            itrop = findlast(iwwtg!=0) + 1
+            ztrop[it,ids] = z[itrop,ids]
+            ptrop[it,ids] = p[itrop,ids]
+            iz = @views z[1:itrop,ids]
+            for imode = 1 : nmode
+                iiwwtg = iwwtg .* sin.(iz./ztrop[it,ids]*pi*imode)
+                mode[it,imode,ids] = 2/ztrop[it,ids]*trapz(vcat(0,iz),vcat(0,iiwwtg))
+            end
+        else
+            mode[it,:,ids] .= NaN
+        end
+
+    end
+
     fol = datadir("wwtg","$(schname)","$(expname)")
     fnc = joinpath(fol,"$(runname).nc")
     if !isdir(fol); mkpath(fol) end
@@ -185,8 +207,9 @@ function extractwwtg(
         "comments"    => "Creating NetCDF files in the same format that data is saved on the Climate Data Store"
     ))
 
-    nds.dim["time"] = nt
+    nds.dim["time"]  = nt
     nds.dim["level"] = 64
+    nds.dim["mode"]  = nmode
     nds.dim["ensemble"] = nmember
 
     nctime = defVar(nds,"time",Float64,("time",),attrib = Dict(
@@ -210,10 +233,31 @@ function extractwwtg(
         "full_name" => "WTG Vertical Velocity"
     ))
 
+    ncmode = defVar(nds,"wₙ",Float64,("time","mode","ensemble"),attrib = Dict(
+        "units"     => "m s**-1",
+        "long_name" => "weak_temperature_gradient_vertical_mode_coefficient",
+        "full_name" => "WTG Vertical Mode Coefficient"
+    ))
+
+    ncztrop = defVar(nds,"ztrop",Float64,("time","ensemble"),attrib = Dict(
+        "units"     => "m",
+        "long_name" => "tropopause_height",
+        "full_name" => "Tropopause Height"
+    ))
+
+    ncptrop = defVar(nds,"ptrop",Float64,("time","ensemble"),attrib = Dict(
+        "units"     => "hPa",
+        "long_name" => "tropopause_pressure",
+        "full_name" => "Tropopause Pressure"
+    ))
+
     nctime[:] = t
     ncz[:] = dropdims(mean(z,dims=2),dims=2)
     ncp[:] = p
-    ncwwtg[:,:,:]  = wwtg
+    ncwwtg[:,:,:] = wwtg
+    ncmode[:,:,:] = mode
+    ncztrop[:] = ztrop
+    ncptrop[:] = ptrop
 
     close(nds)
 
