@@ -182,9 +182,10 @@ function extractwwtg(
 
         iwwtg = @views wwtg[:,it,ids]
         if !isnan(sum(iwwtg))
-            itrop = findlast(iwwtg!=0) + 1
+            itrop = findlast(.!iszero.(iwwtg)) + 1
             ztrop[it,ids] = z[itrop,ids]
             ptrop[it,ids] = p[itrop,ids]
+            iwwtg = @views iwwtg[1:itrop]
             iz = @views z[1:itrop,ids]
             for imode = 1 : nmode
                 iiwwtg = iwwtg .* sin.(iz./ztrop[it,ids]*pi*imode)
