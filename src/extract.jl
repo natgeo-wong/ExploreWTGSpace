@@ -183,6 +183,7 @@ function extractwwtg(
         iwwtg = @views wwtg[:,it,ids]
         if !isnan(sum(iwwtg))
             itrop = findlast(.!iszero.(iwwtg)) + 1
+            if itrop > length(iwwtg); itrop = length(iwwtg) end
             ztrop[it,ids] = z[itrop,ids]
             ptrop[it,ids] = p[itrop,ids]
             iwwtg = @views iwwtg[1:itrop]
