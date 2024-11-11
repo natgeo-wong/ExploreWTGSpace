@@ -192,7 +192,7 @@ function extractwwtg(
             if schname == "TDG"
                 tmin = tabs[1,it,ids]
                 itrop = 2
-                while tabs[itrop,it,ids] < tmin
+                while (tabs[itrop,it,ids] < tmin) || (z[itrop,ids] < 5000)
                     tmin = tabs[itrop,it,ids]
                     itrop += 1
                 end
