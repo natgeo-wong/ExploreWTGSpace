@@ -155,6 +155,10 @@ function extractwwtg(
     t = collect(t[1:(end-1)] .+ t[2:end]) / 2
     t = t / tperday
 
+    if schname == "TDG"
+        tabs = zeros(64,nt,nmember) * NaN
+    end
+
     for ids = 1 : nmember
 
         ensemble = @sprintf("%02d",ids)
@@ -168,6 +172,9 @@ function extractwwtg(
                 z[:,ids] .= ods["z"][:]
                 p[:,ids] .= ods["p"][:]
                 wwtg[:,:,ids] .= ods["WWTG"][:,:]
+                if schname == "TDG"
+                    tabs[:,:,ids] .= ods["TABS"][:,:]
+                end
             catch
                 @warn "Unable to extract WWTG data from $(fnc)"
             end
@@ -182,8 +189,17 @@ function extractwwtg(
 
         iwwtg = @views wwtg[:,it,ids]
         if !isnan(sum(iwwtg))
-            itrop = findlast(.!iszero.(iwwtg)) + 1
-            if itrop > length(iwwtg); itrop = length(iwwtg) end
+            if schname == "TDG"
+                tmin = tabs[1,it,ids]
+                itrop = 2
+                while tabs[itrop,it,ids] < tmin
+                    tmin = tabs[itrop,it,ids]
+                    itrop += 1
+                end
+            else
+                itrop = findlast(.!iszero.(iwwtg)) + 1
+                if itrop > length(iwwtg); itrop = length(iwwtg) end
+            end
             ztrop[it,ids] = z[itrop,ids]
             ptrop[it,ids] = p[itrop,ids]
             iwwtg = @views iwwtg[1:itrop]
