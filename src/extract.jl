@@ -274,8 +274,8 @@ function extractwwtg(
     ncp[:] = p
     ncwwtg[:,:,:] = wwtg
     ncmode[:,:,:] = mode
-    ncztrop[:] = ztrop
-    ncptrop[:] = ptrop
+    ncztrop[:,:] = ztrop
+    ncptrop[:,:] = ptrop
 
     close(nds)
 
