@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.27
+# v0.20.5
 
 using Markdown
 using InteractiveUtils
@@ -21,7 +21,7 @@ begin
 	
 	using ImageShow, PNGFiles
 	using PyCall, LaTeXStrings
-	pplt = pyimport("proplot")
+	pplt = pyimport("ultraplot")
 	
 	include(srcdir("sam.jl"))
 	
@@ -35,33 +35,20 @@ md"
 
 # ╔═╡ 3c16bd2b-55e0-492f-baf3-aef6a998e9d6
 begin
-	configDGW1 = [0.2,0.5,1,2,5,10,20,50,100,200,500]
-	configDGW2 = [0.02,0.05,0.1,0.2,0.5,1,2,5,10,20,50,100,200,500]
-	configWTG1 = [
-		sqrt(2),2,2*sqrt(2.5),5,5*sqrt(2),10,
-		10*sqrt(2),20,20*sqrt(2.5),50,50*sqrt(2)
-	]
-	configWTG2 = [
+	configDGW = [0.02,0.05,0.1,0.2,0.5,1,2,5,10,20,50,100,200,500]
+	configWTG = [
 		0.1*sqrt(2),0.2,0.2*sqrt(2.5),0.5,0.5*sqrt(2),1,
 		sqrt(2),2,2*sqrt(2.5),5,5*sqrt(2),10,
 		10*sqrt(2),20,20*sqrt(2.5),50,50*sqrt(2)
 	]
-	nDGW1 = length(configDGW1)
-	wet_DGW1 = pplt.get_colors("Blues",(nDGW1+2))
-	dry_DGW1 = pplt.get_colors("Brown",(nDGW1+2))
-	rce_DGW1 = pplt.get_colors("Teal", (nDGW1+2))
-	nDGW2 = length(configDGW2)
-	wet_DGW2 = pplt.get_colors("Blues",(nDGW2+2))
-	dry_DGW2 = pplt.get_colors("Brown",(nDGW2+2))
-	rce_DGW2 = pplt.get_colors("Teal", (nDGW2+2))
-	nWTG1 = length(configWTG1)
-	wet_WTG1 = pplt.get_colors("Blues",(nWTG1+2))
-	dry_WTG1 = pplt.get_colors("Brown",(nWTG1+2))
-	rce_WTG1 = pplt.get_colors("Teal", (nWTG1+2))
-	nWTG2 = length(configWTG2)
-	wet_WTG2 = pplt.get_colors("Blues",(nWTG2+2))
-	dry_WTG2 = pplt.get_colors("Brown",(nWTG2+2))
-	rce_WTG2 = pplt.get_colors("Teal", (nWTG2+2))
+	nDGW = length(configDGW)
+	wet_DGW = pplt.get_colors("Blues",(nDGW+2))
+	dry_DGW = pplt.get_colors("Brown",(nDGW+2))
+	rce_DGW = pplt.get_colors("Teal", (nDGW+2))
+	nWTG = length(configWTG)
+	wet_WTG = pplt.get_colors("Blues",(nWTG+2))
+	dry_WTG = pplt.get_colors("Brown",(nWTG+2))
+	rce_WTG = pplt.get_colors("Teal", (nWTG+2))
 md"Loading time dimension and defining the damping experiments ..."
 end
 
@@ -69,93 +56,60 @@ end
 # ╠═╡ show_logs = false
 begin
 	pplt.close()
-	fig,axs = pplt.subplots(ncols=6,aspect=0.3,axwidth=1.1,wspace=[1,2.5,1,2.5,1])
+	fig,axs = pplt.subplots(ncols=4,nrows=2,aspect=0.4,axwidth=1,wspace=1,)
 
-	ds_rceprcp = NCDataset(datadir("precipitation","RCE-P1282km300V64.nc"))
+	ds_rceprcp = NCDataset(datadir("precipitation","RCE","P1282km300V64.nc"))
 	prcp_RCE = ds_rceprcp["precipitation"][:] / 24
 	prcpRCEμ_P = mean(prcp_RCE[1001:2000,:])
 	close(ds_rceprcp)
 
-	ds_rceprcp = NCDataset(datadir("precipitation","RCE-T1282km300V64.nc"))
+	ds_rceprcp = NCDataset(datadir("precipitation","RCE","T1282km300V64.nc"))
 	prcp_RCE = ds_rceprcp["precipitation"][:] / 24
 	prcpRCEμ_T = mean(prcp_RCE[1001:2000,:])
 	close(ds_rceprcp)
 
-	for conii in 1 : nDGW1
+	for conii in 1 : nDGW
 
-		fnc = "DGW-P1282km300V64-$(dampingstrprnt(configDGW1[conii])).nc"
-		ds_wwtg = NCDataset(datadir("wwtg",fnc))
-		ds_prcp = NCDataset(datadir("precipitation",fnc))
+		fnc = "$(dampingstrprnt(configDGW[conii])).nc"
+		ds_wwtg = NCDataset(datadir("wwtg","DGW","P1282km300V64",fnc))
+		ds_prcp = NCDataset(datadir("precipitation","DGW","P1282km300V64",fnc))
 
-		p    = ds_wwtg["p"][:]
-		wwtg = ds_wwtg["wwtg"][:]*100
-		prcp = ds_prcp["precipitation"][:] / 24
+		p    = ds_wwtg["p"][:,:]
+		wwtg = ds_wwtg["wwtg"][:,:,:]*100
+		prcp = ds_prcp["precipitation"][:,:] / 24
 		for ien = 1 : 15
 
 			wwtgii = dropdims(mean(wwtg[:,end-2399:end,ien],dims=2),dims=2)
 			prcpμ  = mean(prcp[end-2399:end,ien])
 			if prcpμ > prcpRCEμ_P / 0.95
-				axs[1].plot(wwtgii,p[:,ien],c=wet_DGW1[conii+1])
+				axs[3].plot(wwtgii,p[:,ien],c=wet_DGW[conii+1])
 			elseif prcpμ < prcpRCEμ_P * 0.95
-				axs[1].plot(wwtgii,p[:,ien],c=dry_DGW1[conii+1])
+				axs[3].plot(wwtgii,p[:,ien],c=dry_DGW[conii+1])
 			else
-				axs[1].plot(wwtgii,p[:,ien],c=rce_DGW1[conii+1])
+				axs[3].plot(wwtgii,p[:,ien],c=rce_DGW[conii+1])
 			end
 			
 		end
 
 		close(ds_wwtg)
 		close(ds_prcp)
+		
+		ds_wwtg = NCDataset(datadir("wwtg","KGW","P1282km300V64",fnc))
+		ds_prcp = NCDataset(datadir("precipitation","KGW","P1282km300V64",fnc))
 
-	end
-
-	for conii in 1 : nDGW2
-
-		fnc = "DGW-T1282km300V64-$(dampingstrprnt(configDGW2[conii])).nc"
-		ds_wwtg = NCDataset(datadir("wwtg",fnc))
-		ds_prcp = NCDataset(datadir("precipitation",fnc))
-
-		p    = ds_wwtg["p"][:]
-		wwtg = ds_wwtg["wwtg"][:]*100
-		prcp = ds_prcp["precipitation"][:] / 24
-		for ien = 1 : 15
-
-			wwtgii = dropdims(mean(wwtg[:,end-2399:end,ien],dims=2),dims=2)
-			prcpμ  = mean(prcp[end-2399:end,ien])
-			if prcpμ > prcpRCEμ_T / 0.95
-				axs[2].plot(wwtgii,p[:,ien],c=wet_DGW2[conii+1])
-			elseif prcpμ < prcpRCEμ_T * 0.95
-				axs[2].plot(wwtgii,p[:,ien],c=dry_DGW2[conii+1])
-			else
-				axs[2].plot(wwtgii,p[:,ien],c=rce_DGW2[conii+1])
-			end
-			
-		end
-
-		close(ds_wwtg)
-		close(ds_prcp)
-
-	end
-
-	for conii in 1 : nWTG1
-
-		fnc = "TGR-P1282km300V64-$(relaxscalestrprnt(configWTG1[conii])).nc"
-		ds_wwtg = NCDataset(datadir("wwtg",fnc))
-		ds_prcp = NCDataset(datadir("precipitation",fnc))
-
-		p    = ds_wwtg["p"][:]
-		wwtg = ds_wwtg["wwtg"][:]*100
-		prcp = ds_prcp["precipitation"][:] / 24
+		p    = ds_wwtg["p"][:,:]
+		wwtg = ds_wwtg["wwtg"][:,:,:]*100
+		prcp = ds_prcp["precipitation"][:,:] / 24
 		for ien = 1 : 15
 
 			wwtgii = dropdims(mean(wwtg[:,end-2399:end,ien],dims=2),dims=2)
 			prcpμ  = mean(prcp[end-2399:end,ien])
 			if prcpμ > prcpRCEμ_P / 0.95
-				axs[3].plot(wwtgii,p[:,ien],c=wet_WTG1[conii+1])
+				axs[4].plot(wwtgii,p[:,ien],c=wet_DGW[conii+1])
 			elseif prcpμ < prcpRCEμ_P * 0.95
-				axs[3].plot(wwtgii,p[:,ien],c=dry_WTG1[conii+1])
+				axs[4].plot(wwtgii,p[:,ien],c=dry_DGW[conii+1])
 			else
-				axs[3].plot(wwtgii,p[:,ien],c=rce_WTG1[conii+1])
+				axs[4].plot(wwtgii,p[:,ien],c=rce_DGW[conii+1])
 			end
 			
 		end
@@ -163,23 +117,146 @@ begin
 		close(ds_wwtg)
 		close(ds_prcp)
 
-		fnc = "SPC-P1282km300V64-$(relaxscalestrprnt(configWTG1[conii])).nc"
-		ds_wwtg = NCDataset(datadir("wwtg",fnc))
-		ds_prcp = NCDataset(datadir("precipitation",fnc))
+		ds_wwtg = NCDataset(datadir("wwtg","DGW","T1282km300V64",fnc))
+		ds_prcp = NCDataset(datadir("precipitation","DGW","T1282km300V64",fnc))
 
-		p    = ds_wwtg["p"][:]
-		wwtg = ds_wwtg["wwtg"][:]*100
-		prcp = ds_prcp["precipitation"][:] / 24
+		p    = ds_wwtg["p"][:,:]
+		wwtg = ds_wwtg["wwtg"][:,:,:]*100
+		prcp = ds_prcp["precipitation"][:,:] / 24
+		for ien = 1 : 15
+
+			wwtgii = dropdims(mean(wwtg[:,end-2399:end,ien],dims=2),dims=2)
+			prcpμ  = mean(prcp[end-2399:end,ien])
+			if prcpμ > prcpRCEμ_T / 0.95
+				axs[7].plot(wwtgii,p[:,ien],c=wet_DGW[conii+1])
+			elseif prcpμ < prcpRCEμ_T * 0.95
+				axs[7].plot(wwtgii,p[:,ien],c=dry_DGW[conii+1])
+			else
+				axs[7].plot(wwtgii,p[:,ien],c=rce_DGW[conii+1])
+			end
+			
+		end
+
+		close(ds_wwtg)
+		close(ds_prcp)
+
+		close(ds_wwtg)
+		close(ds_prcp)
+
+		ds_wwtg = NCDataset(datadir("wwtg","KGW","T1282km300V64",fnc))
+		ds_prcp = NCDataset(datadir("precipitation","KGW","T1282km300V64",fnc))
+
+		p    = ds_wwtg["p"][:,:]
+		wwtg = ds_wwtg["wwtg"][:,:,:]*100
+		prcp = ds_prcp["precipitation"][:,:] / 24
+		for ien = 1 : 15
+
+			wwtgii = dropdims(mean(wwtg[:,end-2399:end,ien],dims=2),dims=2)
+			prcpμ  = mean(prcp[end-2399:end,ien])
+			if prcpμ > prcpRCEμ_T / 0.95
+				axs[8].plot(wwtgii,p[:,ien],c=wet_DGW[conii+1])
+			elseif prcpμ < prcpRCEμ_T * 0.95
+				axs[8].plot(wwtgii,p[:,ien],c=dry_DGW[conii+1])
+			else
+				axs[8].plot(wwtgii,p[:,ien],c=rce_DGW[conii+1])
+			end
+			
+		end
+
+		close(ds_wwtg)
+		close(ds_prcp)
+
+	end
+
+	for conii in 1 : nWTG
+
+		fnc = "$(relaxscalestrprnt(configWTG[conii])).nc"
+		
+		ds_wwtg = NCDataset(datadir("wwtg","TGR","P1282km300V64",fnc))
+		ds_prcp = NCDataset(datadir("precipitation","TGR","P1282km300V64",fnc))
+
+		p    = ds_wwtg["p"][:,:]
+		wwtg = ds_wwtg["wwtg"][:,:,:]*100
+		prcp = ds_prcp["precipitation"][:,:] / 24
 		for ien = 1 : 15
 
 			wwtgii = dropdims(mean(wwtg[:,end-2399:end,ien],dims=2),dims=2)
 			prcpμ  = mean(prcp[end-2399:end,ien])
 			if prcpμ > prcpRCEμ_P / 0.95
-				axs[5].plot(wwtgii,p[:,ien],c=wet_WTG1[conii+1])
+				axs[1].plot(wwtgii,p[:,ien],c=wet_WTG[conii+1])
 			elseif prcpμ < prcpRCEμ_P * 0.95
-				axs[5].plot(wwtgii,p[:,ien],c=dry_WTG1[conii+1])
+				axs[1].plot(wwtgii,p[:,ien],c=dry_WTG[conii+1])
 			else
-				axs[5].plot(wwtgii,p[:,ien],c=rce_WTG1[conii+1])
+				axs[1].plot(wwtgii,p[:,ien],c=rce_WTG[conii+1])
+			end
+			
+		end
+
+		close(ds_wwtg)
+		close(ds_prcp)
+
+		ds_wwtg = NCDataset(datadir("wwtg","SPC","P1282km300V64",fnc))
+		ds_prcp = NCDataset(datadir("precipitation","SPC","P1282km300V64",fnc))
+
+		p    = ds_wwtg["p"][:,:]
+		wwtg = ds_wwtg["wwtg"][:,:,:]*100
+		prcp = ds_prcp["precipitation"][:,:] / 24
+		for ien = 1 : 15
+
+			wwtgii = dropdims(mean(wwtg[:,end-2399:end,ien],dims=2),dims=2)
+			prcpμ  = mean(prcp[end-2399:end,ien])
+			if prcpμ > prcpRCEμ_P / 0.95
+				axs[2].plot(wwtgii,p[:,ien],c=wet_WTG[conii+1])
+			elseif prcpμ < prcpRCEμ_P * 0.95
+				axs[2].plot(wwtgii,p[:,ien],c=dry_WTG[conii+1])
+			else
+				axs[2].plot(wwtgii,p[:,ien],c=rce_WTG[conii+1])
+			end
+			
+		end
+
+		close(ds_wwtg)
+		close(ds_prcp)
+
+		ds_wwtg = NCDataset(datadir("wwtg","TGR","T1282km300V64",fnc))
+		ds_prcp = NCDataset(datadir("precipitation","TGR","T1282km300V64",fnc))
+
+		p    = ds_wwtg["p"][:,:]
+		wwtg = ds_wwtg["wwtg"][:,:,:]*100
+		prcp = ds_prcp["precipitation"][:,:] / 24
+		for ien = 1 : 15
+
+			wwtgii = dropdims(mean(wwtg[:,end-2399:end,ien],dims=2),dims=2)
+			prcpμ  = mean(prcp[end-2399:end,ien])
+			if prcpμ > prcpRCEμ_T / 0.95
+				axs[5].plot(wwtgii,p[:,ien],c=wet_WTG[conii+1])
+			elseif prcpμ < prcpRCEμ_T * 0.95
+				axs[5].plot(wwtgii,p[:,ien],c=dry_WTG[conii+1])
+			else
+				axs[5].plot(wwtgii,p[:,ien],c=rce_WTG[conii+1])
+			end
+			
+		end
+
+		close(ds_wwtg)
+		close(ds_prcp)
+
+		ds_wwtg = NCDataset(datadir("wwtg","SPC","T1282km300V64",fnc))
+		ds_prcp = NCDataset(datadir("precipitation","SPC","T1282km300V64",fnc))
+
+		p    = ds_wwtg["p"][:,:]
+		wwtg = ds_wwtg["wwtg"][:,:,:]*100
+		prcp = ds_prcp["precipitation"][:,:] / 24
+		for ien = 1 : 15
+
+			wwtgii = dropdims(mean(wwtg[:,end-2399:end,ien],dims=2),dims=2)
+			prcpμ  = mean(prcp[end-2399:end,ien])
+			if prcpμ > prcpRCEμ_T / 0.95
+				axs[6].plot(wwtgii,p[:,ien],c=wet_WTG[conii+1])
+			elseif prcpμ < prcpRCEμ_T * 0.95
+				axs[6].plot(wwtgii,p[:,ien],c=dry_WTG[conii+1])
+			else
+				axs[6].plot(wwtgii,p[:,ien],c=rce_WTG[conii+1])
 			end
 			
 		end
@@ -189,74 +266,19 @@ begin
 
 	end
 
-	for conii in 1 : nWTG2
-
-		fnc = "TGR-T1282km300V64-$(relaxscalestrprnt(configWTG2[conii])).nc"
-		ds_wwtg = NCDataset(datadir("wwtg",fnc))
-		ds_prcp = NCDataset(datadir("precipitation",fnc))
-
-		p    = ds_wwtg["p"][:]
-		wwtg = ds_wwtg["wwtg"][:]*100
-		prcp = ds_prcp["precipitation"][:] / 24
-		for ien = 1 : 15
-
-			wwtgii = dropdims(mean(wwtg[:,end-2399:end,ien],dims=2),dims=2)
-			prcpμ  = mean(prcp[end-2399:end,ien])
-			if prcpμ > prcpRCEμ_T / 0.95
-				axs[4].plot(wwtgii,p[:,ien],c=wet_WTG2[conii+1])
-			elseif prcpμ < prcpRCEμ_T * 0.95
-				axs[4].plot(wwtgii,p[:,ien],c=dry_WTG2[conii+1])
-			else
-				axs[4].plot(wwtgii,p[:,ien],c=rce_WTG2[conii+1])
-			end
-			
-		end
-
-		close(ds_wwtg)
-		close(ds_prcp)
-
-		fnc = "SPC-T1282km300V64-$(relaxscalestrprnt(configWTG2[conii])).nc"
-		ds_wwtg = NCDataset(datadir("wwtg",fnc))
-		ds_prcp = NCDataset(datadir("precipitation",fnc))
-
-		p    = ds_wwtg["p"][:]
-		wwtg = ds_wwtg["wwtg"][:]*100
-		prcp = ds_prcp["precipitation"][:] / 24
-		for ien = 1 : 15
-
-			wwtgii = dropdims(mean(wwtg[:,end-2399:end,ien],dims=2),dims=2)
-			prcpμ  = mean(prcp[end-2399:end,ien])
-			if prcpμ > prcpRCEμ_T / 0.95
-				axs[6].plot(wwtgii,p[:,ien],c=wet_WTG2[conii+1])
-			elseif prcpμ < prcpRCEμ_T * 0.95
-				axs[6].plot(wwtgii,p[:,ien],c=dry_WTG2[conii+1])
-			else
-				axs[6].plot(wwtgii,p[:,ien],c=rce_WTG2[conii+1])
-			end
-			
-		end
-
-		close(ds_wwtg)
-		close(ds_prcp)
-
-	end
-
-	axs[1].format(ltitle="(a) DGW")
-	axs[3].format(ltitle="(b) TGR",)
-	axs[5].format(ltitle="(c) SPC")
+	axs[1].format(ltitle="(a) WTG-RZ")
+	axs[2].format(ltitle="(b) SWTG",)
+	axs[3].format(ltitle="(c) DGW-B")
+	axs[4].format(ltitle=L"(d) DGW-K ($\partial_t = 0$)")
 
 	for ax in axs
 		ax.plot([0,0],[1000,10],c="k")
 		ax.format(
-			ylim=(1000,20),yscale="log",
+			ylim=(1000,20),yscale="log",ylabel="Pressure / hPa",
 			xscale="symlog",xscale_kw=Dict("linthresh"=>1),
 			xlim=(-25,25),xlabel=L"$w_{wtg}$ / 10$^{-2}$ m s$^{-1}$",
+			rightlabels=["RRTM","Idealized Radiative Cooling"]
 		)
-	end
-
-	for ii in 1 : 2 : 5
-		axs[ii].format(ultitle="(i) RRTM")
-		axs[ii+1].format(ultitle="(ii) Ideal")
 	end
 	
 	fig.savefig(projectdir("figures","figS1-wwtg.png"),transparent=false,dpi=400)
@@ -264,7 +286,7 @@ begin
 end
 
 # ╔═╡ Cell order:
-# ╠═e78a75c2-590f-11eb-1144-9127b0309135
+# ╟─e78a75c2-590f-11eb-1144-9127b0309135
 # ╟─681658b0-5914-11eb-0d65-bbace277d145
 # ╟─6dce35fc-5914-11eb-0ce2-0d4e164e1898
 # ╟─3c16bd2b-55e0-492f-baf3-aef6a998e9d6

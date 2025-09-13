@@ -1,17 +1,19 @@
 ### A Pluto.jl notebook ###
-# v0.19.46
+# v0.20.3
 
 using Markdown
 using InteractiveUtils
 
 # This Pluto notebook uses @bind for interactivity. When running this notebook outside of Pluto, the following 'mock version' of @bind gives bound variables a default value (instead of an error).
 macro bind(def, element)
+    #! format: off
     quote
         local iv = try Base.loaded_modules[Base.PkgId(Base.UUID("6e696c72-6542-2067-7265-42206c756150"), "AbstractPlutoDingetjes")].Bonds.initial_value catch; b -> missing; end
         local el = $(esc(element))
         global $(esc(def)) = Core.applicable(Base.get, el) ? Base.get(el) : iv(el)
         el
     end
+    #! format: on
 end
 
 # ╔═╡ 681658b0-5914-11eb-0d65-bbace277d145
@@ -25,7 +27,7 @@ end
 # ╔═╡ 6dce35fc-5914-11eb-0ce2-0d4e164e1898
 begin
 	@quickactivate "ExploreWTGSpace"
-	using DSP
+	using MultivariateStats
 	using NCDatasets
 	using PlutoUI
 	using Printf
@@ -50,7 +52,8 @@ In this notebook, we investigate and develop a way to implement the WTG forcing 
 # ╔═╡ f188190f-81bf-4b29-b479-38e9a85a997c
 @bind wtgscheme Select([
 	"DGW" => "(DGW) Damped Gravity Wave [Blossey et al., 2009]",
-	"LGW" => "(LGW) Linear Gravity Waves [Kuang et al., 2008]",
+	"KGW" => "(KGW) Damped Gravity Wave [Kuang et al., 2008]",
+	"TDG" => "(TDG) Time-Dependent Damped Gravity Wave [Kuang et al., 2008]",
 	"TGR" => "(TGR) Temperature Gradient Relaxation [Raymond and Zeng, 2005]",
 	"SPC" => "(SPC) Spectral TGR [Herman and Raymond, 2014]",
 ])
@@ -81,7 +84,7 @@ end
 
 # ╔═╡ a63de98c-5b35-11eb-0a8f-b7a1ebd441b6
 begin
-	if (wtgscheme == "DGW") || (wtgscheme == "LGW")
+	if checkschemeDGW(wtgscheme)
 		configWTG = [0.02,0.05,0.1,0.2,0.5,1,2,5,10,20,50,100,200,500]
 	else
 		configWTG = [
@@ -91,111 +94,135 @@ begin
 		]
 	end
 	nconWTG = length(configWTG)
-	blues_WTG = pplt.get_colors("Blues",(nconWTG))
+	nmode   = 5
+	blues_WTG = pplt.get_colors("Blues_r",(nmode+2))
 	lgd_WTG = Dict("frame"=>false,"ncols"=>3)
 	md"Loading time dimension and defining the damping experiments ..."
 end
 
+# ╔═╡ 228c6070-0682-48ec-9870-d83ba44cf128
+md"WTG Strength: $(@bind iconWTG PlutoUI.Slider(1:nconWTG,default=1))"
+
+# ╔═╡ dbdffc08-71d1-46e8-b583-7a18fa351d0b
+configWTG[iconWTG]
+
 # ╔═╡ dc06d1f6-b3ab-4c7e-9f30-cfe1bb5e9cbd
 begin
 	pplt.close()
-	fts,ats = pplt.subplots(aspect=3,axwidth=5)
+	fts,ats = pplt.subplots(nrows=2,aspect=3,axwidth=5)
 
-	for ic in 1 : nconWTG
-
-		if (wtgscheme == "DGW") || (wtgscheme == "LGW")
-			fnc = "$wtgscheme-$expname-$(dampingstrprnt(configWTG[ic])).nc"
-		else
-			fnc = "$wtgscheme-$expname-$(relaxscalestrprnt(configWTG[ic])).nc"
-		end
-		if isfile(datadir("precipitation",fnc))
-			ds_dgwprcp = NCDataset(datadir("precipitation",fnc))
-			dt    = ds_dgwprcp["time"][:]
-			prcp  = ds_dgwprcp["precipitation"][:,:] / 24
-			ats[1].plot(dt,prcp,c=blues_WTG[ic])
-			close(ds_dgwprcp)
-		end
-
+	if checkschemeDGW(wtgscheme)
+		fnc = joinpath(wtgscheme,expname,"$(dampingstrprnt(configWTG[iconWTG])).nc")
+	else
+		fnc = joinpath(wtgscheme,expname,"$(relaxscalestrprnt(configWTG[iconWTG])).nc")
 	end
 
+	imem = 14
+	ds_dgwprcp = NCDataset(datadir("wwtg",fnc))
+	dt   = ds_dgwprcp["time"][:]
+	p    = ds_dgwprcp["p"][:,imem]
+	wwtg = ds_dgwprcp["wwtg"][:,:,imem]
+	ptrp = ds_dgwprcp["ptrop"][:,imem]
+	ztrp = ds_dgwprcp["ztrop"][:,imem]
+	wₙ   = ds_dgwprcp["wₙ"][:,:,imem] ./ sum(abs.(ds_dgwprcp["wₙ"][:,:,imem]),dims=2)
+	close(ds_dgwprcp)
+
+	ats[1].pcolormesh(dt,p,wwtg,levels=-0.05:0.005:0.05)
+	ats[1].plot(dt,ptrp)
+	ats[2].plot(dt,wₙ)
+	pnl = ats[2].panel("r")
+	pnl.scatter(zeros(10),mean(abs.(wₙ),dims=1)')
+
+	ats[1].format(ylim=(1000,25),yscale="log")
+	ats[2].format(ylim=(-1,1))
 	for ax in ats
 		ax.format(
-			xlim=(0,250),yscale="symlog",yscale_kw=Dict("linthresh"=>0.001),
-			ylim=(0,10),
-			ylabel=L"Rainfall Rate / mm hr$^{-1}$",xlabel="Days"
+			xlim=(240,250),xlabel="Days"
 		)
 	end
 
-	ats[1].format(ultitle="(a) Precipitation Time-Series ($wtgscheme)")
-
 	fts.savefig(
-		plotsdir("02b-rce2wtg-$(expname)-$wtgscheme.png"),
+		plotsdir("11-wn-$(expname)-$wtgscheme.png"),
 		transparent=false,dpi=400
 	)
 		
-	load(plotsdir("02b-rce2wtg-$(expname)-$wtgscheme.png"))
+	load(plotsdir("11-wn-$(expname)-$wtgscheme.png"))
 end
 
-# ╔═╡ 0a74e728-1cf6-4db3-b616-fbd5d50595b1
+# ╔═╡ a08e9b0e-fb3b-4d84-b9ae-7c618941dd3f
+md"
+### A. Compilation
+"
+
+# ╔═╡ 59cdcd12-394b-4f66-bb83-be11959da38c
 begin
-	signalpower = zeros(1201,nconWTG,15)
-	signalfreq  = zeros(1201,nconWTG,15)
-	totalmember = zeros(1,nconWTG)
-	for icon = 1 : nconWTG
-		if (wtgscheme == "DGW") || (wtgscheme == "LGW")
-			fnc = "$wtgscheme-$expname-$(dampingstrprnt(configWTG[icon])).nc"
+	pplt.close()
+	f2,a2 = pplt.subplots(ncols=1,aspect=0.4,axwidth=0.9)
+
+	ds_rceprcp = NCDataset(datadir("precipitation","RCE","P1282km300V64.nc"))
+	prcp_RCE = ds_rceprcp["precipitation"][:,:]
+	prcpRCEμ_P = mean(prcp_RCE[1001:2000,:])
+	close(ds_rceprcp)
+	ds_rceprcp = NCDataset(datadir("precipitation","RCE","T1282km300V64.nc"))
+	prcp_RCE = ds_rceprcp["precipitation"][:,:]
+	prcpRCEμ_T = mean(prcp_RCE[1001:2000,:])
+	close(ds_rceprcp)
+
+	function ncname(wtgvec,ii)
+
+		iconWTG = wtgvec[ii]
+
+		if checkschemeDGW(wtgscheme)
+			return "$(dampingstrprnt(iconWTG)).nc"
 		else
-			fnc = "$wtgscheme-$expname-$(relaxscalestrprnt(configWTG[icon])).nc"
-		end
-		nmem = 0
-		if isfile(datadir("precipitation",fnc))
-			ds_dgwprcp = NCDataset(datadir("precipitation",fnc))
-			prcp  = ds_dgwprcp["precipitation"][:,:] / 24
-			close(ds_dgwprcp)
-			for imem = 1 : 15
-				if sum(.!isnan.(prcp[:,imem])) == 6000
-					nmem += 1
-					prcpii = prcp[(end-2399):end,imem] .- mean(prcp[(end-2399):end,imem])
-					pdg = periodogram(prcpii,fs=24)
-					signalpower[:,icon,imem] .= pdg.power
-					signalfreq[:,icon,imem]  .= pdg.freq
-				end
+			return "$(relaxscalestrprnt(iconWTG)).nc"
+		end 
+		
+	end
+
+	for iconfig in 1 : nconWTG
+
+		fnc = ncname(configWTG,iconfig)
+			
+		ds = NCDataset(datadir("wwtg","SPC","P1282km300V64",fnc))
+		wₙ = ds["wₙ"][:,:,:]
+		close(ds)
+		
+		ds = NCDataset(datadir("precipitation","SPC","P1282km300V64",fnc))
+		prcp = ds["precipitation"][1001:2000,:]
+		close(ds)
+		
+		wₙ = wₙ ./ sum(abs.(wₙ),dims=2)
+		wₙ = dropdims(mean(abs.(wₙ),dims=1),dims=1)
+		prcp = dropdims(mean(prcp,dims=1),dims=1)
+
+		ii = prcp .< (prcpRCEμ_P / 0.9)
+		jj = prcp .> (prcpRCEμ_P * 0.9)
+
+		for imode = 1 : nmode
+			if !iszero(length(ii))
+				a2[1].scatter(-mean(wₙ[imode,ii])./mean(wₙ[1,ii]),configWTG[iconfig],c=blues_WTG[imode+1],s=5,zorder=5)
+			end
+			if !iszero(length(jj))
+				a2[1].scatter(mean(wₙ[imode,jj])./mean(wₙ[1,jj]),configWTG[iconfig],c=blues_WTG[imode+1],s=5,zorder=5)
 			end
 		end
-		totalmember[icon] = nmem
-	end
-	signalpower = dropdims(sum(signalpower,dims=3),dims=3)
-	signalpower = signalpower ./ totalmember
-	signalfreq  = dropdims(sum(signalfreq ,dims=3),dims=3)
-	signalfreq  = signalfreq  ./ totalmember
-	signalfreq  = dropdims(mean(signalfreq,dims=2),dims=2)
-	md"Doing power spectrum ..."
-end
 
-# ╔═╡ d28f2438-8b19-4763-a31d-4cd2feb30ace
-begin
-	pplt.close(); f2,a2 = pplt.subplots(aspect=4,axwidth=5)
-
-	if (wtgscheme == "DGW") || (wtgscheme == "LGW")
-		wtglabel = L"$a_m$ / day$^{-1}$"
-	else
-		wtglabel = L"$\tau$ / hr"
 	end
+
 	
-	c2 = a2[1].pcolormesh(1 ./signalfreq[2:end],configWTG,log10.(signalpower')[:,2:end],levels=-5:0.5:-0,extend="both")
-	a2[1].format(
-		xscale="log",xlim=(0.1,10),
-		yscale="log",ylim=(minimum(configWTG),maximum(configWTG)),
-		suptitle="$wtgscheme | $expname",
-		xlabel=L"Frequency / day$^{-1}$",ylabel=wtglabel
-	)
+	for ax in a2
+		ax.format(
+			ylim=(0.005,2000),yscale="log",xlim=(-1.1,1.1)
+		)
+	end
 
-	f2.colorbar(c2,locator=-5:-0)
 	f2.savefig(
-		plotsdir("03-timeseries-$wtgscheme-$expname.png"),
+		plotsdir("11-compiledwn-$(expname)-$wtgscheme.png"),
 		transparent=false,dpi=400
 	)
-	load(plotsdir("03-timeseries-$wtgscheme-$expname.png"))
+		
+	load(plotsdir("11-compiledwn-$(expname)-$wtgscheme.png"))
 end
 
 # ╔═╡ Cell order:
@@ -208,6 +235,8 @@ end
 # ╟─026110d9-55be-484a-b962-1aed19528933
 # ╟─d3b025e0-5b35-11eb-330a-5fbb2204da63
 # ╟─a63de98c-5b35-11eb-0a8f-b7a1ebd441b6
-# ╟─dc06d1f6-b3ab-4c7e-9f30-cfe1bb5e9cbd
-# ╟─0a74e728-1cf6-4db3-b616-fbd5d50595b1
-# ╟─d28f2438-8b19-4763-a31d-4cd2feb30ace
+# ╟─228c6070-0682-48ec-9870-d83ba44cf128
+# ╟─dbdffc08-71d1-46e8-b583-7a18fa351d0b
+# ╠═dc06d1f6-b3ab-4c7e-9f30-cfe1bb5e9cbd
+# ╟─a08e9b0e-fb3b-4d84-b9ae-7c618941dd3f
+# ╠═59cdcd12-394b-4f66-bb83-be11959da38c

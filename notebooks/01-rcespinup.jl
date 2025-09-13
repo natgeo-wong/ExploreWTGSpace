@@ -1,17 +1,19 @@
 ### A Pluto.jl notebook ###
-# v0.19.46
+# v0.20.3
 
 using Markdown
 using InteractiveUtils
 
 # This Pluto notebook uses @bind for interactivity. When running this notebook outside of Pluto, the following 'mock version' of @bind gives bound variables a default value (instead of an error).
 macro bind(def, element)
+    #! format: off
     quote
         local iv = try Base.loaded_modules[Base.PkgId(Base.UUID("6e696c72-6542-2067-7265-42206c756150"), "AbstractPlutoDingetjes")].Bonds.initial_value catch; b -> missing; end
         local el = $(esc(element))
         global $(esc(def)) = Core.applicable(Base.get, el) ? Base.get(el) : iv(el)
         el
     end
+    #! format: on
 end
 
 # ╔═╡ df810659-6173-483f-912c-523b022d641e
@@ -129,11 +131,18 @@ else
 	md""
 end
 
+# ╔═╡ 47b2aaf8-eed2-440b-aac2-3b0e37cc600c
+md"Is TrainML? $(@bind istrainml PlutoUI.Slider(0:1))"
+
 # ╔═╡ ac8b9d4c-5ade-11eb-06f4-33bff063bbde
 begin
-	config = "$(prefix)$(@sprintf("%03d",128*2. ^dsize))$(@sprintf("%d",2. ^hres))km$(sst)V$(nvert)"
-	if isone(is2D); config = "$(config)_2D" end
-	if isone(isfsf); config = "$(config)_FSF" end
+	if iszero(istrainml)
+		config = "$(prefix)$(@sprintf("%03d",128*2. ^dsize))$(@sprintf("%d",2. ^hres))km$(sst)V$(nvert)"
+		if isone(is2D); config = "$(config)_2D" end
+		if isone(isfsf); config = "$(config)_FSF" end
+	else
+		config = "TrainML"
+	end
 	nen = 10
 	
 md"**Experiment Set:** $config | **Number of Control Members**: $nen"
@@ -156,7 +165,7 @@ Should the difference in the final averaged sounding profile be vastly different
 "
 
 # ╔═╡ 401a6a3a-8444-11eb-3ee8-594591ed5aa9
-nendays = 1900
+nendays = 1500
 
 # ╔═╡ c658d650-8614-11eb-252c-c3066fb1d506
 ptrop = 70
@@ -328,6 +337,10 @@ begin
 	pre_μ = dropdims(mean(pre_en[:,(end-nendays+1):end,:],dims=(2,3)),dims=(2,3))
 	
 	pot_μ = tem_μ .* (1000 ./pre_μ).^(287/1004)
+	if isone(istrainml)
+		pot_μ[(end-1)] = 664.96979
+		pot_μ[end] = 834.28748
+	end
 	
 	snddata = zeros(nz_en,6)
 	snddata[:,1] .= z_en;  snddata[:,2] .= pre_μ
@@ -360,10 +373,11 @@ end
 # ╟─8697387f-a384-41a6-bba1-f61f47056bd0
 # ╟─fab65122-bf01-44d7-8a92-e0b842983a98
 # ╟─2ec96d61-c6f5-4015-b9bb-f2b544914ab3
+# ╟─47b2aaf8-eed2-440b-aac2-3b0e37cc600c
 # ╟─ac8b9d4c-5ade-11eb-06f4-33bff063bbde
 # ╟─7842e150-822b-11eb-1ded-f35ee4cc6d8c
 # ╟─99dca670-81e5-11eb-24b8-cf1b23d8c1f7
-# ╠═401a6a3a-8444-11eb-3ee8-594591ed5aa9
+# ╟─401a6a3a-8444-11eb-3ee8-594591ed5aa9
 # ╠═c658d650-8614-11eb-252c-c3066fb1d506
 # ╟─7d905176-81e8-11eb-20d3-b9be287472f5
 # ╟─ad523b4e-81ee-11eb-2d10-a984d5983471

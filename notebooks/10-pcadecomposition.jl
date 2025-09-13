@@ -1,17 +1,19 @@
 ### A Pluto.jl notebook ###
-# v0.19.46
+# v0.20.3
 
 using Markdown
 using InteractiveUtils
 
 # This Pluto notebook uses @bind for interactivity. When running this notebook outside of Pluto, the following 'mock version' of @bind gives bound variables a default value (instead of an error).
 macro bind(def, element)
+    #! format: off
     quote
         local iv = try Base.loaded_modules[Base.PkgId(Base.UUID("6e696c72-6542-2067-7265-42206c756150"), "AbstractPlutoDingetjes")].Bonds.initial_value catch; b -> missing; end
         local el = $(esc(element))
         global $(esc(def)) = Core.applicable(Base.get, el) ? Base.get(el) : iv(el)
         el
     end
+    #! format: on
 end
 
 # ╔═╡ 681658b0-5914-11eb-0d65-bbace277d145
@@ -25,7 +27,7 @@ end
 # ╔═╡ 6dce35fc-5914-11eb-0ce2-0d4e164e1898
 begin
 	@quickactivate "ExploreWTGSpace"
-	using DSP
+	using MultivariateStats
 	using NCDatasets
 	using PlutoUI
 	using Printf
@@ -50,7 +52,8 @@ In this notebook, we investigate and develop a way to implement the WTG forcing 
 # ╔═╡ f188190f-81bf-4b29-b479-38e9a85a997c
 @bind wtgscheme Select([
 	"DGW" => "(DGW) Damped Gravity Wave [Blossey et al., 2009]",
-	"LGW" => "(LGW) Linear Gravity Waves [Kuang et al., 2008]",
+	"KGW" => "(KGW) Damped Gravity Waves [Kuang et al., 2008]",
+	"TDG" => "(TDG) Time-Dependent Damped Gravity Waves [Kuang et al., 2008]",
 	"TGR" => "(TGR) Temperature Gradient Relaxation [Raymond and Zeng, 2005]",
 	"SPC" => "(SPC) Spectral TGR [Herman and Raymond, 2014]",
 ])
@@ -81,7 +84,7 @@ end
 
 # ╔═╡ a63de98c-5b35-11eb-0a8f-b7a1ebd441b6
 begin
-	if (wtgscheme == "DGW") || (wtgscheme == "LGW")
+	if checkschemeDGW(wtgscheme)
 		configWTG = [0.02,0.05,0.1,0.2,0.5,1,2,5,10,20,50,100,200,500]
 	else
 		configWTG = [
@@ -96,107 +99,121 @@ begin
 	md"Loading time dimension and defining the damping experiments ..."
 end
 
+# ╔═╡ 228c6070-0682-48ec-9870-d83ba44cf128
+md"WTG Strength: $(@bind iconWTG PlutoUI.Slider(1:nconWTG,default=1))"
+
+# ╔═╡ dbdffc08-71d1-46e8-b583-7a18fa351d0b
+configWTG[iconWTG]
+
 # ╔═╡ dc06d1f6-b3ab-4c7e-9f30-cfe1bb5e9cbd
 begin
 	pplt.close()
 	fts,ats = pplt.subplots(aspect=3,axwidth=5)
 
-	for ic in 1 : nconWTG
-
-		if (wtgscheme == "DGW") || (wtgscheme == "LGW")
-			fnc = "$wtgscheme-$expname-$(dampingstrprnt(configWTG[ic])).nc"
-		else
-			fnc = "$wtgscheme-$expname-$(relaxscalestrprnt(configWTG[ic])).nc"
-		end
-		if isfile(datadir("precipitation",fnc))
-			ds_dgwprcp = NCDataset(datadir("precipitation",fnc))
-			dt    = ds_dgwprcp["time"][:]
-			prcp  = ds_dgwprcp["precipitation"][:,:] / 24
-			ats[1].plot(dt,prcp,c=blues_WTG[ic])
-			close(ds_dgwprcp)
-		end
-
+	if checkschemeDGW(wtgscheme)
+		fnc = joinpath(wtgscheme,expname,"$(dampingstrprnt(configWTG[iconWTG])).nc")
+	else
+		fnc = joinpath(wtgscheme,expname,"$(relaxscalestrprnt(configWTG[iconWTG])).nc")
 	end
+	
+	ds_dgwprcp = NCDataset(datadir("wwtg",fnc))
+	dt   = ds_dgwprcp["time"][(end-4799):end]
+	p    = ds_dgwprcp["p"][:,1]
+	wwtg = ds_dgwprcp["wwtg"][:,(end-4799):end,11] * 1000
+	ptrp = ds_dgwprcp["ptrop"][(end-4799):end,11]
+	close(ds_dgwprcp)
+
+	ats[1].pcolormesh(dt,p,wwtg)
+	ats[1].plot(dt,ptrp)
 
 	for ax in ats
 		ax.format(
-			xlim=(0,250),yscale="symlog",yscale_kw=Dict("linthresh"=>0.001),
-			ylim=(0,10),
-			ylabel=L"Rainfall Rate / mm hr$^{-1}$",xlabel="Days"
+			xlim=(225,250),yscale="log",ylim=(1000,25),
+			ylabel="Pressure / hPa",xlabel="Days"
 		)
 	end
 
-	ats[1].format(ultitle="(a) Precipitation Time-Series ($wtgscheme)")
-
 	fts.savefig(
-		plotsdir("02b-rce2wtg-$(expname)-$wtgscheme.png"),
+		plotsdir("10-wwtg-$(expname)-$wtgscheme.png"),
 		transparent=false,dpi=400
 	)
 		
-	load(plotsdir("02b-rce2wtg-$(expname)-$wtgscheme.png"))
+	load(plotsdir("10-wwtg-$(expname)-$wtgscheme.png"))
 end
 
-# ╔═╡ 0a74e728-1cf6-4db3-b616-fbd5d50595b1
-begin
-	signalpower = zeros(1201,nconWTG,15)
-	signalfreq  = zeros(1201,nconWTG,15)
-	totalmember = zeros(1,nconWTG)
-	for icon = 1 : nconWTG
-		if (wtgscheme == "DGW") || (wtgscheme == "LGW")
-			fnc = "$wtgscheme-$expname-$(dampingstrprnt(configWTG[icon])).nc"
-		else
-			fnc = "$wtgscheme-$expname-$(relaxscalestrprnt(configWTG[icon])).nc"
-		end
-		nmem = 0
-		if isfile(datadir("precipitation",fnc))
-			ds_dgwprcp = NCDataset(datadir("precipitation",fnc))
-			prcp  = ds_dgwprcp["precipitation"][:,:] / 24
-			close(ds_dgwprcp)
-			for imem = 1 : 15
-				if sum(.!isnan.(prcp[:,imem])) == 6000
-					nmem += 1
-					prcpii = prcp[(end-2399):end,imem] .- mean(prcp[(end-2399):end,imem])
-					pdg = periodogram(prcpii,fs=24)
-					signalpower[:,icon,imem] .= pdg.power
-					signalfreq[:,icon,imem]  .= pdg.freq
-				end
-			end
-		end
-		totalmember[icon] = nmem
-	end
-	signalpower = dropdims(sum(signalpower,dims=3),dims=3)
-	signalpower = signalpower ./ totalmember
-	signalfreq  = dropdims(sum(signalfreq ,dims=3),dims=3)
-	signalfreq  = signalfreq  ./ totalmember
-	signalfreq  = dropdims(mean(signalfreq,dims=2),dims=2)
-	md"Doing power spectrum ..."
-end
+# ╔═╡ 2dfdd378-a118-4335-9fc9-98675b027757
+M = fit(PCA, wwtg; pratio=0.99)
 
-# ╔═╡ d28f2438-8b19-4763-a31d-4cd2feb30ace
-begin
-	pplt.close(); f2,a2 = pplt.subplots(aspect=4,axwidth=5)
+# ╔═╡ 98c7a489-2f8b-4c73-b96e-f396a0bc573a
+evec = eigvecs(M);
 
-	if (wtgscheme == "DGW") || (wtgscheme == "LGW")
-		wtglabel = L"$a_m$ / day$^{-1}$"
-	else
-		wtglabel = L"$\tau$ / hr"
-	end
+# ╔═╡ 5426c985-b6f9-4143-9ea5-87e31ea9f784
+begin
+	pplt.close(); f2,a2 = pplt.subplots(aspect=0.5,axwidth=1)
 	
-	c2 = a2[1].pcolormesh(1 ./signalfreq[2:end],configWTG,log10.(signalpower')[:,2:end],levels=-5:0.5:-0,extend="both")
-	a2[1].format(
-		xscale="log",xlim=(0.1,10),
-		yscale="log",ylim=(minimum(configWTG),maximum(configWTG)),
-		suptitle="$wtgscheme | $expname",
-		xlabel=L"Frequency / day$^{-1}$",ylabel=wtglabel
-	)
+	a2[1].plot(evec[:,1],p)
+	# a2[1].plot(evec[:,2],p)
+	# a2[1].plot(evec[:,3],p)
+	# a2[1].plot(evec[:,4],p)
+	a2[1].plot([-1,1]*0.1,ones(2)*mean(ptrp))
+	# a2[1].plot(evec[:,3],p)
+	a2[1].format(ylim=(1000,25),yscale="log",xlim=(-0.5,0.5))
+	
+	f2.savefig("test.png",transparent=false,dpi=150)
+	load("test.png")
+end
 
-	f2.colorbar(c2,locator=-5:-0)
-	f2.savefig(
-		plotsdir("03-timeseries-$wtgscheme-$expname.png"),
+# ╔═╡ 082f10dc-e9e6-4d1c-8186-97b771a2d8ad
+size(ptrp)
+
+# ╔═╡ 09260a1d-4c76-43ce-b8c7-267fa534f0b4
+Y = predict(M,wwtg)
+
+# ╔═╡ 84b4c52c-1820-4be9-9bf2-037b91d8c897
+begin
+	pplt.close()
+	f3,a3 = pplt.subplots(aspect=3,axwidth=5)
+
+	a3[1].pcolormesh(dt,p,reconstruct(M,Y))
+
+	for ax in a3
+		ax.format(
+			xlim=(225,250),yscale="log",ylim=(1000,25),
+			ylabel="Pressure / hPa",xlabel="Days"
+		)
+	end
+
+	f3.savefig(
+		plotsdir("10-wwtg-$(expname)-$wtgscheme.png"),
 		transparent=false,dpi=400
 	)
-	load(plotsdir("03-timeseries-$wtgscheme-$expname.png"))
+		
+	load(plotsdir("10-wwtg-$(expname)-$wtgscheme.png"))
 end
+
+# ╔═╡ 9b866d0e-3ab0-4673-b482-56e9125a42ae
+begin
+	pplt.close()
+	f4,a4 = pplt.subplots(aspect=3,axwidth=5)
+
+	a4[1].plot(dt,Y')
+
+	for ax in a4
+		ax.format(
+			xlim=(225,250),xlabel="Days"
+		)
+	end
+
+	f4.savefig(
+		plotsdir("10-wwtg-$(expname)-$wtgscheme.png"),
+		transparent=false,dpi=400
+	)
+		
+	load(plotsdir("10-wwtg-$(expname)-$wtgscheme.png"))
+end
+
+# ╔═╡ 834fb00a-2e75-486b-a265-4d7b94e1a816
+principalvars(M) ./ (tprincipalvar(M) + tresidualvar(M))
 
 # ╔═╡ Cell order:
 # ╟─e78a75c2-590f-11eb-1144-9127b0309135
@@ -208,6 +225,14 @@ end
 # ╟─026110d9-55be-484a-b962-1aed19528933
 # ╟─d3b025e0-5b35-11eb-330a-5fbb2204da63
 # ╟─a63de98c-5b35-11eb-0a8f-b7a1ebd441b6
-# ╟─dc06d1f6-b3ab-4c7e-9f30-cfe1bb5e9cbd
-# ╟─0a74e728-1cf6-4db3-b616-fbd5d50595b1
-# ╟─d28f2438-8b19-4763-a31d-4cd2feb30ace
+# ╟─228c6070-0682-48ec-9870-d83ba44cf128
+# ╟─dbdffc08-71d1-46e8-b583-7a18fa351d0b
+# ╠═dc06d1f6-b3ab-4c7e-9f30-cfe1bb5e9cbd
+# ╠═2dfdd378-a118-4335-9fc9-98675b027757
+# ╟─98c7a489-2f8b-4c73-b96e-f396a0bc573a
+# ╠═5426c985-b6f9-4143-9ea5-87e31ea9f784
+# ╠═082f10dc-e9e6-4d1c-8186-97b771a2d8ad
+# ╠═09260a1d-4c76-43ce-b8c7-267fa534f0b4
+# ╠═84b4c52c-1820-4be9-9bf2-037b91d8c897
+# ╠═9b866d0e-3ab0-4673-b482-56e9125a42ae
+# ╠═834fb00a-2e75-486b-a265-4d7b94e1a816
