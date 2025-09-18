@@ -1,24 +1,19 @@
 #!/bin/sh 
 
-##SBATCH -p test         # short jobs, time limit 8 hours
-##SBATCH -p huce_cascade # default, moderate, no time limit
-##SBATCH -p huce_ice     # expensive, faster, no time limit
-##SBATCH -p shared       # longer jobs, 7 days, use only when needed
+#SBATCH --nodes=2
+#SBATCH --ntasks-per-node=8
+#SBATCH --cpus-per-task=1
+#SBATCH --mem=4GB
+#SBATCH --time=0-00:15
 
-#SBATCH -N 2 # number of nodes
-#SBATCH -n 64 # number of cores
-#SBATCH --mem-per-cpu=500 # memory pool for each core
-#SBATCH -t 0-12:00 # time (D-HH:MM)
-
-##SBATCH --account=linz_lab
-#SBATCH -J "SAM_WTG"
+#SBATCH --job-name=SAM_run
 #SBATCH --mail-user=[email]
 #SBATCH --mail-type=ALL
-#SBATCH -o ./LOGS/samrun.%j.out # STDOUT
-#SBATCH -e ./LOGS/samrun.%j.err # STDERR
+#SBATCH --output=./LOGS/samrun.%j.out
+#SBATCH --error=./LOGS/samrun.%j.err
 
 module purge
-module load intel/23.0.0-fasrc01 intelmpi/2021.8.0-fasrc01 netcdf-fortran/4.6.0-fasrc03
+module load openmpi/intel/4.1.8 netcdf-fortran/intel/4.6.2
 
 exproot=[dirname]/exp
 prmfile=$exproot/prm/[schname]/[expname]/[pwrname]/[memberx].prm
