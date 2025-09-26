@@ -41,7 +41,7 @@ setenv GNUMAKE 'make -j8'
 
 
 setenv SAM_DIR  `pwd`
-setenv SAM_OBJ  [datadir]/OBJ
+setenv SAM_OBJ  [datadir]/[expname]/OBJ
 #setenv SAM_SRC  `pwd`/SRC
 setenv SAM_SRC  /home/nw2648/SAM/SRC_v6.11
 
