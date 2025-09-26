@@ -55,7 +55,7 @@ if !(-d $SAM_SCR/OUT_MOMENTS) mkdir $SAM_SCR/OUT_MOMENTS
 if !(-d $SAM_SCR/OUT_STAT) mkdir $SAM_SCR/OUT_STAT
 if !(-d $SAM_SCR/OUT_MOVIES) mkdir $SAM_SCR/OUT_MOVIES
 if !(-d $SAM_SCR/RESTART) mkdir $SAM_SCR/RESTART
-if !(-d $SAM_OBJ) mkdir $SAM_OBJ
+if !(-d $SAM_OBJ) mkdir -p $SAM_OBJ
 if !(-d LOGS) mkdir LOGS
 
 if !(-d OUT_2D) ln -s $SAM_SCR/OUT_2D  OUT_2D
