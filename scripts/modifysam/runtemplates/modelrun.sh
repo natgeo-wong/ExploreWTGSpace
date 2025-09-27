@@ -6,7 +6,9 @@
 #SBATCH --mem=4GB
 #SBATCH --time=0-00:15
 
-#SBATCH --job-name=SAM_run
+#SBATCH --job-name=[schname]_[expname]_[pwrname]
+#SBATCH --dependency=singleton
+
 #SBATCH --mail-user=[email]
 #SBATCH --mail-type=ALL
 #SBATCH --output=./LOGS/samrun.%j.out
