@@ -87,6 +87,10 @@ doradtendency = .false.,
 dobulksfcflx  = .false.,
 bulksfcflx_u  = 5.
 
+doadv3d    = .true.,
+dotqlsvadv = .true.,
+douvlsvadv = .true.,
+
 dowtg_blossey_etal_JAMES2009  = .true.
 dowtg_raymondzeng_QJRMS2005   = .false.
 dowtg_hermanraymond_JAMES2014 = .false.

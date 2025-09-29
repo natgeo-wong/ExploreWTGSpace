@@ -46,6 +46,7 @@ setenv SAM_OBJ  [datadir]/SAM_OBJ/[expname]
 setenv SAM_SRC  /home/nw2648/SAM/SRC_v6.11
 
 if !(-d $SAM_SCR) mkdir -p $SAM_SCR
+if !(-d $SAM_OBJ) mkdir -p $SAM_OBJ
 
 set echo
 
@@ -55,7 +56,6 @@ if !(-d $SAM_SCR/OUT_MOMENTS) mkdir $SAM_SCR/OUT_MOMENTS
 if !(-d $SAM_SCR/OUT_STAT) mkdir $SAM_SCR/OUT_STAT
 if !(-d $SAM_SCR/OUT_MOVIES) mkdir $SAM_SCR/OUT_MOVIES
 if !(-d $SAM_SCR/RESTART) mkdir $SAM_SCR/RESTART
-if !(-d $SAM_OBJ) mkdir -p $SAM_OBJ
 if !(-d LOGS) mkdir LOGS
 
 if !(-d OUT_2D) ln -s $SAM_SCR/OUT_2D  OUT_2D
