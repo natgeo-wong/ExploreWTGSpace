@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.20.3
+# v0.20.19
 
 using Markdown
 using InteractiveUtils
@@ -7,7 +7,7 @@ using InteractiveUtils
 # This Pluto notebook uses @bind for interactivity. When running this notebook outside of Pluto, the following 'mock version' of @bind gives bound variables a default value (instead of an error).
 macro bind(def, element)
     #! format: off
-    quote
+    return quote
         local iv = try Base.loaded_modules[Base.PkgId(Base.UUID("6e696c72-6542-2067-7265-42206c756150"), "AbstractPlutoDingetjes")].Bonds.initial_value catch; b -> missing; end
         local el = $(esc(element))
         global $(esc(def)) = Core.applicable(Base.get, el) ? Base.get(el) : iv(el)
@@ -26,13 +26,10 @@ end
 # ╔═╡ 46faa412-5ade-11eb-3c37-23a7e59037a0
 begin
 	@quickactivate "ExploreWTGSpace"
-	using Statistics
 	using PlutoUI
-	using Printf
-	
-	using ImageShow, PNGFiles
-	using PyCall, LaTeXStrings
-	pplt = pyimport("proplot")
+	using Printf, Statistics
+	using CairoMakie
+	set_theme!(theme_latexfonts())
 	
 	include(srcdir("sam.jl"))
 	include(srcdir("samsnd.jl"))
@@ -65,7 +62,7 @@ There are two broad model configuration categories: (P)erpetual (INSOL)ation, an
 
 # ╔═╡ 427511d0-88cb-11eb-2a40-019c91ee1401
 if prefix == "D"
-	md"Toggle Domain Size: $(@bind dsize PlutoUI.Slider(0:1,default=0))"
+	md"Toggle Domain Size: $(@bind dsize PlutoUI.Slider(-1:1,default=0))"
 else
 	md"Toggle Domain Size: $(@bind dsize PlutoUI.Slider(-1:0,default=0))"
 end
@@ -143,6 +140,7 @@ begin
 	else
 		config = "TrainML"
 	end
+	# config = "D3842km300V64"
 	nen = 10
 	
 md"**Experiment Set:** $config | **Number of Control Members**: $nen"
@@ -165,7 +163,7 @@ Should the difference in the final averaged sounding profile be vastly different
 "
 
 # ╔═╡ 401a6a3a-8444-11eb-3ee8-594591ed5aa9
-nendays = 1500
+nendays = 1000
 
 # ╔═╡ c658d650-8614-11eb-252c-c3066fb1d506
 ptrop = 70
@@ -225,94 +223,111 @@ begin
 md"Assuming that the tropopause in the tropics can sometimes reach as high as $ptrop hPa, the root-mean-square of the temperature difference between the model temperature `TABS` and the observed temperature `TABSOBS` below the tropopause is $(trms_en) K (i.e., we take calculate the root-mean-square using only levels where p > $(ptrop) hPa).  The profile of the temperature difference is shown below:"
 end
 
-# ╔═╡ a3650e8a-822b-11eb-29ca-cd01b90e8099
+# ╔═╡ 5ca776cf-30e8-46fa-a9f5-72c25a735205
 begin
+	fig = Figure()
+
+	wdt = 75
 	
-	pplt.close()
-	fen,aen = pplt.subplots(arr,aspect=1/3,axwidth=0.6,sharex=0,wspace=1)
+	ax1 = Axis(
+		fig[1,1],height=wdt*3,yscale=log10,yticks=[10,100,1000],width=wdt,
+		xlabel=L"$T$ / K",
+		yminorticks=vcat(10:10:90,100:100:1000),yminorticksvisible=true,
+		xticks=200:100:300,xminorticks=180:20:320,xminorticksvisible=true
+	)
+	ax2 = Axis(
+		fig[1,2],height=wdt*3,yscale=log10,yticks=[10,100,1000],width=wdt,
+		yminorticks=vcat(10:10:90,100:100:1000),yminorticksvisible=true,
+		yticklabelsvisible=false,xlabel=L"$T - T_\text{ref}$ / K",
+		xticks=(-1:1)./10,xminorticks=(-10:10)./50,xminorticksvisible=true
+	)
+	ax3 = Axis(
+		fig[1,3],height=wdt*3,yscale=log10,yticks=[10,100,1000],width=wdt*7,
+		yticklabelsvisible=false,xlabel="time / days",
+		yminorticks=vcat(10:10:90,100:100:1000),yminorticksvisible=true,
+		xticks=0:250:2000,xminorticks=0:50:2000,xminorticksvisible=true
+	)
+	ax4 = Axis(
+		fig[2,1],height=wdt*3,yscale=log10,yticks=[10,100,1000],width=wdt,
+		yminorticks=vcat(10:10:90,100:100:1000),yminorticksvisible=true,
+		xlabel="r / %",xminorticks=0:10:100,xminorticksvisible=true
+	)
+	ax5 = Axis(
+		fig[2,2],height=wdt*3,yscale=log10,yticks=[10,100,1000],width=wdt,
+		yticklabelsvisible=false,xlabel=L"q/q_\text{OBS}-1 / %",
+		yminorticks=vcat(10:10:90,100:100:1000),yminorticksvisible=true,
+		xticks=(-1:1),xminorticks=(-10:10)./5,xminorticksvisible=true
+	)
+	ax6 = Axis(
+		fig[2,3],height=wdt*3,yscale=log10,yticks=[10,100,1000],width=wdt*7,
+		yticklabelsvisible=false,xlabel="time / days",
+		yminorticks=vcat(10:10:90,100:100:1000),yminorticksvisible=true,
+		xticks=0:250:2000,xminorticks=0:50:2000,xminorticksvisible=true
+	)
+
 	
+	xlims!(ax2,-0.15,0.15)
+	xlims!(ax1,180,320)
+	xlims!(ax5,-1.5,1.5)
+	xlims!(ax4,0,100)
+	
+	ylims!(ax1,1000,25)
+	ylims!(ax2,1000,25)
+	ylims!(ax3,1000,25)
+	ylims!(ax4,1000,25)
+	ylims!(ax5,1000,25)
+	ylims!(ax6,1000,25)
+
 	for im = 1 : nen
-		aen[1].scatter(tdiff_en[:,im],pts_en[:,im],s=1,c="gray")
+		scatter!(ax2,tdiff_en[:,im],pts_en[:,im],markersize=5,color=:gray)
 	end
-	
-	aen[1].plot(
+	lines!(ax2,
 		dropdims(mean(tdiff_en,dims=2),dims=2),
-		dropdims(mean(pts_en,dims=2),dims=2),c="k"
+		dropdims(mean(pts_en,dims=2),dims=2),color=:black
 	)
-	aen[1].format(
-		xlim=(-1.5,1.5)./10,xlocator=(-2:2)./10,xlabel=L"T - T$_{OBS}$ / K",
-		ylim=(1010,25),yscale="log",ylabel="Pressure / hPa",
-		suptitle="Model Ensemble Equilibrium RCE | $config",ultitle="(a)"
-	)
-	
-	cten = aen[2].pcolormesh(
-		t_en.-t_en[1],plevel,tdts_en,
-		# t.-80,p,tem .- mean(tem[:,(end-100+1):end],dims=2),
-		# t[5:(end-4)].-80,p,temn .- tob[:,1],
-		cmap="RdBu_r",
-		extend="both",
-		levels=lvls/10
-	)
-	aen[2].format(
-		xlim=(0,nt_en),
-		ylim=(1010,25),yscale="log",
-		ylabel="Pressure / hPa",
-		urtitle=L"T$_{RMS}$" * " = $(trms_en) K",ultitle="(b)"
-	)
-	
+
 	for im = 1 : nen
-		aen[3].scatter(qdiff_en[:,im],pts_en[:,im],s=1,c="gray")
+		scatter!(ax1,tabs_en[:,im],pts_en[:,im],markersize=5,color=:gray)
 	end
-	
-	aen[3].plot(
-		dropdims(mean(qdiff_en,dims=2),dims=2),
-		dropdims(mean(pts_en,dims=2),dims=2),c="k"
-	)
-	aen[3].format(
-		xlim=(-1.5,1.5),xlocator=(-2:2),
-		xlabel=L"qr = $\frac{q - q_{OBS}}{q_{OBS}}$ / %",
-		ylim=(1010,25),yscale="log",ylabel="Pressure / hPa",ultitle="(c)"
-	)
-	
-	cqen = aen[4].pcolormesh(
-		t_en.-t_en[1],plevel,qdts_en,
-		# t.-80,p,qvp .- mean(qvp[:,(end-100+1):end],dims=2),
-		cmap="drywet",
-		extend="both",
-		levels=lvls
-	)
-	aen[4].format(
-		xlim=(0,nt_en),
-		ylim=(1010,25),yscale="log",
-		xlabel="time / days",ylabel="Pressure / hPa",
-		urtitle=L"$qr_{RMS}$" * " = $(qrms_en) %",ultitle="(d)"
-	)
-	
-	for im = 1 : nen
-		aen[5].scatter(tabs_en[:,im],pts_en[:,im],s=2,c="gray")
-	end
-	
-	aen[5].plot(
+	lines!(ax1,
 		dropdims(mean(tabs_en,dims=2),dims=2),
-		dropdims(mean(pts_en,dims=2),dims=2),c="k"
+		dropdims(mean(pts_en,dims=2),dims=2),color=:black
 	)
-	aen[5].format(xlim=(180,320),xlabel="T / K")
 	
+	c1 = heatmap!(ax3,
+		t_en,plevel,tdts_en',
+		colormap=:balance,colorrange=(-0.2,0.2)
+	)
+	text!(ax3,0.98*length(t_en),30,text="RMS = $(trms_en) K",align=(:right,:top))
+
 	for im = 1 : nen
-		aen[6].scatter(relh_en[:,im],pts_en[:,im],s=2,c="gray")
+		scatter!(ax5,qdiff_en[:,im],pts_en[:,im],markersize=5,color=:gray)
 	end
-	
-	aen[6].plot(
-		dropdims(mean(relh_en,dims=2),dims=2),
-		dropdims(mean(pts_en,dims=2),dims=2),c="k"
+	lines!(ax5,
+		dropdims(mean(qdiff_en,dims=2),dims=2),
+		dropdims(mean(pts_en,dims=2),dims=2),color=:black
 	)
-	aen[6].format(xlim=(0,120),xlabel="r / %")
+
+	for im = 1 : nen
+		scatter!(ax4,relh_en[:,im],pts_en[:,im],markersize=5,color=:gray)
+	end
+	lines!(ax4,
+		dropdims(mean(relh_en,dims=2),dims=2),
+		dropdims(mean(pts_en,dims=2),dims=2),color=:black
+	)
 	
-	aen[2].colorbar(cten,loc="r",width=0.2)
-	aen[4].colorbar(cqen,loc="r",width=0.2)
-	fen.savefig(plotsdir("01a-ensemble-$(config).png"),transparent=false,dpi=400)
-	load(plotsdir("01a-ensemble-$(config).png"))
-	
+	c2 = heatmap!(ax6,
+		t_en,plevel,qdts_en',
+		colormap=:BrBg,colorrange=(-2.5,2.5)
+	)
+	text!(ax6,0.98*length(t_en),30,text="RMS = $(qrms_en) %",align=(:right,:top))
+
+	Colorbar(fig[1,4], c1,)
+	Colorbar(fig[2,4], c2,)
+	Label(fig[:,0],"Pressure / hPa",rotation=pi/2)
+
+	resize_to_layout!(fig)
+	fig
 end
 
 # ╔═╡ 11913f26-8e7c-11eb-1b37-0f9c8e7b7331
@@ -377,12 +392,12 @@ end
 # ╟─ac8b9d4c-5ade-11eb-06f4-33bff063bbde
 # ╟─7842e150-822b-11eb-1ded-f35ee4cc6d8c
 # ╟─99dca670-81e5-11eb-24b8-cf1b23d8c1f7
-# ╟─401a6a3a-8444-11eb-3ee8-594591ed5aa9
+# ╠═401a6a3a-8444-11eb-3ee8-594591ed5aa9
 # ╠═c658d650-8614-11eb-252c-c3066fb1d506
 # ╟─7d905176-81e8-11eb-20d3-b9be287472f5
 # ╟─ad523b4e-81ee-11eb-2d10-a984d5983471
 # ╟─f35ab14c-8226-11eb-29b4-c3b7130f3733
-# ╟─a3650e8a-822b-11eb-29ca-cd01b90e8099
+# ╟─5ca776cf-30e8-46fa-a9f5-72c25a735205
 # ╟─11913f26-8e7c-11eb-1b37-0f9c8e7b7331
 # ╟─caf84abe-581d-4859-baf5-81c75d133fd4
 # ╟─4db59bf0-82ec-11eb-0374-81a982a74216
