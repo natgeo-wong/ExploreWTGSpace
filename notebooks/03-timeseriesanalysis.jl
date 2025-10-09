@@ -1,17 +1,19 @@
 ### A Pluto.jl notebook ###
-# v0.19.46
+# v0.20.19
 
 using Markdown
 using InteractiveUtils
 
 # This Pluto notebook uses @bind for interactivity. When running this notebook outside of Pluto, the following 'mock version' of @bind gives bound variables a default value (instead of an error).
 macro bind(def, element)
-    quote
+    #! format: off
+    return quote
         local iv = try Base.loaded_modules[Base.PkgId(Base.UUID("6e696c72-6542-2067-7265-42206c756150"), "AbstractPlutoDingetjes")].Bonds.initial_value catch; b -> missing; end
         local el = $(esc(element))
         global $(esc(def)) = Core.applicable(Base.get, el) ? Base.get(el) : iv(el)
         el
     end
+    #! format: on
 end
 
 # ╔═╡ 681658b0-5914-11eb-0d65-bbace277d145
@@ -25,19 +27,13 @@ end
 # ╔═╡ 6dce35fc-5914-11eb-0ce2-0d4e164e1898
 begin
 	@quickactivate "ExploreWTGSpace"
-	using DSP
-	using NCDatasets
 	using PlutoUI
-	using Printf
-	using StatsBase
-	
-	using ImageShow, PNGFiles
-	using PyCall, LaTeXStrings
-	pplt = pyimport("proplot")
-	
+	using NCDatasets, DSP
+	using Printf, StatsBase
+	using CairoMakie, MakieExtra, LaTeXStrings, ColorSchemes
+	set_theme!(theme_latexfonts())
 	include(srcdir("sam.jl"))
-	
-md"Loading modules for the ExploreWTGSpace paper ..."
+	md"Loading modules for the ExploreWTGSpace paper ..."
 end
 
 # ╔═╡ e78a75c2-590f-11eb-1144-9127b0309135
@@ -75,14 +71,14 @@ md"Domain Size = $(128*hres) x $(128*hres) km"
 # ╔═╡ d3b025e0-5b35-11eb-330a-5fbb2204da63
 begin
 	expname = "$(prefix)$(@sprintf("%03d",128*hres))2km300V64"
-
+	expname = "D0642km300V64"
 md"**Experiment Set:** $expname"
 end
 
 # ╔═╡ a63de98c-5b35-11eb-0a8f-b7a1ebd441b6
 begin
 	if (wtgscheme == "DGW") || (wtgscheme == "LGW")
-		configWTG = [0.02,0.05,0.1,0.2,0.5,1,2,5,10,20,50,100,200,500]
+		configWTG = [0.02,0.05,0.1,0.5,1,2,5,10,20,50,100,200,500]
 	else
 		configWTG = [
 			0.1*sqrt(2),0.2,0.2*sqrt(2.5),0.5,0.5*sqrt(2),
@@ -91,50 +87,48 @@ begin
 		]
 	end
 	nconWTG = length(configWTG)
-	blues_WTG = pplt.get_colors("Blues",(nconWTG))
+	blues_WTG = get(ColorSchemes.Blues, range(0.0, 1.0, length=nconWTG))
 	lgd_WTG = Dict("frame"=>false,"ncols"=>3)
 	md"Loading time dimension and defining the damping experiments ..."
 end
 
 # ╔═╡ dc06d1f6-b3ab-4c7e-9f30-cfe1bb5e9cbd
 begin
-	pplt.close()
-	fts,ats = pplt.subplots(aspect=3,axwidth=5)
+	f1 = Figure()
+	ax1 = Axis(
+		f1[1,1],width=450,height=200,limits=(0,250,0,10),
+		yscale=SymLog(0.01),yticks=[0,0.01,0.1,1,10],
+		ylabel=L"Rainfall Rate / mm hr$^{-1}$",xlabel="Days"
+	)
 
 	for ic in 1 : nconWTG
 
 		if (wtgscheme == "DGW") || (wtgscheme == "LGW")
-			fnc = "$wtgscheme-$expname-$(dampingstrprnt(configWTG[ic])).nc"
+			fnc = "$(dampingstrprnt(configWTG[ic])).nc"
 		else
-			fnc = "$wtgscheme-$expname-$(relaxscalestrprnt(configWTG[ic])).nc"
+			fnc = "$(relaxscalestrprnt(configWTG[ic])).nc"
 		end
-		if isfile(datadir("precipitation",fnc))
-			ds_dgwprcp = NCDataset(datadir("precipitation",fnc))
+		fnc = datadir("precipitation",wtgscheme,expname,fnc)
+		if isfile(fnc)
+			ds_dgwprcp = NCDataset(fnc)
 			dt    = ds_dgwprcp["time"][:]
 			prcp  = ds_dgwprcp["precipitation"][:,:] / 24
-			ats[1].plot(dt,prcp,c=blues_WTG[ic])
+			for imem = 1 : 15
+				idt = dropdims(mean(reshape(dt,24,:),dims=1),dims=1)
+				iprcp = dropdims(mean(reshape(prcp[:,imem],24,:),dims=1),dims=1)
+				lines!(ax1,idt,iprcp,color=blues_WTG[ic])
+			end
 			close(ds_dgwprcp)
 		end
 
 	end
 
-	for ax in ats
-		ax.format(
-			xlim=(0,250),yscale="symlog",yscale_kw=Dict("linthresh"=>0.001),
-			ylim=(0,10),
-			ylabel=L"Rainfall Rate / mm hr$^{-1}$",xlabel="Days"
-		)
-	end
-
-	ats[1].format(ultitle="(a) Precipitation Time-Series ($wtgscheme)")
-
-	fts.savefig(
-		plotsdir("02b-rce2wtg-$(expname)-$wtgscheme.png"),
-		transparent=false,dpi=400
-	)
-		
-	load(plotsdir("02b-rce2wtg-$(expname)-$wtgscheme.png"))
+	resize_to_layout!(f1)
+	f1
 end
+
+# ╔═╡ 3f880613-b30e-417c-99e0-d78ea2302891
+CairoMakie.save(plotsdir("02b-rce2wtg-$(expname)-$wtgscheme.png"),f1)
 
 # ╔═╡ 0a74e728-1cf6-4db3-b616-fbd5d50595b1
 begin
@@ -209,5 +203,6 @@ end
 # ╟─d3b025e0-5b35-11eb-330a-5fbb2204da63
 # ╟─a63de98c-5b35-11eb-0a8f-b7a1ebd441b6
 # ╟─dc06d1f6-b3ab-4c7e-9f30-cfe1bb5e9cbd
+# ╟─3f880613-b30e-417c-99e0-d78ea2302891
 # ╟─0a74e728-1cf6-4db3-b616-fbd5d50595b1
 # ╟─d28f2438-8b19-4763-a31d-4cd2feb30ace
