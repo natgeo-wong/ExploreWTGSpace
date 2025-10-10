@@ -6,7 +6,7 @@ dx = 4000.,
 dy = 4000.,
 dt = 30.,
 
-doensemble    = .true.,
+doensemble    = .false.,
 nensemble     = [en],
 nrestart      = 0,
 nrestart_skip = 239,
