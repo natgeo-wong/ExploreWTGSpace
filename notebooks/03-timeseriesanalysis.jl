@@ -78,7 +78,7 @@ end
 # ╔═╡ a63de98c-5b35-11eb-0a8f-b7a1ebd441b6
 begin
 	if (wtgscheme == "DGW") || (wtgscheme == "LGW")
-		configWTG = [0.02,0.05,0.1,0.5,1,2,5,10,20,50,100,200,500]
+		configWTG = [0.02,0.05,0.1,0.2,0.5,1,2,5,10,20,50,100,200,500]
 	else
 		configWTG = [
 			0.1*sqrt(2),0.2,0.2*sqrt(2.5),0.5,0.5*sqrt(2),
@@ -117,6 +117,7 @@ begin
 				idt = dropdims(mean(reshape(dt,24,:),dims=1),dims=1)
 				iprcp = dropdims(mean(reshape(prcp[:,imem],24,:),dims=1),dims=1)
 				lines!(ax1,idt,iprcp,color=blues_WTG[ic])
+				# lines!(ax1,dt,prcp[:,imem],color=blues_WTG[ic])
 			end
 			close(ds_dgwprcp)
 		end
@@ -146,7 +147,7 @@ begin
 			ds_dgwprcp = NCDataset(datadir("precipitation",fnc))
 			prcp  = ds_dgwprcp["precipitation"][:,:] / 24
 			close(ds_dgwprcp)
-			for imem = 1 : 15
+			for imem = 1 : 2
 				if sum(.!isnan.(prcp[:,imem])) == 6000
 					nmem += 1
 					prcpii = prcp[(end-2399):end,imem] .- mean(prcp[(end-2399):end,imem])
@@ -200,9 +201,9 @@ end
 # ╟─b7a79d4e-4007-4c55-99cd-33abe6ee9f32
 # ╟─292ff637-7f96-4d9b-beeb-8b3d7b28a218
 # ╟─026110d9-55be-484a-b962-1aed19528933
-# ╟─d3b025e0-5b35-11eb-330a-5fbb2204da63
-# ╟─a63de98c-5b35-11eb-0a8f-b7a1ebd441b6
-# ╟─dc06d1f6-b3ab-4c7e-9f30-cfe1bb5e9cbd
+# ╠═d3b025e0-5b35-11eb-330a-5fbb2204da63
+# ╠═a63de98c-5b35-11eb-0a8f-b7a1ebd441b6
+# ╠═dc06d1f6-b3ab-4c7e-9f30-cfe1bb5e9cbd
 # ╟─3f880613-b30e-417c-99e0-d78ea2302891
 # ╟─0a74e728-1cf6-4db3-b616-fbd5d50595b1
 # ╟─d28f2438-8b19-4763-a31d-4cd2feb30ace

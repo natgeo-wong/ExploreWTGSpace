@@ -140,8 +140,8 @@ begin
 	else
 		config = "TrainML"
 	end
-	# config = "D3842km300V64"
-	nen = 10
+	config = "D3841km300V64"
+	nen = 2
 	
 md"**Experiment Set:** $config | **Number of Control Members**: $nen"
 end
@@ -163,7 +163,7 @@ Should the difference in the final averaged sounding profile be vastly different
 "
 
 # ╔═╡ 401a6a3a-8444-11eb-3ee8-594591ed5aa9
-nendays = 1000
+nendays = 250
 
 # ╔═╡ c658d650-8614-11eb-252c-c3066fb1d506
 ptrop = 70
@@ -171,7 +171,7 @@ ptrop = 70
 # ╔═╡ 7d905176-81e8-11eb-20d3-b9be287472f5
 begin
 	z_en,_,t_en = retrievedims("RCE","$(config)",isensemble=true,member=1)
-	nz_en = length(z_en); nt_en = length(t_en);
+	nz_en = length(z_en); nt_en = length(t_en)
 	tbi_en = zeros(nz_en,nt_en,nen); tob_en = zeros(nz_en,nen)
 	qbi_en = zeros(nz_en,nt_en,nen); qob_en = zeros(nz_en,nen)
 	tem_en = zeros(nz_en,nt_en,nen)
@@ -389,7 +389,7 @@ end
 # ╟─fab65122-bf01-44d7-8a92-e0b842983a98
 # ╟─2ec96d61-c6f5-4015-b9bb-f2b544914ab3
 # ╟─47b2aaf8-eed2-440b-aac2-3b0e37cc600c
-# ╟─ac8b9d4c-5ade-11eb-06f4-33bff063bbde
+# ╠═ac8b9d4c-5ade-11eb-06f4-33bff063bbde
 # ╟─7842e150-822b-11eb-1ded-f35ee4cc6d8c
 # ╟─99dca670-81e5-11eb-24b8-cf1b23d8c1f7
 # ╠═401a6a3a-8444-11eb-3ee8-594591ed5aa9

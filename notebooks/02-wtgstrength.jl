@@ -72,7 +72,7 @@ begin
 				yticklabelsvisible=isone(icol)||icol==4,
 				yscale=log10,yticks=[0.01,0.1,1,10,100,1000],
 				xminorticks=vcat((1:9)/100,(1:9)/10,1:9),
-				xminorticksvisible=true
+				xminorticksvisible=true,xticklabelsvisible=false
 			)
 		else
 			axs[irow,icol] = Axis(
@@ -86,7 +86,7 @@ begin
 		end
 	end
 
-	ds_rceprcp = NCDataset(datadir("precipitation","RCE","D1282km300V64.nc"))
+	ds_rceprcp = NCDataset(datadir("precipitation","RCE","D0642km300V64.nc"))
 	prcp_RCE = ds_rceprcp["precipitation"][:,:] / 24
 	prcpRCEμ_P = mean(prcp_RCE[1001:2000,:])
 	close(ds_rceprcp)
@@ -121,7 +121,7 @@ begin
 
 		close(ds_dgwprcp)
 
-		fnc = joinpath("DGW","D1282km300V64","$(dampingstrprnt(conDGW)).nc")
+		fnc = joinpath("DGW","D0642km300V64","$(dampingstrprnt(conDGW)).nc")
 		ds_dgwprcp = NCDataset(datadir("precipitation",fnc))
 
 		prcp  = ds_dgwprcp["precipitation"][:,:] / 24
@@ -221,7 +221,7 @@ begin
 
 		close(ds_wtgprcp)
 
-		fnc = joinpath("SPC","D1282km300V64","$(relaxscalestrprnt(conWTG)).nc")
+		fnc = joinpath("SPC","D0642km300V64","$(relaxscalestrprnt(conWTG)).nc")
 		ds_wtgprcp = NCDataset(datadir("precipitation",fnc))
 
 		prcp  = ds_wtgprcp["precipitation"][:,:] / 24
@@ -350,7 +350,7 @@ end
 # ╔═╡ Cell order:
 # ╟─e78a75c2-590f-11eb-1144-9127b0309135
 # ╟─681658b0-5914-11eb-0d65-bbace277d145
-# ╠═6dce35fc-5914-11eb-0ce2-0d4e164e1898
+# ╟─6dce35fc-5914-11eb-0ce2-0d4e164e1898
 # ╟─3c16bd2b-55e0-492f-baf3-aef6a998e9d6
-# ╠═87038073-d846-40c2-8a0f-b5969185998c
-# ╠═946c2a8f-6aa2-4fe9-a550-e2f84f1bdaee
+# ╟─87038073-d846-40c2-8a0f-b5969185998c
+# ╟─946c2a8f-6aa2-4fe9-a550-e2f84f1bdaee
